@@ -399,7 +399,6 @@
                     <div>
                         <select id="categoryFilter" onchange="filterMenuByCategory()" style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
                             <option value="">All Categories</option>
-                            <option value="Traditional">Traditional</option>
                             <option value="Rice & Curry">Rice & Curry</option>
                             <option value="Chinese">Chinese</option>
                             <option value="Seafood">Seafood</option>
@@ -407,8 +406,7 @@
                             <option value="Street Food">Street Food</option>
                             <option value="Juices">Juices</option>
                             <option value="Desserts">Desserts</option>
-                            <option value="Curry">Curry</option>
-                            <option value="Fusion">Fusion</option>
+                            <option value="Other Specialties">Other Specialties</option>
                         </select>
                         <button class="action-btn" onclick="openCategoryModal()" style="background-color: #6f42c1; margin-right: 10px;">🏷️ Manage Categories</button>
                         <button class="action-btn confirm" onclick="openAddItemModal()">+ Add New Item</button>
@@ -463,7 +461,6 @@
                             <label for="itemCategory">Category</label>
                             <select id="itemCategory" name="category" required>
                                 <option value="">Select Category</option>
-                                <option value="Traditional">Traditional</option>
                                 <option value="Rice & Curry">Rice & Curry</option>
                                 <option value="Chinese">Chinese</option>
                                 <option value="Seafood">Seafood</option>
@@ -471,8 +468,7 @@
                                 <option value="Street Food">Street Food</option>
                                 <option value="Juices">Juices</option>
                                 <option value="Desserts">Desserts</option>
-                                <option value="Curry">Curry</option>
-                                <option value="Fusion">Fusion</option>
+                                <option value="Other Specialties">Other Specialties</option>
                             </select>
                         </div>
                     </div>
@@ -901,7 +897,6 @@
 
         function getCategoryColor(category) {
             const colors = {
-                'Traditional': '#8B4513',
                 'Rice & Curry': '#228B22',
                 'Chinese': '#DC143C',
                 'Seafood': '#4682B4',
@@ -909,8 +904,7 @@
                 'Street Food': '#FF8C00',
                 'Juices': '#32CD32',
                 'Desserts': '#DA70D6',
-                'Curry': '#B8860B',
-                'Fusion': '#9370DB'
+                'Other Specialties': '#9370DB'
             };
             return colors[category] || '#6c757d';
         }
