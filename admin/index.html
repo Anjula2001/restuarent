@@ -410,10 +410,7 @@
                             <option value="Curry">Curry</option>
                             <option value="Fusion">Fusion</option>
                         </select>
-                        <button class="action-btn" onclick="loadMenu()" style="background-color: #007bff; margin-right: 10px;">🔄 Refresh Menu</button>
-                        <button class="action-btn" onclick="openBulkAddModal()" style="background-color: #17a2b8; margin-right: 10px;">📦 Bulk Add Items</button>
                         <button class="action-btn" onclick="openCategoryModal()" style="background-color: #6f42c1; margin-right: 10px;">🏷️ Manage Categories</button>
-                        <button class="action-btn" onclick="restoreSampleData()" style="background-color: #28a745; margin-right: 10px;">🎯 Restore Sample Data</button>
                         <button class="action-btn confirm" onclick="openAddItemModal()">+ Add New Item</button>
                     </div>
                 </div>
@@ -502,108 +499,6 @@
                     <div class="form-actions">
                         <button type="button" class="action-btn cancel" onclick="closeMenuModal()">Cancel</button>
                         <button type="submit" class="action-btn confirm">Save Item</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Bulk Add Menu Items Modal -->
-        <div id="bulkModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Bulk Add Menu Items</h3>
-                    <span class="close" onclick="closeBulkModal()">&times;</span>
-                </div>
-                <form id="bulkItemForm">
-                    <div class="form-group">
-                        <label for="bulkCategory">Category for all items</label>
-                        <select id="bulkCategory" name="category" required>
-                            <option value="">Select Category</option>
-                            <option value="Traditional">Traditional</option>
-                            <option value="Rice & Curry">Rice & Curry</option>
-                            <option value="Chinese">Chinese</option>
-                            <option value="Seafood">Seafood</option>
-                            <option value="Kottu">Kottu</option>
-                            <option value="Street Food">Street Food</option>
-                            <option value="Juices">Juices</option>
-                            <option value="Desserts">Desserts</option>
-                            <option value="Curry">Curry</option>
-                            <option value="Fusion">Fusion</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="bulkItems">Items (One per line, format: Name | Description | Price | Image URL)</label>
-                        <textarea id="bulkItems" name="items" rows="10" placeholder="Example:
-Chicken Fried Rice | Delicious fried rice with chicken | 850.00 | https://example.com/image.jpg
-Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/beef.jpg"></textarea>
-                        <small style="color: #666; font-size: 12px;">
-                            Each line should contain: Item Name | Description | Price | Image URL (optional)<br>
-                            Separate each field with a pipe symbol (|). Image URL is optional.
-                        </small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="bulkAvailable" name="is_available" checked>
-                            All items available for ordering
-                        </label>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="action-btn cancel" onclick="closeBulkModal()">Cancel</button>
-                        <button type="submit" class="action-btn confirm">Add All Items</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Bulk Add Menu Items Modal -->
-        <div id="bulkModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Bulk Add Menu Items</h3>
-                    <span class="close" onclick="closeBulkModal()">&times;</span>
-                </div>
-                <form id="bulkItemForm">
-                    <div class="form-group">
-                        <label for="bulkCategory">Category for all items</label>
-                        <select id="bulkCategory" name="category" required>
-                            <option value="">Select Category</option>
-                            <option value="Traditional">Traditional</option>
-                            <option value="Rice & Curry">Rice & Curry</option>
-                            <option value="Chinese">Chinese</option>
-                            <option value="Seafood">Seafood</option>
-                            <option value="Kottu">Kottu</option>
-                            <option value="Street Food">Street Food</option>
-                            <option value="Juices">Juices</option>
-                            <option value="Desserts">Desserts</option>
-                            <option value="Curry">Curry</option>
-                            <option value="Fusion">Fusion</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="bulkItems">Items (One per line, format: Name | Description | Price | Image URL)</label>
-                        <textarea id="bulkItems" name="items" rows="10" placeholder="Example:
-Chicken Fried Rice | Delicious fried rice with chicken | 850.00 | https://example.com/image.jpg
-Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/beef.jpg"></textarea>
-                        <small style="color: #666; font-size: 12px;">
-                            Each line should contain: Item Name | Description | Price | Image URL (optional)<br>
-                            Separate each field with a pipe symbol (|). Image URL is optional.
-                        </small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="bulkAvailable" name="is_available" checked>
-                            All items available for ordering
-                        </label>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="action-btn cancel" onclick="closeBulkModal()">Cancel</button>
-                        <button type="submit" class="action-btn confirm">Add All Items</button>
                     </div>
                 </form>
             </div>
@@ -977,7 +872,7 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
                             <th>Category</th>
                             <th>Price</th>
                             <th>Available</th>
-                            <th>Actions (Edit | Toggle | Hide | Delete)</th>
+                            <th>Actions (Edit | Toggle | Delete)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -993,7 +888,6 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
                                     <button class="action-btn ${item.is_available ? 'cancel' : 'confirm'}" onclick="toggleMenuItem(${item.id}, ${!item.is_available})" title="${item.is_available ? 'Disable' : 'Enable'} Item">
                                         ${item.is_available ? '🔒 Disable' : '🔓 Enable'}
                                     </button>
-                                    <button class="action-btn" onclick="softDeleteMenuItem(${item.id})" title="Hide from customers (can be restored)" style="background-color: #ffc107; color: #000;">👁️ Hide</button>
                                     <button class="action-btn reject" onclick="hardDeleteMenuItem(${item.id})" title="Permanently delete from database">🗑️ Delete</button>
                                 </td>
                             </tr>
@@ -1244,16 +1138,6 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
             document.getElementById('menuModal').style.display = 'none';
         }
 
-        // Bulk Add Functions
-        function openBulkAddModal() {
-            document.getElementById('bulkModal').style.display = 'flex';
-            document.getElementById('bulkItemForm').reset();
-        }
-
-        function closeBulkModal() {
-            document.getElementById('bulkModal').style.display = 'none';
-        }
-
         // Category Management Functions
         function openCategoryModal() {
             document.getElementById('categoryModal').style.display = 'flex';
@@ -1430,43 +1314,6 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
             console.log('Category selectors should be updated here');
         }
 
-        async function processBulkAdd(category, items, isAvailable) {
-            const results = [];
-            const errors = [];
-
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                try {
-                    const response = await fetch(`${API_BASE}/menu.php`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            action: 'add',
-                            name: item.name,
-                            description: item.description,
-                            price: parseFloat(item.price),
-                            category: category,
-                            image_url: item.image_url || '',
-                            availability: isAvailable ? 1 : 0
-                        })
-                    });
-
-                    if (response.ok) {
-                        results.push(`✅ ${item.name} - Added successfully`);
-                    } else {
-                        const errorData = await response.json();
-                        errors.push(`❌ ${item.name} - ${errorData.message || 'Failed to add'}`);
-                    }
-                } catch (error) {
-                    errors.push(`❌ ${item.name} - ${error.message}`);
-                }
-            }
-
-            return { results, errors };
-        }
-
         // Image Upload Handler
         async function handleImageUpload(input) {
             const file = input.files[0];
@@ -1531,28 +1378,6 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
             imageGroup.appendChild(preview);
         }
 
-        // Soft delete - hide from customers but keep in database
-        async function softDeleteMenuItem(itemId) {
-            if (confirm('Hide this menu item from customers? It will remain in the database and can be restored later.')) {
-                try {
-                    const response = await fetch(`${API_BASE}/menu.php?id=${itemId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        loadMenu(); // Reload menu
-                        alert('Menu item hidden from customers (can be restored)');
-                    } else {
-                        const errorData = await response.json();
-                        alert('Failed to hide menu item: ' + (errorData.error || 'Unknown error'));
-                    }
-                } catch (error) {
-                    console.error('Hide error:', error);
-                    alert('Error hiding menu item: ' + error.message);
-                }
-            }
-        }
-
         // Hard delete - permanently remove from database
         async function hardDeleteMenuItem(itemId) {
             if (confirm('⚠️ PERMANENTLY DELETE this menu item from the database?\n\nThis action CANNOT be undone!\n\nThe item will be completely removed and cannot be recovered.')) {
@@ -1578,33 +1403,6 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
         // Legacy function - now redirects to hard delete for backwards compatibility
         async function deleteMenuItem(itemId) {
             hardDeleteMenuItem(itemId);
-        }
-
-        // Restore sample data function
-        async function restoreSampleData() {
-            if (confirm('🎯 Restore sample menu data?\n\nThis will add 8 sample menu items to the database.\nExisting items will not be affected.')) {
-                try {
-                    const response = await fetch(`${API_BASE}/menu.php`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ action: 'restore_sample_data' })
-                    });
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        loadMenu(); // Reload menu to show new items
-                        alert('✅ Sample data restored successfully!\n\n8 sample menu items have been added.');
-                    } else {
-                        const errorData = await response.json();
-                        alert('❌ Failed to restore sample data: ' + (errorData.error || 'Unknown error'));
-                    }
-                } catch (error) {
-                    console.error('Sample data restoration error:', error);
-                    alert('❌ Error restoring sample data: ' + error.message);
-                }
-            }
         }
 
         // Handle menu item form submission
@@ -1644,92 +1442,6 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
                     }
                 } catch (error) {
                     alert('Error saving menu item');
-                }
-            });
-
-            // Bulk Add Form Handler
-            document.getElementById('bulkItemForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const category = document.getElementById('bulkCategory').value;
-                const itemsText = document.getElementById('bulkItems').value.trim();
-                const isAvailable = document.getElementById('bulkAvailable').checked;
-                
-                if (!category || !itemsText) {
-                    alert('Please select a category and enter items');
-                    return;
-                }
-                
-                // Parse items from text
-                const lines = itemsText.split('\n').filter(line => line.trim());
-                const items = [];
-                const invalidLines = [];
-                
-                lines.forEach((line, index) => {
-                    const parts = line.split('|').map(part => part.trim());
-                    if (parts.length >= 3) {
-                        items.push({
-                            name: parts[0],
-                            description: parts[1],
-                            price: parts[2],
-                            image_url: parts[3] || ''
-                        });
-                    } else {
-                        invalidLines.push(`Line ${index + 1}: ${line}`);
-                    }
-                });
-                
-                if (invalidLines.length > 0) {
-                    alert(`Invalid format on the following lines:\n${invalidLines.join('\n')}\n\nPlease use format: Name | Description | Price | Image URL`);
-                    return;
-                }
-                
-                if (items.length === 0) {
-                    alert('No valid items found');
-                    return;
-                }
-                
-                // Confirm bulk add
-                if (!confirm(`Are you sure you want to add ${items.length} items to the "${category}" category?`)) {
-                    return;
-                }
-                
-                // Show loading state
-                const submitBtn = e.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Processing...';
-                submitBtn.disabled = true;
-                
-                try {
-                    const { results, errors } = await processBulkAdd(category, items, isAvailable);
-                    
-                    // Show results
-                    let message = `Bulk add completed!\n\n`;
-                    if (results.length > 0) {
-                        message += `Successfully added:\n${results.join('\n')}\n\n`;
-                    }
-                    if (errors.length > 0) {
-                        message += `Errors:\n${errors.join('\n')}`;
-                    }
-                    
-                    alert(message);
-                    
-                    if (results.length > 0) {
-                        loadMenu(); // Reload menu to show new items
-                        closeBulkModal();
-                    }
-                } catch (error) {
-                    alert('Error during bulk add: ' + error.message);
-                } finally {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                }
-            });
-
-            // Close bulk modal when clicking outside of it
-            document.getElementById('bulkModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeBulkModal();
                 }
             });
 
