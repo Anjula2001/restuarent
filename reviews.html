@@ -167,10 +167,11 @@
             line-height: 1.7;
             font-size: 1.05em;
             margin-bottom: 20px;
+            position: relative;
         }
 
         .review-text::before {
-            content: """;
+            content: "\201C";
             font-size: 3em;
             color: #8B5A2B;
             opacity: 0.3;
@@ -181,7 +182,7 @@
         }
 
         .review-text::after {
-            content: """;
+            content: "\201D";
             font-size: 3em;
             color: #8B5A2B;
             opacity: 0.3;
@@ -284,6 +285,178 @@
             cursor: not-allowed;
         }
 
+        /* Review Submission Form Styles */
+        .review-submission {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 50px auto;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
+            max-width: 600px;
+        }
+
+        .review-submission h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8B5A2B;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Star Rating Widget */
+        .star-rating {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .star-rating label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .star-input {
+            display: none;
+        }
+
+        .star-label {
+            font-size: 2.5em;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .star-label:hover,
+        .star-input:checked ~ .star-label,
+        .star-label.active {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+
+        .star-label:hover ~ .star-label {
+            color: #ddd;
+            transform: scale(1);
+        }
+
+        .rating-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #666;
+            min-height: 25px;
+        }
+
+        .submit-review-btn {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .submit-review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.3);
+        }
+
+        .submit-review-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .form-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .form-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .form-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Toggle Review Form */
+        .write-review-toggle {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .toggle-form-btn {
+            background: #8B5A2B;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .toggle-form-btn:hover {
+            background: #654321;
+        }
+
         @media (max-width: 768px) {
             .reviews-header h1 {
                 font-size: 2.5em;
@@ -304,6 +477,19 @@
 
             .stat-number {
                 font-size: 2.5em;
+            }
+
+            .review-submission {
+                margin: 30px 20px;
+                padding: 30px 20px;
+            }
+
+            .star-label {
+                font-size: 2em;
+            }
+
+            .stars-container {
+                gap: 2px;
             }
         }
 
@@ -329,6 +515,22 @@
             to {
                 transform: translateY(0);
                 opacity: 1;
+            }
+        }
+
+        /* Animation for form appearance */
+        .review-submission.show {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
@@ -445,6 +647,44 @@
                     <button class="page-btn" id="nextPage" onclick="nextPage()">Next →</button>
                 </div>
             </div>
+
+            <!-- Toggle Review Form Button -->
+            <div class="write-review-toggle">
+                <button class="toggle-form-btn" id="toggleReviewForm">✏️ Write a Review</button>
+            </div>
+
+            <!-- Review Submission Form (initially hidden) -->
+            <div class="review-submission" id="reviewSubmissionForm" style="display: none;">
+                <h3>Submit Your Review</h3>
+                <div class="form-message" id="formMessage"></div>
+                <div class="form-group">
+                    <label for="reviewerName">Your Name</label>
+                    <input type="text" id="reviewerName" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="reviewRating">Rating</label>
+                    <div class="star-rating">
+                        <div class="stars-container">
+                            <input type="radio" name="rating" value="5" id="star5" class="star-input">
+                            <label for="star5" class="star-label">★</label>
+                            <input type="radio" name="rating" value="4" id="star4" class="star-input">
+                            <label for="star4" class="star-label">★</label>
+                            <input type="radio" name="rating" value="3" id="star3" class="star-input">
+                            <label for="star3" class="star-label">★</label>
+                            <input type="radio" name="rating" value="2" id="star2" class="star-input">
+                            <label for="star2" class="star-label">★</label>
+                            <input type="radio" name="rating" value="1" id="star1" class="star-input">
+                            <label for="star1" class="star-label">★</label>
+                        </div>
+                        <div class="rating-text" id="ratingText">Please select a rating</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reviewText">Your Review</label>
+                    <textarea id="reviewText" placeholder="Write your review here"></textarea>
+                </div>
+                <button class="submit-review-btn" id="submitReviewBtn">Submit Review</button>
+            </div>
         </section>
 
         <!-- Cart Section (initially hidden) -->
@@ -474,6 +714,7 @@
             // Load reviews page functionality first
             loadReviewsPage();
             setupFilters();
+            initializeStarRating();
             
             // Then load authentication (non-blocking)
             setTimeout(() => {
@@ -782,6 +1023,156 @@
                     alert('Error logging out. Please try again.');
                 }
             }
+        }
+
+        // Review Submission Form Handling
+        document.getElementById('toggleReviewForm').addEventListener('click', function() {
+            const form = document.getElementById('reviewSubmissionForm');
+            form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+            if (form.style.display === 'block') {
+                form.classList.add('show');
+                document.getElementById('formMessage').style.display = 'none'; // Hide message on new form open
+            }
+        });
+
+        document.getElementById('submitReviewBtn').addEventListener('click', async function() {
+            const name = document.getElementById('reviewerName').value.trim();
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const reviewText = document.getElementById('reviewText').value.trim();
+
+            if (!name || !rating || !reviewText) {
+                showReviewMessage('Please fill in all fields and select a rating.', 'error');
+                return;
+            }
+
+            const reviewData = {
+                customer_name: name,
+                rating: rating.value,
+                review_text: reviewText,
+                created_at: new Date().toISOString() // Use current date for submission
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reviewData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                console.log('Review submitted:', result);
+
+                // Reset form fields
+                document.getElementById('reviewerName').value = '';
+                const selectedRating = document.querySelector('input[name="rating"]:checked');
+                if (selectedRating) {
+                    selectedRating.checked = false;
+                }
+                document.getElementById('reviewText').value = '';
+                resetStars();
+                document.getElementById('ratingText').textContent = 'Please select a rating';
+                document.getElementById('ratingText').style.color = '#666';
+                document.getElementById('ratingText').style.fontWeight = 'normal';
+
+                // Close the form
+                document.getElementById('reviewSubmissionForm').style.display = 'none';
+
+                // Reload reviews
+                loadReviewsPage();
+
+                showReviewMessage('Thank you for your review! It has been submitted for moderation.', 'success');
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                showReviewMessage('There was an error submitting your review. Please try again later.', 'error');
+            }
+        });
+
+        function showReviewMessage(message, type) {
+            const messageBox = document.getElementById('formMessage');
+            messageBox.textContent = message;
+            messageBox.className = 'form-message ' + (type === 'success' ? 'success' : 'error');
+            messageBox.style.display = 'block';
+        }
+
+        // Star Rating Interactive Functionality
+        function initializeStarRating() {
+            const starLabels = document.querySelectorAll('.star-label');
+            const ratingText = document.getElementById('ratingText');
+            const ratingTexts = {
+                1: 'Poor - Not satisfied',
+                2: 'Fair - Below expectations',
+                3: 'Good - Meets expectations',
+                4: 'Very Good - Above expectations',
+                5: 'Excellent - Outstanding!'
+            };
+
+            starLabels.forEach((star, index) => {
+                const rating = 5 - index; // Stars are in reverse order (5 to 1)
+                
+                // Handle hover effect
+                star.addEventListener('mouseenter', function() {
+                    highlightStars(rating);
+                    ratingText.textContent = ratingTexts[rating];
+                    ratingText.style.color = '#8B5A2B';
+                });
+
+                // Handle click to select rating
+                star.addEventListener('click', function() {
+                    const radioInput = document.getElementById(`star${rating}`);
+                    radioInput.checked = true;
+                    highlightStars(rating);
+                    ratingText.textContent = ratingTexts[rating];
+                    ratingText.style.color = '#8B5A2B';
+                    ratingText.style.fontWeight = 'bold';
+                });
+            });
+
+            // Reset on mouse leave
+            const starContainer = document.querySelector('.stars-container');
+            if (starContainer) {
+                starContainer.addEventListener('mouseleave', function() {
+                    const selectedRating = document.querySelector('input[name="rating"]:checked');
+                    if (selectedRating) {
+                        highlightStars(selectedRating.value);
+                        ratingText.textContent = ratingTexts[selectedRating.value];
+                        ratingText.style.color = '#8B5A2B';
+                        ratingText.style.fontWeight = 'bold';
+                    } else {
+                        resetStars();
+                        ratingText.textContent = 'Please select a rating';
+                        ratingText.style.color = '#666';
+                        ratingText.style.fontWeight = 'normal';
+                    }
+                });
+            }
+        }
+
+        function highlightStars(rating) {
+            const starLabels = document.querySelectorAll('.star-label');
+            starLabels.forEach((star, index) => {
+                const starRating = 5 - index;
+                if (starRating <= rating) {
+                    star.style.color = '#ffd700';
+                    star.style.transform = 'scale(1.1)';
+                } else {
+                    star.style.color = '#ddd';
+                    star.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        function resetStars() {
+            const starLabels = document.querySelectorAll('.star-label');
+            starLabels.forEach(star => {
+                star.style.color = '#ddd';
+                star.style.transform = 'scale(1)';
+            });
         }
     </script>
 </body>

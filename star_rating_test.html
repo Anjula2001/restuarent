@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Rating Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background-color: #f8f9fa;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        .form-group input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        
+        .star-rating {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .star-input {
+            display: none;
+        }
+        
+        .star-label {
+            font-size: 2.5em;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        
+        .star-label:hover {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+        
+        .rating-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #666;
+            min-height: 25px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0;
+            font-weight: bold;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.3);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Interactive Star Rating Test</h1>
+        <p>Test the star rating functionality for the reviews feature:</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="customerName">Customer Name</label>
+                <input type="text" id="customerName" placeholder="Enter your name" value="Test Customer">
+            </div>
+            
+            <div class="form-group">
+                <label>Rating</label>
+                <div class="star-rating">
+                    <div class="stars-container">
+                        <input type="radio" name="rating" value="5" id="star5" class="star-input">
+                        <label for="star5" class="star-label">★</label>
+                        <input type="radio" name="rating" value="4" id="star4" class="star-input">
+                        <label for="star4" class="star-label">★</label>
+                        <input type="radio" name="rating" value="3" id="star3" class="star-input">
+                        <label for="star3" class="star-label">★</label>
+                        <input type="radio" name="rating" value="2" id="star2" class="star-input">
+                        <label for="star2" class="star-label">★</label>
+                        <input type="radio" name="rating" value="1" id="star1" class="star-input">
+                        <label for="star1" class="star-label">★</label>
+                    </div>
+                    <div class="rating-text" id="ratingText">Please select a rating</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reviewText">Review Text</label>
+                <textarea id="reviewText" placeholder="Write your review here" rows="4">This is a test review to verify the star rating functionality works correctly.</textarea>
+            </div>
+            
+            <button type="button" class="submit-btn" id="submitBtn">Test Submit</button>
+        </form>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Star Rating Interactive Functionality
+        function initializeStarRating() {
+            const starLabels = document.querySelectorAll('.star-label');
+            const ratingText = document.getElementById('ratingText');
+            const ratingTexts = {
+                1: 'Poor - Not satisfied',
+                2: 'Fair - Below expectations', 
+                3: 'Good - Meets expectations',
+                4: 'Very Good - Above expectations',
+                5: 'Excellent - Outstanding!'
+            };
+
+            starLabels.forEach((star, index) => {
+                const rating = 5 - index; // Stars are in reverse order (5 to 1)
+                
+                // Handle hover effect
+                star.addEventListener('mouseenter', function() {
+                    highlightStars(rating);
+                    ratingText.textContent = ratingTexts[rating];
+                    ratingText.style.color = '#8B5A2B';
+                });
+
+                // Handle click to select rating
+                star.addEventListener('click', function() {
+                    const radioInput = document.getElementById(`star${rating}`);
+                    radioInput.checked = true;
+                    highlightStars(rating);
+                    ratingText.textContent = ratingTexts[rating];
+                    ratingText.style.color = '#8B5A2B';
+                    ratingText.style.fontWeight = 'bold';
+                });
+            });
+
+            // Reset on mouse leave
+            const starContainer = document.querySelector('.stars-container');
+            if (starContainer) {
+                starContainer.addEventListener('mouseleave', function() {
+                    const selectedRating = document.querySelector('input[name="rating"]:checked');
+                    if (selectedRating) {
+                        highlightStars(selectedRating.value);
+                        ratingText.textContent = ratingTexts[selectedRating.value];
+                        ratingText.style.color = '#8B5A2B';
+                        ratingText.style.fontWeight = 'bold';
+                    } else {
+                        resetStars();
+                        ratingText.textContent = 'Please select a rating';
+                        ratingText.style.color = '#666';
+                        ratingText.style.fontWeight = 'normal';
+                    }
+                });
+            }
+        }
+
+        function highlightStars(rating) {
+            const starLabels = document.querySelectorAll('.star-label');
+            starLabels.forEach((star, index) => {
+                const starRating = 5 - index;
+                if (starRating <= rating) {
+                    star.style.color = '#ffd700';
+                    star.style.transform = 'scale(1.1)';
+                } else {
+                    star.style.color = '#ddd';
+                    star.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        function resetStars() {
+            const starLabels = document.querySelectorAll('.star-label');
+            starLabels.forEach(star => {
+                star.style.color = '#ddd';
+                star.style.transform = 'scale(1)';
+            });
+        }
+
+        // Test submission
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const name = document.getElementById('customerName').value;
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const reviewText = document.getElementById('reviewText').value;
+            
+            const result = document.getElementById('result');
+            
+            if (!rating) {
+                result.textContent = 'Please select a star rating!';
+                result.style.background = '#ffebee';
+                result.style.color = '#c62828';
+            } else {
+                result.innerHTML = `
+                    <h3>Test Results:</h3>
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Rating:</strong> ${rating.value} stars</p>
+                    <p><strong>Review:</strong> ${reviewText}</p>
+                    <p style="color: green;"><strong>✓ Star rating functionality working correctly!</strong></p>
+                `;
+                result.style.background = '#e8f5e8';
+                result.style.color = '#2e7d32';
+            }
+            
+            result.style.display = 'block';
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeStarRating);
+    </script>
+</body>
+</html>
