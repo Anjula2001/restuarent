@@ -214,7 +214,10 @@ class UserManager {
 
     // Get user reservations
     public function getUserReservations($user_id, $limit = null) {
-        $query = "SELECT * FROM reservations 
+        $query = "SELECT id, customer_name as name, customer_email as email, customer_phone as phone, 
+                         reservation_date as date, reservation_time as time, party_size as guests, 
+                         special_requests, status, created_at, updated_at 
+                  FROM reservations 
                   WHERE customer_email = (SELECT email FROM " . $this->table_name . " WHERE id = :user_id)
                   ORDER BY reservation_date DESC, reservation_time DESC";
         

@@ -18,7 +18,7 @@ class ReservationManager {
         }
 
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, email, phone, date, time, guests, special_requests) 
+                  (customer_name, customer_email, customer_phone, reservation_date, reservation_time, party_size, special_requests) 
                   VALUES (:name, :email, :phone, :date, :time, :guests, :special_requests)";
         
         $stmt = $this->conn->prepare($query);
@@ -41,7 +41,7 @@ class ReservationManager {
     // Check if time slot is available
     private function isTimeSlotAvailable($date, $time) {
         $query = "SELECT COUNT(*) as count FROM " . $this->table_name . " 
-                  WHERE date = :date AND time = :time AND status != 'cancelled'";
+                  WHERE reservation_date = :date AND reservation_time = :time AND status != 'cancelled'";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':date', $date);
@@ -54,13 +54,15 @@ class ReservationManager {
 
     // Get all reservations (admin only)
     public function getAllReservations($status = null) {
-        $query = "SELECT * FROM " . $this->table_name;
+        $query = "SELECT id, customer_name as name, customer_email as email, customer_phone as phone, 
+                         reservation_date as date, reservation_time as time, party_size as guests, 
+                         special_requests, status, created_at, updated_at FROM " . $this->table_name;
         
         if ($status) {
             $query .= " WHERE status = :status";
         }
         
-        $query .= " ORDER BY date DESC, time DESC";
+        $query .= " ORDER BY reservation_date DESC, reservation_time DESC";
         
         $stmt = $this->conn->prepare($query);
         
@@ -74,7 +76,9 @@ class ReservationManager {
 
     // Get reservation by ID
     public function getReservationById($id) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id";
+        $query = "SELECT id, customer_name as name, customer_email as email, customer_phone as phone, 
+                         reservation_date as date, reservation_time as time, party_size as guests, 
+                         special_requests, status, created_at, updated_at FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -83,7 +87,10 @@ class ReservationManager {
 
     // Get reservations by email
     public function getReservationsByEmail($email) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email ORDER BY date DESC, time DESC";
+        $query = "SELECT id, customer_name as name, customer_email as email, customer_phone as phone, 
+                         reservation_date as date, reservation_time as time, party_size as guests, 
+                         special_requests, status, created_at, updated_at FROM " . $this->table_name . " 
+                  WHERE customer_email = :email ORDER BY reservation_date DESC, reservation_time DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
@@ -106,9 +113,9 @@ class ReservationManager {
             '18:00:00', '18:30:00', '19:00:00', '19:30:00', '20:00:00', '20:30:00', '21:00:00'
         ];
 
-        $query = "SELECT time, COUNT(*) as count FROM " . $this->table_name . " 
-                  WHERE date = :date AND status != 'cancelled' 
-                  GROUP BY time";
+        $query = "SELECT reservation_time as time, COUNT(*) as count FROM " . $this->table_name . " 
+                  WHERE reservation_date = :date AND status != 'cancelled' 
+                  GROUP BY reservation_time";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':date', $date);

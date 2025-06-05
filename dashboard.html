@@ -621,8 +621,8 @@
             reservationsContent.innerHTML = reservations.map(reservation => `
                 <div class="reservation-item">
                     <div class="item-details">
-                        <h4>${new Date(reservation.reservation_date).toLocaleDateString()}</h4>
-                        <p>${reservation.reservation_time} - ${reservation.party_size} guests</p>
+                        <h4>${new Date(reservation.date).toLocaleDateString()}</h4>
+                        <p>${reservation.time} - ${reservation.guests} guests</p>
                         <p>${reservation.special_requests || 'No special requests'}</p>
                     </div>
                     <span class="item-status status-${reservation.status}">${reservation.status}</span>
