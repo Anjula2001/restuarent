@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Update Function Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        select {
+            padding: 8px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .log {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Category Selector Update Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Dropdowns (should match admin panel behavior)</h3>
+        
+        <div>
+            <strong>Category Filter:</strong>
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        
+        <div>
+            <strong>Item Category:</strong>
+            <select id="itemCategory">
+                <option value="">Select Category</option>
+            </select>
+        </div>
+        
+        <button onclick="testUpdateFunction()">Test updateCategorySelectors()</button>
+        <button onclick="addTestCategory()">Add Test Category</button>
+        <button onclick="compareWithDatabase()">Compare with Database</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Log</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8888/restuarent/api';
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Copy of the updateCategorySelectors function from admin panel
+        async function updateCategorySelectors() {
+            try {
+                log('🔄 Starting updateCategorySelectors...');
+                
+                // Get current categories from the database
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                
+                if (!Array.isArray(menuItems)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                log(`📊 Found ${menuItems.length} menu items`);
+                
+                const categories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
+                
+                log(`📁 Extracted categories: [${categories.join(', ')}]`);
+                
+                // Update category filter dropdown
+                const categoryFilter = document.getElementById('categoryFilter');
+                if (categoryFilter) {
+                    const currentValue = categoryFilter.value;
+                    log(`🎯 Current filter value: "${currentValue}"`);
+                    
+                    // Clear existing options except "All Categories"
+                    categoryFilter.innerHTML = '<option value="">All Categories</option>';
+                    
+                    // Add category options
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        categoryFilter.appendChild(option);
+                    });
+                    
+                    // Restore previous selection if it still exists
+                    if (categories.includes(currentValue)) {
+                        categoryFilter.value = currentValue;
+                        log(`✅ Restored filter selection: "${currentValue}"`);
+                    } else {
+                        log(`⚠️ Previous filter selection "${currentValue}" no longer exists`);
+                    }
+                }
+                
+                // Update item category dropdown in the modal
+                const itemCategory = document.getElementById('itemCategory');
+                if (itemCategory) {
+                    const currentValue = itemCategory.value;
+                    log(`🎯 Current item category value: "${currentValue}"`);
+                    
+                    // Clear existing options except "Select Category"
+                    itemCategory.innerHTML = '<option value="">Select Category</option>';
+                    
+                    // Add category options
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        itemCategory.appendChild(option);
+                    });
+                    
+                    // Restore previous selection if it still exists
+                    if (categories.includes(currentValue)) {
+                        itemCategory.value = currentValue;
+                        log(`✅ Restored item category selection: "${currentValue}"`);
+                    } else {
+                        log(`⚠️ Previous item category selection "${currentValue}" no longer exists`);
+                    }
+                }
+                
+                log(`✅ Category selectors updated successfully with ${categories.length} categories`);
+                return categories;
+            } catch (error) {
+                log(`❌ Error updating category selectors: ${error.message}`);
+                console.error('Error updating category selectors:', error);
+                return [];
+            }
+        }
+
+        async function testUpdateFunction() {
+            log('🧪 Testing updateCategorySelectors function...');
+            const categories = await updateCategorySelectors();
+            
+            if (categories.length > 0) {
+                log(`🎉 Test completed successfully! Updated with ${categories.length} categories.`);
+            } else {
+                log('❌ Test failed - no categories returned');
+            }
+        }
+
+        async function addTestCategory() {
+            const categoryName = 'Test Category ' + Math.floor(Math.random() * 1000);
+            log(`➕ Adding test category: "${categoryName}"`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/menu.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'add',
+                        name: `${categoryName} - Placeholder`,
+                        description: 'Test placeholder item for category testing.',
+                        price: 0,
+                        category: categoryName,
+                        image_url: 'https://via.placeholder.com/300x200?text=Test',
+                        availability: 0
+                    })
+                });
+
+                if (response.ok) {
+                    log(`✅ Test category "${categoryName}" added successfully!`);
+                    
+                    // Wait a moment then update selectors
+                    setTimeout(async () => {
+                        log('🔄 Auto-updating selectors after category addition...');
+                        await updateCategorySelectors();
+                    }, 500);
+                } else {
+                    throw new Error('Failed to add test category');
+                }
+            } catch (error) {
+                log(`❌ Error adding test category: ${error.message}`);
+            }
+        }
+
+        async function compareWithDatabase() {
+            log('🔍 Comparing dropdown contents with database...');
+            
+            try {
+                // Get categories from database
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                const dbCategories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
+                
+                // Get categories from dropdowns
+                const filterOptions = Array.from(document.getElementById('categoryFilter').options)
+                    .map(opt => opt.value).filter(val => val).sort();
+                const itemOptions = Array.from(document.getElementById('itemCategory').options)
+                    .map(opt => opt.value).filter(val => val).sort();
+                
+                log(`💾 Database categories: [${dbCategories.join(', ')}]`);
+                log(`📋 Filter dropdown: [${filterOptions.join(', ')}]`);
+                log(`📋 Item dropdown: [${itemOptions.join(', ')}]`);
+                
+                // Check for mismatches
+                const missingFromFilter = dbCategories.filter(cat => !filterOptions.includes(cat));
+                const extraInFilter = filterOptions.filter(cat => !dbCategories.includes(cat));
+                const missingFromItem = dbCategories.filter(cat => !itemOptions.includes(cat));
+                const extraInItem = itemOptions.filter(cat => !dbCategories.includes(cat));
+                
+                if (missingFromFilter.length === 0 && extraInFilter.length === 0 && 
+                    missingFromItem.length === 0 && extraInItem.length === 0) {
+                    log('✅ Perfect match! All dropdowns are synchronized with database.');
+                } else {
+                    if (missingFromFilter.length > 0) log(`⚠️ Missing from filter: [${missingFromFilter.join(', ')}]`);
+                    if (extraInFilter.length > 0) log(`⚠️ Extra in filter: [${extraInFilter.join(', ')}]`);
+                    if (missingFromItem.length > 0) log(`⚠️ Missing from item dropdown: [${missingFromItem.join(', ')}]`);
+                    if (extraInItem.length > 0) log(`⚠️ Extra in item dropdown: [${extraInItem.join(', ')}]`);
+                }
+                
+            } catch (error) {
+                log(`❌ Error comparing with database: ${error.message}`);
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            log('🚀 Category Update Function Test initialized');
+            testUpdateFunction();
+        };
+    </script>
+</body>
+</html>

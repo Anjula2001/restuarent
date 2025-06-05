@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .dropdown-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Category Management System Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Current State Check</h2>
+        <button onclick="checkCurrentState()">Check Current Categories & Dropdowns</button>
+        <div id="currentState" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>➕ Add New Category Test</h2>
+        <input type="text" id="testCategoryName" placeholder="Enter test category name" value="Test Category">
+        <button onclick="testAddCategory()">Add Test Category</button>
+        <div id="addCategoryResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Live Dropdown Monitor</h2>
+        <p>These dropdowns should automatically update when categories are added/modified:</p>
+        
+        <div class="dropdown-section">
+            <h4>Category Filter (from admin panel):</h4>
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+
+        <div class="dropdown-section">
+            <h4>Item Category Selector (from admin panel):</h4>
+            <select id="itemCategory">
+                <option value="">Select Category</option>
+            </select>
+        </div>
+        
+        <button onclick="refreshDropdowns()">Manually Refresh Dropdowns</button>
+        <div id="dropdownStatus" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🗑️ Category Management Actions</h2>
+        <div>
+            <label>Select category to rename/delete:</label>
+            <select id="categoryToManage">
+                <option value="">Select Category</option>
+            </select>
+            <button onclick="testRenameCategory()">Rename Selected</button>
+            <button onclick="testDeleteCategory()">Delete Selected</button>
+        </div>
+        <div id="managementResult" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8888/restuarent/api';
+        let logElement;
+
+        function log(message, type = 'info') {
+            if (!logElement) return;
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function checkCurrentState() {
+            logElement = document.getElementById('currentState');
+            logElement.textContent = '';
+            
+            try {
+                log('Fetching current menu items...');
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const menuItems = await response.json();
+                log(`Found ${menuItems.length} menu items`, 'success');
+                
+                // Extract categories
+                const categories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
+                log(`Current categories: ${categories.join(', ')}`, 'success');
+                
+                // Update all dropdowns
+                updateAllDropdowns(categories);
+                
+                // Check each category's item count
+                categories.forEach(category => {
+                    const count = menuItems.filter(item => item.category === category).length;
+                    log(`${category}: ${count} items`);
+                });
+                
+            } catch (error) {
+                log(`Error checking current state: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAddCategory() {
+            logElement = document.getElementById('addCategoryResult');
+            logElement.textContent = '';
+            
+            const categoryName = document.getElementById('testCategoryName').value.trim();
+            
+            if (!categoryName) {
+                log('Please enter a category name', 'warning');
+                return;
+            }
+            
+            try {
+                log(`Testing add category: "${categoryName}"`);
+                
+                // Check if category exists
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                const existingCategories = [...new Set(menuItems.map(item => item.category))];
+                
+                if (existingCategories.includes(categoryName)) {
+                    log('Category already exists', 'warning');
+                    return;
+                }
+                
+                // Add placeholder item to create category
+                log('Adding placeholder item to create category...');
+                const addResponse = await fetch(`${API_BASE}/menu.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'add',
+                        name: `${categoryName} - Placeholder`,
+                        description: 'Test placeholder item for category testing.',
+                        price: 0,
+                        category: categoryName,
+                        image_url: 'https://via.placeholder.com/300x200?text=Test+Category',
+                        availability: 0
+                    })
+                });
+
+                if (addResponse.ok) {
+                    log('Category created successfully!', 'success');
+                    
+                    // Wait a moment then check if dropdowns updated
+                    setTimeout(async () => {
+                        log('Checking if dropdowns updated...');
+                        await checkDropdownUpdates();
+                    }, 1000);
+                    
+                } else {
+                    throw new Error('Failed to create category');
+                }
+                
+            } catch (error) {
+                log(`Error adding category: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkDropdownUpdates() {
+            try {
+                // Get fresh categories
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                const categories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
+                
+                // Check category filter dropdown
+                const categoryFilter = document.getElementById('categoryFilter');
+                const filterOptions = Array.from(categoryFilter.options).map(opt => opt.value).filter(val => val);
+                
+                // Check item category dropdown
+                const itemCategory = document.getElementById('itemCategory');
+                const itemOptions = Array.from(itemCategory.options).map(opt => opt.value).filter(val => val);
+                
+                log(`Database categories: [${categories.join(', ')}]`);
+                log(`Filter dropdown options: [${filterOptions.join(', ')}]`);
+                log(`Item dropdown options: [${itemOptions.join(', ')}]`);
+                
+                // Check if all categories are in dropdowns
+                const missingFromFilter = categories.filter(cat => !filterOptions.includes(cat));
+                const missingFromItem = categories.filter(cat => !itemOptions.includes(cat));
+                
+                if (missingFromFilter.length === 0 && missingFromItem.length === 0) {
+                    log('✅ All dropdowns updated correctly!', 'success');
+                } else {
+                    if (missingFromFilter.length > 0) {
+                        log(`⚠️ Missing from filter dropdown: ${missingFromFilter.join(', ')}`, 'warning');
+                    }
+                    if (missingFromItem.length > 0) {
+                        log(`⚠️ Missing from item dropdown: ${missingFromItem.join(', ')}`, 'warning');
+                    }
+                }
+                
+            } catch (error) {
+                log(`Error checking dropdown updates: ${error.message}`, 'error');
+            }
+        }
+
+        async function refreshDropdowns() {
+            logElement = document.getElementById('dropdownStatus');
+            logElement.textContent = '';
+            
+            try {
+                log('Manually refreshing dropdowns...');
+                
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                const categories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
+                
+                updateAllDropdowns(categories);
+                log(`Dropdowns updated with categories: ${categories.join(', ')}`, 'success');
+                
+            } catch (error) {
+                log(`Error refreshing dropdowns: ${error.message}`, 'error');
+            }
+        }
+
+        function updateAllDropdowns(categories) {
+            // Update category filter
+            const categoryFilter = document.getElementById('categoryFilter');
+            const currentFilterValue = categoryFilter.value;
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+            if (categories.includes(currentFilterValue)) {
+                categoryFilter.value = currentFilterValue;
+            }
+
+            // Update item category selector
+            const itemCategory = document.getElementById('itemCategory');
+            const currentItemValue = itemCategory.value;
+            itemCategory.innerHTML = '<option value="">Select Category</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                itemCategory.appendChild(option);
+            });
+            if (categories.includes(currentItemValue)) {
+                itemCategory.value = currentItemValue;
+            }
+
+            // Update management dropdown
+            const categoryToManage = document.getElementById('categoryToManage');
+            const currentManageValue = categoryToManage.value;
+            categoryToManage.innerHTML = '<option value="">Select Category</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryToManage.appendChild(option);
+            });
+            if (categories.includes(currentManageValue)) {
+                categoryToManage.value = currentManageValue;
+            }
+        }
+
+        async function testRenameCategory() {
+            logElement = document.getElementById('managementResult');
+            
+            const oldCategory = document.getElementById('categoryToManage').value;
+            if (!oldCategory) {
+                log('Please select a category to rename', 'warning');
+                return;
+            }
+
+            const newCategory = prompt(`Rename "${oldCategory}" to:`, oldCategory + ' Renamed');
+            if (!newCategory || newCategory === oldCategory) {
+                log('Rename cancelled', 'warning');
+                return;
+            }
+
+            try {
+                log(`Renaming "${oldCategory}" to "${newCategory}"...`);
+                
+                // Get items in category
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                const itemsToUpdate = menuItems.filter(item => item.category === oldCategory);
+                
+                log(`Found ${itemsToUpdate.length} items to update`);
+                
+                // Update each item
+                for (const item of itemsToUpdate) {
+                    const updateResponse = await fetch(`${API_BASE}/menu.php`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: item.id,
+                            name: item.name,
+                            description: item.description,
+                            price: item.price,
+                            category: newCategory,
+                            image_url: item.image_url,
+                            is_available: item.is_available
+                        })
+                    });
+                    
+                    if (!updateResponse.ok) {
+                        throw new Error(`Failed to update item: ${item.name}`);
+                    }
+                }
+                
+                log(`Category renamed successfully! ${itemsToUpdate.length} items updated.`, 'success');
+                
+                // Check dropdown updates
+                setTimeout(async () => {
+                    await checkDropdownUpdates();
+                }, 1000);
+                
+            } catch (error) {
+                log(`Error renaming category: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDeleteCategory() {
+            logElement = document.getElementById('managementResult');
+            
+            const category = document.getElementById('categoryToManage').value;
+            if (!category) {
+                log('Please select a category to delete', 'warning');
+                return;
+            }
+
+            if (!confirm(`Delete category "${category}"?`)) {
+                log('Delete cancelled', 'warning');
+                return;
+            }
+
+            try {
+                log(`Checking category "${category}" for items...`);
+                
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                const itemsInCategory = menuItems.filter(item => item.category === category);
+                
+                if (itemsInCategory.length > 0) {
+                    log(`Cannot delete category with ${itemsInCategory.length} items. Delete items first.`, 'warning');
+                    return;
+                }
+                
+                log('Category has no items, can be deleted', 'success');
+                
+                // Check dropdown updates
+                setTimeout(async () => {
+                    await checkDropdownUpdates();
+                }, 1000);
+                
+            } catch (error) {
+                log(`Error deleting category: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            checkCurrentState();
+        };
+    </script>
+</body>
+</html>

@@ -1239,6 +1239,7 @@
                     document.getElementById('newCategoryName').value = '';
                     loadCategories();
                     updateCategorySelectors(); // Update all category dropdowns
+                    loadMenu(); // Refresh menu display to show new item and update statistics
                     alert(`Category "${categoryName}" created successfully! A placeholder item was added - please add real menu items to this category.`);
                 } else {
                     throw new Error('Failed to create category');
@@ -1317,11 +1318,66 @@
             }
         }
 
-        function updateCategorySelectors() {
-            // This function would update all category dropdowns in the UI
-            // For now, we'll just reload the page to refresh all selectors
-            // In a production app, you'd update each dropdown individually
-            console.log('Category selectors should be updated here');
+        async function updateCategorySelectors() {
+            try {
+                // Get current categories from the database
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                
+                if (!Array.isArray(menuItems)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                const categories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
+                
+                // Update category filter dropdown
+                const categoryFilter = document.getElementById('categoryFilter');
+                if (categoryFilter) {
+                    const currentValue = categoryFilter.value;
+                    
+                    // Clear existing options except "All Categories"
+                    categoryFilter.innerHTML = '<option value="">All Categories</option>';
+                    
+                    // Add category options
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        categoryFilter.appendChild(option);
+                    });
+                    
+                    // Restore previous selection if it still exists
+                    if (categories.includes(currentValue)) {
+                        categoryFilter.value = currentValue;
+                    }
+                }
+                
+                // Update item category dropdown in the modal
+                const itemCategory = document.getElementById('itemCategory');
+                if (itemCategory) {
+                    const currentValue = itemCategory.value;
+                    
+                    // Clear existing options except "Select Category"
+                    itemCategory.innerHTML = '<option value="">Select Category</option>';
+                    
+                    // Add category options
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        itemCategory.appendChild(option);
+                    });
+                    
+                    // Restore previous selection if it still exists
+                    if (categories.includes(currentValue)) {
+                        itemCategory.value = currentValue;
+                    }
+                }
+                
+                console.log('Category selectors updated with:', categories);
+            } catch (error) {
+                console.error('Error updating category selectors:', error);
+            }
         }
 
         // Image Upload Handler
