@@ -461,40 +461,66 @@
         </footer>
     </div>
 
-    <script src="js/script.js"></script>
     <script>
         // Reviews page specific variables
         let allReviews = [];
         let currentPage = 1;
-        let reviewsPerPage = 6;
+        let reviewsPerPage = 9; // Increased to show more reviews per page
         let currentFilter = 'all';
         const API_BASE = 'api';
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            checkUserAuthentication();
+            // Load reviews page functionality first
             loadReviewsPage();
             setupFilters();
+            
+            // Then load authentication (non-blocking)
+            setTimeout(() => {
+                checkUserAuthentication();
+            }, 100);
         });
 
         // Load all reviews and statistics
         async function loadReviewsPage() {
             try {
+                console.log('[Reviews Page] Loading reviews page...');
+                
                 // Load reviews and statistics in parallel
                 const [reviewsResponse, statsResponse] = await Promise.all([
                     fetch(`${API_BASE}/reviews.php`),
                     fetch(`${API_BASE}/reviews.php?statistics=1`)
                 ]);
 
+                console.log('[Reviews Page] Reviews API response status:', reviewsResponse.status);
+                console.log('[Reviews Page] Statistics API response status:', statsResponse.status);
+
+                if (!reviewsResponse.ok) {
+                    throw new Error(`Reviews API error: ${reviewsResponse.status}`);
+                }
+                
+                if (!statsResponse.ok) {
+                    throw new Error(`Statistics API error: ${statsResponse.status}`);
+                }
+
                 const reviews = await reviewsResponse.json();
                 const stats = await statsResponse.json();
 
+                console.log(`[Reviews Page] Loaded ${reviews.length} reviews`);
+                console.log('[Reviews Page] Statistics:', stats);
+
                 allReviews = reviews;
                 displayReviewsStatistics(stats);
-                displayReviews(reviews);
+                
+                // Apply the current filter before displaying reviews
+                const filteredReviews = currentFilter === 'all' 
+                    ? reviews 
+                    : reviews.filter(review => review.rating == currentFilter);
+                
+                displayReviews(filteredReviews);
 
             } catch (error) {
-                console.error('Error loading reviews:', error);
+                console.error('[Reviews Page] Error loading reviews:', error);
                 showErrorState();
             }
         }
@@ -510,27 +536,34 @@
             const reviewsGrid = document.getElementById('reviewsGrid');
             const reviewsLoading = document.getElementById('reviewsLoading');
             const noReviews = document.getElementById('noReviews');
+            const pagination = document.getElementById('pagination');
 
+            console.log(`[Reviews Page] Displaying reviews: ${reviews ? reviews.length : 0} total`);
             reviewsLoading.style.display = 'none';
 
             if (!reviews || reviews.length === 0) {
+                console.log('[Reviews Page] No reviews to display');
                 noReviews.style.display = 'block';
                 reviewsGrid.style.display = 'none';
+                pagination.style.display = 'none';
                 return;
             }
 
             noReviews.style.display = 'none';
             reviewsGrid.style.display = 'grid';
 
-            // Filter reviews based on current filter
-            const filteredReviews = currentFilter === 'all' 
-                ? reviews 
-                : reviews.filter(review => review.rating == currentFilter);
+            // No need to filter reviews again - we now pass in already filtered reviews
+            // from the pagination functions
+            const filteredReviews = reviews;
+
+            console.log(`[Reviews Page] Filtered reviews: ${filteredReviews.length} (filter: ${currentFilter})`);
 
             // Paginate reviews
             const startIndex = (currentPage - 1) * reviewsPerPage;
             const endIndex = startIndex + reviewsPerPage;
             const paginatedReviews = filteredReviews.slice(startIndex, endIndex);
+
+            console.log(`[Reviews Page] Showing page ${currentPage}: reviews ${startIndex + 1}-${Math.min(endIndex, filteredReviews.length)} of ${filteredReviews.length}`);
 
             // Generate review cards
             reviewsGrid.innerHTML = paginatedReviews.map((review, index) => `
@@ -563,6 +596,8 @@
                     </div>
                 </div>
             `).join('');
+
+            console.log(`[Reviews Page] Generated ${paginatedReviews.length} review cards`);
 
             // Setup pagination
             setupPagination(filteredReviews.length);
@@ -608,8 +643,15 @@
                     currentFilter = this.dataset.rating;
                     currentPage = 1; // Reset to first page
                     
+                    console.log(`[Reviews Page] Filter changed to: ${currentFilter}`);
+                    
+                    // Filter reviews based on selected filter
+                    const filteredReviews = currentFilter === 'all' 
+                        ? allReviews 
+                        : allReviews.filter(review => review.rating == currentFilter);
+                    
                     // Re-display reviews with new filter
-                    displayReviews(allReviews);
+                    displayReviews(filteredReviews);
                 });
             });
         }
@@ -651,7 +693,10 @@
         function previousPage() {
             if (currentPage > 1) {
                 currentPage--;
-                displayReviews(allReviews);
+                const filteredReviews = currentFilter === 'all' 
+                    ? allReviews 
+                    : allReviews.filter(review => review.rating == currentFilter);
+                displayReviews(filteredReviews); // Fixed: Use filtered reviews instead of all reviews
             }
         }
 
@@ -663,13 +708,16 @@
             
             if (currentPage < totalPages) {
                 currentPage++;
-                displayReviews(allReviews);
+                displayReviews(filteredReviews); // Fixed: Use filtered reviews instead of all reviews
             }
         }
 
         function goToPage(pageNumber) {
             currentPage = pageNumber;
-            displayReviews(allReviews);
+            const filteredReviews = currentFilter === 'all' 
+                ? allReviews 
+                : allReviews.filter(review => review.rating == currentFilter);
+            displayReviews(filteredReviews); // Fixed: Use filtered reviews instead of all reviews
         }
 
         // Mark review as helpful (placeholder function)
