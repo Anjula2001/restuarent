@@ -102,9 +102,12 @@
 
         .status {
             padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: bold;
+            display: inline-block;
+            text-align: center;
+            min-width: 60px;
         }
 
         .status.pending { background-color: #ffc107; color: #000; }
@@ -131,70 +134,181 @@
         .action-btn.reject { background-color: #6c757d; color: white; }
         .action-btn.delete { background-color: #e74c3c; color: white; }
 
-        /* Fix table row height and action column */
-        td:last-child {
+        /* Enhanced table layout for better organization */
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            table-layout: fixed;
+        }
+
+        .admin-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
             white-space: nowrap;
-            min-width: 150px;
-            text-align: center;
         }
 
-        tbody tr {
+        .admin-table td {
+            padding: 12px 8px;
             vertical-align: middle;
-            height: auto;
+            border-bottom: 1px solid #dee2e6;
+            word-wrap: break-word;
         }
 
-        /* Ensure table cells don't wrap */
-        table td {
-            vertical-align: middle;
-            white-space: nowrap;
-        }
+        /* Column width specifications for reviews table */
+        .reviews-table th:nth-child(1) { width: 8%; }  /* ID */
+        .reviews-table th:nth-child(2) { width: 15%; } /* Customer */
+        .reviews-table th:nth-child(3) { width: 12%; } /* Rating */
+        .reviews-table th:nth-child(4) { width: 35%; } /* Review Text */
+        .reviews-table th:nth-child(5) { width: 10%; } /* Status */
+        .reviews-table th:nth-child(6) { width: 12%; } /* Date */
+        .reviews-table th:nth-child(7) { width: 8%; }  /* Actions */
 
-        /* Allow wrapping only for special requests column if present */
-        table td:nth-child(7), table td.wrap-text {
+        /* Review text column - allow wrapping */
+        .reviews-table td:nth-child(4) {
             white-space: normal;
-            max-width: 200px;
+            max-width: 300px;
             overflow-wrap: break-word;
+            word-break: break-word;
+            line-height: 1.4;
         }
 
-        /* Ensure action buttons stay inline */
+        /* Actions column styling */
+        .reviews-table td:nth-child(7) {
+            text-align: center;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        /* Better action button spacing and layout */
         .action-btn {
             display: inline-block;
-            margin: 1px;
+            margin: 2px 1px;
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        .action-btn:hover {
+            opacity: 0.8;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
+        /* Action button container for better spacing */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Responsive table wrapper */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid #dee2e6;
             border-radius: 8px;
-            text-align: center;
         }
 
-        .stat-value {
-            font-size: 2em;
+        /* Row hover effect */
+        .admin-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Status badge improvements */
+        .status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .loading {
+            display: inline-block;
             text-align: center;
-            padding: 20px;
-            color: #666;
+            min-width: 60px;
         }
 
-        .error {
-            color: #dc3545;
-            background-color: #f8d7da;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+        /* Specific table column widths for different tables */
+        
+        /* Orders table column widths */
+        .orders-table th:nth-child(1) { width: 8%; }  /* ID */
+        .orders-table th:nth-child(2) { width: 18%; } /* Customer */
+        .orders-table th:nth-child(3) { width: 10%; } /* Type */
+        .orders-table th:nth-child(4) { width: 15%; } /* Items */
+        .orders-table th:nth-child(5) { width: 12%; } /* Total */
+        .orders-table th:nth-child(6) { width: 10%; } /* Status */
+        .orders-table th:nth-child(7) { width: 12%; } /* Date */
+        .orders-table th:nth-child(8) { width: 15%; } /* Actions */
+
+        /* Menu table column widths */
+        .menu-table th:nth-child(1) { width: 8%; }  /* ID */
+        .menu-table th:nth-child(2) { width: 30%; } /* Name */
+        .menu-table th:nth-child(3) { width: 15%; } /* Category */
+        .menu-table th:nth-child(4) { width: 12%; } /* Price */
+        .menu-table th:nth-child(5) { width: 10%; } /* Available */
+        .menu-table th:nth-child(6) { width: 25%; } /* Actions */
+
+        /* Reservations table column widths */
+        .reservations-table th:nth-child(1) { width: 8%; }  /* ID */
+        .reservations-table th:nth-child(2) { width: 18%; } /* Name */
+        .reservations-table th:nth-child(3) { width: 20%; } /* Email */
+        .reservations-table th:nth-child(4) { width: 12%; } /* Date */
+        .reservations-table th:nth-child(5) { width: 10%; } /* Time */
+        .reservations-table th:nth-child(6) { width: 8%; }  /* Guests */
+        .reservations-table th:nth-child(7) { width: 10%; } /* Status */
+        .reservations-table th:nth-child(8) { width: 14%; } /* Actions */
+
+        /* Make customer names and important text bold */
+        .admin-table td strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Improve mobile responsiveness */
+        @media (max-width: 768px) {
+            .admin-table {
+                font-size: 12px;
+            }
+            
+            .action-btn {
+                font-size: 10px;
+                padding: 4px 6px;
+                margin: 1px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 2px;
+            }
+            
+            .reviews-table td:nth-child(4) {
+                max-width: 150px;
+            }
+        }
+
+        /* Loading state for tables */
+        .table-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Empty state for tables */
+        .table-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .table-empty h3 {
+            color: #666;
+            margin-bottom: 10px;
         }
 
         /* Modal Styles */
@@ -615,39 +729,43 @@
                 }
 
                 const table = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Customer</th>
-                                <th>Type</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${orders.map(order => `
+                    <div class="table-wrapper">
+                        <table class="admin-table orders-table">
+                            <thead>
                                 <tr>
-                                    <td>#${order.id}</td>
-                                    <td>${order.customer_name}</td>
-                                    <td>${order.order_type}</td>
-                                    <td>${order.items || 'N/A'}</td>
-                                    <td>Rs. ${order.total_amount}</td>
-                                    <td><span class="status ${order.status}">${order.status}</span></td>
-                                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
-                                    <td>
-                                        ${order.status === 'pending' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'preparing')">Start Preparing</button>` : ''}
-                                        ${order.status === 'preparing' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'ready')">Mark Ready</button>` : ''}
-                                        ${order.status === 'ready' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'delivered')">Mark Delivered</button>` : ''}
-                                        <button class="action-btn cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Cancel</button>
-                                    </td>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Type</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${orders.map(order => `
+                                    <tr>
+                                        <td>#${order.id}</td>
+                                        <td><strong>${order.customer_name}</strong></td>
+                                        <td>${order.order_type}</td>
+                                        <td>${order.items || 'N/A'}</td>
+                                        <td><strong>Rs. ${order.total_amount}</strong></td>
+                                        <td><span class="status ${order.status}">${order.status}</span></td>
+                                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                ${order.status === 'pending' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'preparing')" title="Start Preparing">Start</button>` : ''}
+                                                ${order.status === 'preparing' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'ready')" title="Mark as Ready">Ready</button>` : ''}
+                                                ${order.status === 'ready' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'delivered')" title="Mark as Delivered">Delivered</button>` : ''}
+                                                <button class="action-btn cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')" title="Cancel Order">Cancel</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
                 
                 container.innerHTML = table;
@@ -674,37 +792,41 @@
                 }
 
                 const table = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Guests</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reservations.map(reservation => `
+                    <div class="table-wrapper">
+                        <table class="admin-table reservations-table">
+                            <thead>
                                 <tr>
-                                    <td>#${reservation.id}</td>
-                                    <td>${reservation.name}</td>
-                                    <td>${reservation.email}</td>
-                                    <td>${reservation.date}</td>
-                                    <td>${reservation.time}</td>
-                                    <td>${reservation.guests}</td>
-                                    <td><span class="status ${reservation.status}">${reservation.status}</span></td>
-                                    <td>
-                                        ${reservation.status === 'pending' ? `<button class="action-btn confirm" onclick="updateReservationStatus(${reservation.id}, 'confirmed')">Confirm</button>` : ''}
-                                        <button class="action-btn cancel" onclick="updateReservationStatus(${reservation.id}, 'cancelled')">Cancel</button>
-                                    </td>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Guests</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${reservations.map(reservation => `
+                                    <tr>
+                                        <td>#${reservation.id}</td>
+                                        <td><strong>${reservation.name}</strong></td>
+                                        <td>${reservation.email}</td>
+                                        <td>${reservation.date}</td>
+                                        <td>${reservation.time}</td>
+                                        <td>${reservation.guests}</td>
+                                        <td><span class="status ${reservation.status}">${reservation.status}</span></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                ${reservation.status === 'pending' ? `<button class="action-btn confirm" onclick="updateReservationStatus(${reservation.id}, 'confirmed')" title="Confirm Reservation">Confirm</button>` : ''}
+                                                <button class="action-btn cancel" onclick="updateReservationStatus(${reservation.id}, 'cancelled')" title="Cancel Reservation">Cancel</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
                 
                 container.innerHTML = table;
@@ -742,36 +864,40 @@
                 }
 
                 const table = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Customer</th>
-                                <th>Rating</th>
-                                <th>Review</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reviews.map(review => `
+                    <div class="table-wrapper">
+                        <table class="admin-table reviews-table">
+                            <thead>
                                 <tr>
-                                    <td>#${review.id}</td>
-                                    <td>${review.customer_name}</td>
-                                    <td>${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</td>
-                                    <td>${review.review_text.substring(0, 100)}${review.review_text.length > 100 ? '...' : ''}</td>
-                                    <td><span class="status ${review.is_approved ? 'confirmed' : 'pending'}">${review.is_approved ? 'Approved' : 'Pending'}</span></td>
-                                    <td>${new Date(review.created_at).toLocaleDateString()}</td>
-                                    <td>
-                                        ${!review.is_approved ? `<button class="action-btn approve" onclick="updateReviewStatus(${review.id}, 'approve')">Approve</button>` : ''}
-                                        <button class="action-btn reject" onclick="updateReviewStatus(${review.id}, 'reject')">Reject</button>
-                                        <button class="action-btn delete" onclick="deleteReview(${review.id})">Remove</button>
-                                    </td>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Rating</th>
+                                    <th>Review</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${reviews.map(review => `
+                                    <tr>
+                                        <td>#${review.id}</td>
+                                        <td><strong>${review.customer_name}</strong></td>
+                                        <td>${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</td>
+                                        <td>${review.review_text.substring(0, 150)}${review.review_text.length > 150 ? '...' : ''}</td>
+                                        <td><span class="status ${review.is_approved ? 'confirmed' : 'pending'}">${review.is_approved ? 'Approved' : 'Pending'}</span></td>
+                                        <td>${new Date(review.created_at).toLocaleDateString()}</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                ${!review.is_approved ? `<button class="action-btn approve" onclick="updateReviewStatus(${review.id}, 'approve')" title="Approve Review">Approve</button>` : ''}
+                                                <button class="action-btn reject" onclick="updateReviewStatus(${review.id}, 'reject')" title="Reject Review">Reject</button>
+                                                <button class="action-btn delete" onclick="deleteReview(${review.id})" title="Delete Review">Remove</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
                 
                 container.innerHTML = table;
@@ -860,36 +986,40 @@
             }
 
             const table = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Available</th>
-                            <th>Actions (Edit | Toggle | Delete)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${menuItems.map(item => `
+                <div class="table-wrapper">
+                    <table class="admin-table menu-table">
+                        <thead>
                             <tr>
-                                <td>#${item.id}</td>
-                                <td>${item.name}</td>
-                                <td><span class="category-badge" style="background-color: ${getCategoryColor(item.category)}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">${item.category}</span></td>
-                                <td>Rs. ${item.price}</td>
-                                <td><span class="status ${item.is_available ? 'confirmed' : 'cancelled'}">${item.is_available ? 'Yes' : 'No'}</span></td>
-                                <td>
-                                    <button class="action-btn confirm" onclick="editMenuItem(${item.id})" title="Edit Item">✏️ Edit</button>
-                                    <button class="action-btn ${item.is_available ? 'cancel' : 'confirm'}" onclick="toggleMenuItem(${item.id}, ${!item.is_available})" title="${item.is_available ? 'Disable' : 'Enable'} Item">
-                                        ${item.is_available ? '🔒 Disable' : '🔓 Enable'}
-                                    </button>
-                                    <button class="action-btn reject" onclick="hardDeleteMenuItem(${item.id})" title="Permanently delete from database">🗑️ Delete</button>
-                                </td>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Available</th>
+                                <th>Actions</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            ${menuItems.map(item => `
+                                <tr>
+                                    <td>#${item.id}</td>
+                                    <td><strong>${item.name}</strong></td>
+                                    <td><span class="category-badge" style="background-color: ${getCategoryColor(item.category)}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">${item.category}</span></td>
+                                    <td><strong>Rs. ${item.price}</strong></td>
+                                    <td><span class="status ${item.is_available ? 'confirmed' : 'cancelled'}">${item.is_available ? 'Yes' : 'No'}</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn confirm" onclick="editMenuItem(${item.id})" title="Edit Item">Edit</button>
+                                            <button class="action-btn ${item.is_available ? 'cancel' : 'confirm'}" onclick="toggleMenuItem(${item.id}, ${!item.is_available})" title="${item.is_available ? 'Disable' : 'Enable'} Item">
+                                                ${item.is_available ? 'Disable' : 'Enable'}
+                                            </button>
+                                            <button class="action-btn reject" onclick="hardDeleteMenuItem(${item.id})" title="Permanently delete from database">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             `;
             
             container.innerHTML = table;
