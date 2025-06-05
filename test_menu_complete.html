@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Menu Test - Grand Restaurant</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .warning { border-color: #ffc107; background-color: #fff3cd; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+        .category-test { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .item-count { font-weight: bold; color: #007bff; }
+        .reload-btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+        .reload-btn:hover { background: #0056b3; }
+        .test-results { background: #f1f3f4; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🍽️ Complete Menu Display Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button class="reload-btn" onclick="runCompleteTest()">🔄 Run Complete Test</button>
+        <button class="reload-btn" onclick="testReloadFunction()">🔄 Test Reload Function</button>
+        <button class="reload-btn" onclick="window.open('menu.html', '_blank')">📋 Open Main Menu</button>
+    </div>
+
+    <div class="test-results" id="test-results">
+        <p>Click "Run Complete Test" to verify all menu items are displaying correctly.</p>
+    </div>
+
+    <div id="detailed-results"></div>
+
+    <script>
+        async function runCompleteTest() {
+            const resultsDiv = document.getElementById('test-results');
+            const detailedDiv = document.getElementById('detailed-results');
+            
+            resultsDiv.innerHTML = '<p>🔄 Running complete menu test...</p>';
+            
+            try {
+                // Load menu data
+                const response = await fetch('api/menu.php');
+                const allItems = await response.json();
+                
+                // Expected categories and their matching logic
+                const categories = [
+                    { 
+                        id: 'rice-curry', 
+                        name: 'Rice & Curry', 
+                        matches: ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'],
+                        expected: 5 // Based on database analysis
+                    },
+                    { 
+                        id: 'chinese', 
+                        name: 'Chinese', 
+                        matches: ['chinese'],
+                        expected: 4 // Based on database analysis
+                    },
+                    { 
+                        id: 'seafood', 
+                        name: 'Seafood', 
+                        matches: ['seafood'],
+                        expected: 2 // Based on database analysis
+                    },
+                    { 
+                        id: 'kottu', 
+                        name: 'Kottu', 
+                        matches: ['kottu'],
+                        expected: 2 // Based on database analysis
+                    },
+                    { 
+                        id: 'juices', 
+                        name: 'Juices', 
+                        matches: ['juices', 'juice'],
+                        expected: 1 // Based on database analysis
+                    },
+                    { 
+                        id: 'desserts', 
+                        name: 'Desserts', 
+                        matches: ['desserts', 'dessert'],
+                        expected: 2 // Based on database analysis
+                    },
+                    { 
+                        id: 'others', 
+                        name: 'Other Specialties', 
+                        matches: ['pasta', 'salad', 'other'],
+                        expected: 3 // Based on database analysis
+                    }
+                ];
+
+                let totalItemsFound = 0;
+                let testsPassed = 0;
+                let testsTotal = categories.length + 1; // +1 for total count test
+                
+                let detailedResults = '<div class="test-section"><h2>Detailed Test Results</h2>';
+                
+                // Test each category
+                categories.forEach(category => {
+                    const categoryItems = allItems.filter(item => {
+                        const itemCategory = item.category.toLowerCase().trim();
+                        return category.matches.some(match => {
+                            return itemCategory === match || itemCategory.includes(match);
+                        });
+                    });
+                    
+                    totalItemsFound += categoryItems.length;
+                    const passed = categoryItems.length >= category.expected;
+                    if (passed) testsPassed++;
+                    
+                    detailedResults += `
+                        <div class="category-test ${passed ? 'success' : 'warning'}">
+                            <h4>${category.name} ${passed ? '✅' : '⚠️'}</h4>
+                            <p><span class="item-count">Found: ${categoryItems.length}</span> | Expected: ${category.expected}</p>
+                            <div style="font-size: 0.9em; color: #666;">
+                                Items: ${categoryItems.map(item => `${item.name} (${item.category})`).join(', ') || 'None'}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Test total count
+                const totalCountPassed = totalItemsFound >= 19;
+                if (totalCountPassed) testsPassed++;
+                
+                detailedResults += `
+                    <div class="category-test ${totalCountPassed ? 'success' : 'error'}">
+                        <h4>Total Items Count ${totalCountPassed ? '✅' : '❌'}</h4>
+                        <p><span class="item-count">Total Found: ${totalItemsFound}</span> | Expected: 19+</p>
+                        <p>Database Total: ${allItems.length}</p>
+                    </div>
+                `;
+                
+                detailedResults += '</div>';
+                
+                // Overall results
+                const overallPassed = testsPassed === testsTotal;
+                resultsDiv.innerHTML = `
+                    <div class="${overallPassed ? 'success' : 'warning'}">
+                        <h3>${overallPassed ? '✅ All Tests Passed!' : '⚠️ Some Issues Found'}</h3>
+                        <p><strong>Tests Passed:</strong> ${testsPassed}/${testsTotal}</p>
+                        <p><strong>Items Displayed:</strong> ${totalItemsFound}/${allItems.length}</p>
+                        <p><strong>Status:</strong> ${overallPassed ? 'Menu is working correctly!' : 'Menu may have display issues'}</p>
+                    </div>
+                `;
+                
+                detailedDiv.innerHTML = detailedResults;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Test Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Unable to load menu data from API</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testReloadFunction() {
+            try {
+                // Test the reload function by calling the same logic as the main menu
+                alert('Testing reload functionality...');
+                
+                const response = await fetch('api/menu.php');
+                const data = await response.json();
+                
+                alert(`✅ Reload test successful! Loaded ${data.length} menu items.`);
+            } catch (error) {
+                alert(`❌ Reload test failed: ${error.message}`);
+            }
+        }
+        
+        // Auto-run test on page load
+        document.addEventListener('DOMContentLoaded', runCompleteTest);
+    </script>
+</body>
+</html>

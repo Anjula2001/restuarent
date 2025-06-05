@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">    <style>
+        .contact-section {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contact-item img {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 10px;
+        }
+
+        .contact-item h3 {
+            margin: 0;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .contact-item p {
+            margin: 0;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->        <header>
+            <div class="logo">
+                <a href="index.html">
+                    <h1>GRAND</h1>
+                    <p>RESTAURANT</p>
+                </a>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Food">
+                </div>
+                <div class="cart-icon" id="cart-toggle">
+                    <span>🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>                <!-- Authentication Buttons -->
+                <div class="auth-buttons" id="authButtons">
+                    <div id="guestLinks" style="display: inline;">
+                        <a href="login.html" class="auth-btn login">LOGIN</a>
+                        <a href="register.html" class="auth-btn register">REGISTER</a>
+                    </div>
+                    <div id="userLinks" style="display: none;">
+                        <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
+                        <a href="profile.html" class="auth-btn profile">PROFILE</a>
+                        <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
+                    </div>
+                </div>
+            </div>
+        </header><!-- Navigation Menu -->        <nav>            <ul class="main-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="menu.html">MENU</a></li>
+                <li><a href="reservation.html">RESERVATION</a></li>
+                <li><a href="order.html">ORDER ONLINE</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Savor the Flavor,</h2>
+            <h3>One Grain at a Time!</h3>
+        </section>
+
+
+        <section class="contact-section">
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <img src="images/icons8-call-50.png" alt="">
+                    <h3>Call Us</h3>
+                    <p>0123456789</p>
+                </div>
+                <div class="contact-item">
+                    <img src="images/icons8-email-50.png" alt="">
+                    <h3>Email Us</h3>
+                    <p>Grand@gmail.com</p>
+                </div>                <div class="contact-item">
+                    <img src="images/icons8-fb-50.png" alt="">
+                    <h3>Stay in touch</h3>
+                    <p>Grand Restaurant</p>
+                </div>
+                <div class="contact-item">
+                    <img src="images/icons8-location-50.png" alt="">
+                    <h3>Come Visit Us</h3>
+                    <p>123, Galle Road, Bambalaptiya.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-container">
+                <div class="footer-section">
+                    <p>&copy; 2024 Grand Restaurant. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+         </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Contact page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserAuthentication();
+        });
+
+        // User Authentication Management
+        async function checkUserAuthentication() {
+            try {
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+
+                const guestLinks = document.getElementById('guestLinks');
+                const userLinks = document.getElementById('userLinks');
+
+                if (result.logged_in) {
+                    guestLinks.style.display = 'none';
+                    userLinks.style.display = 'inline';
+                } else {
+                    guestLinks.style.display = 'inline';
+                    userLinks.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Authentication check error:', error);
+                // Default to guest state on error
+                document.getElementById('guestLinks').style.display = 'inline';
+                document.getElementById('userLinks').style.display = 'none';
+            }
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetch('api/auth.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'logout'
+                        })
+                    });
+
+                    // Clear localStorage
+                    localStorage.removeItem('user');
+                    
+                    // Refresh authentication state
+                    checkUserAuthentication();
+                    
+                    alert('Logged out successfully!');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

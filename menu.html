@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+                /* .menu-categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        } */
+
+        /* .category-button {
+            background-color: #f0f0f0;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        } */
+
+        .food-category {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .food-category h2 {
+            margin-bottom: 30px;
+        }
+
+        .food-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }        .food-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .food-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .food-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }        .food-card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .food-card-content h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }        .food-card-content p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            flex-grow: 1;
+        }
+
+        .food-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #8B5A2B;
+            margin-bottom: 15px;
+        }        .food-card-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-input {
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .add-to-cart-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #218838;
+        }        .add-to-cart-btn:active {
+            transform: scale(0.98);
+        }
+
+        .no-items-message {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .no-items-message p {
+            color: #6c757d;
+            margin: 10px 0;
+        }
+
+        .no-items-message p:first-child {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .load-more {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }        .category-button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-button.active {
+            background-color: #6d4520;
+            transform: translateY(-3px);
+            color: white;
+        }
+
+        .reload-menu-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .reload-menu-btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .reload-menu-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 768px) {
+            .food-card-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .quantity-selector {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">        <!-- Header Section -->
+        <header>
+            <div class="logo">
+                <a href="index.html">
+                    <h1>GRAND</h1>
+                    <p>RESTAURANT</p>
+                </a>
+            </div>            <div class="header-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Food">
+                </div>
+                <div class="cart-icon" id="cart-toggle">
+                    <span>🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>                <!-- Authentication Buttons -->
+                <div class="auth-buttons" id="authButtons">
+                    <div id="guestLinks" style="display: inline;">
+                        <a href="login.html" class="auth-btn login">LOGIN</a>
+                        <a href="register.html" class="auth-btn register">REGISTER</a>
+                    </div>
+                    <div id="userLinks" style="display: none;">
+                        <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
+                        <a href="profile.html" class="auth-btn profile">PROFILE</a>
+                        <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cart Dropdown -->
+        <div class="cart-dropdown" id="cart-dropdown" style="display: none;">
+            <div class="cart-header">
+                <h3>Shopping Cart</h3>
+                <button class="close-cart" id="close-cart">×</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <p class="empty-cart">Your cart is empty</p>
+            </div>
+            <div class="cart-footer" id="cart-footer" style="display: none;">
+                <div class="cart-total">
+                    <strong>Total: Rs. <span id="cart-total">0.00</span></strong>
+                </div>
+                <button class="checkout-btn" onclick="goToOrderPage()">View Cart & Checkout</button>
+            </div>
+        </div>        <!-- Navigation Menu -->
+        <nav>            <ul class="main-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="menu.html">MENU</a></li>
+                <li><a href="reservation.html">RESERVATION</a></li>
+                <li><a href="order.html">ORDER ONLINE</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Savor the Flavor,</h2>
+            <h3>One Grain at a Time!</h3>
+        </section>        <!-- Menu Categories -->
+        <section class="menu-categories">            <div class="category-button" onclick="scrollToCategory('rice-curry')">RICE & CURRY</div>
+            <div class="category-button" onclick="scrollToCategory('chinese')">CHINESE</div>
+            <div class="category-button" onclick="scrollToCategory('seafood')">SEAFOOD</div>
+            <div class="category-button" onclick="scrollToCategory('kottu')">KOTTU</div>
+            <div class="category-button" onclick="scrollToCategory('juices')">JUICES</div>
+            <div class="category-button" onclick="scrollToCategory('desserts')">DESSERTS</div>
+        </section><section class="food-category" id="rice-curry">
+            <h2>RICE & CURRY</h2>
+            <div class="food-cards" id="rice-curry-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="rice-curry-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>        <section class="food-category" id="chinese">
+            <h2>CHINESE</h2>
+            <div class="food-cards" id="chinese-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="chinese-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>        <section class="food-category" id="seafood">
+            <h2>SEAFOOD</h2>
+            <div class="food-cards" id="seafood-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="seafood-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>        <section class="food-category" id="kottu">
+            <h2>KOTTU</h2>
+            <div class="food-cards" id="kottu-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="kottu-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>        <section class="food-category" id="juices">
+            <h2>JUICES</h2>
+            <div class="food-cards" id="juices-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="juices-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>        <section class="food-category" id="desserts">
+            <h2>DESSERTS</h2>
+            <div class="food-cards" id="desserts-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="desserts-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>
+
+        <section class="food-category" id="others">
+            <h2>OTHER SPECIALTIES</h2>
+            <div class="food-cards" id="others-items">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="no-items-message" id="others-empty" style="display: none;">
+                <p>No items available in this category.</p>
+                <p>Check back later or browse other categories.</p>
+            </div>
+        </section>
+
+        <!-- Menu Loading Section -->        <section class="menu-loading">
+            <div class="loading-message" id="loading-message">
+                <h3>Loading menu...</h3>
+                <div class="loading-spinner"></div>
+            </div>
+        </section>
+
+        <!-- Dynamic Menu Sections -->
+        <div id="menu-sections">
+            <!-- Menu categories will be loaded here dynamically -->
+        </div>
+
+        <footer>
+            <div class="footer-container">
+                <div class="footer-section">
+                    <p>&copy; 2024 Grand Restaurant. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>    <script>
+        // Menu page specific initialization
+        document.addEventListener("DOMContentLoaded", function() {
+            loadMenuByCategories();
+            checkUserAuthentication();
+        });        // Function to load menu items by categories
+        async function loadMenuByCategories() {            const categories = [
+                { 
+                    id: 'rice-curry', 
+                    name: 'Rice & Curry', 
+                    matches: ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'] 
+                },
+                { 
+                    id: 'chinese', 
+                    name: 'Chinese', 
+                    matches: ['chinese'] 
+                },
+                { 
+                    id: 'seafood', 
+                    name: 'Seafood', 
+                    matches: ['seafood'] 
+                },
+                { 
+                    id: 'kottu', 
+                    name: 'Kottu', 
+                    matches: ['kottu'] 
+                },
+                { 
+                    id: 'juices', 
+                    name: 'Juices', 
+                    matches: ['juices', 'juice'] 
+                },
+                { 
+                    id: 'desserts', 
+                    name: 'Desserts', 
+                    matches: ['desserts', 'dessert'] 
+                },
+                { 
+                    id: 'others', 
+                    name: 'Other Specialties', 
+                    matches: ['pasta', 'salad', 'other'] 
+                }
+            ];
+
+            try {
+                console.log('Loading menu items...');
+                
+                const response = await fetch('api/menu.php');
+                const allItems = await response.json();
+                
+                console.log('All menu items loaded:', allItems);
+
+                // Group items by category using comprehensive matching
+                categories.forEach(category => {
+                    const categoryItems = allItems.filter(item => {
+                        const itemCategory = item.category.toLowerCase().trim();
+                        
+                        // Check all possible matches for this category
+                        return category.matches.some(match => {
+                            return itemCategory === match || itemCategory.includes(match);
+                        });
+                    });
+
+                    console.log(`Category ${category.name} (${category.id}) matched items:`, categoryItems);
+
+                    const containerElement = document.getElementById(`${category.id}-items`);
+                    const emptyElement = document.getElementById(`${category.id}-empty`);
+
+                    if (categoryItems.length > 0) {
+                        containerElement.innerHTML = categoryItems.map(item => `
+                            <div class="food-card">
+                                <img src="${item.image_url || 'images/popular/2.png'}" alt="${item.name}" onerror="this.src='images/popular/2.png'">
+                                <div class="food-card-content">
+                                    <h3>${item.name}</h3>
+                                    <p>${item.description || 'Delicious ' + item.name.toLowerCase()}</p>
+                                    <p class="food-price">Rs. ${parseFloat(item.price).toFixed(2)}</p>
+                                    <div class="food-card-actions">
+                                        <div class="quantity-selector">
+                                            <label>Qty:</label>
+                                            <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">
+                                        </div>
+                                        <button onclick="addToCartWithQuantity(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})" class="add-to-cart-btn">
+                                            Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                        emptyElement.style.display = 'none';
+                    } else {
+                        containerElement.innerHTML = '';
+                        emptyElement.style.display = 'block';
+                    }
+                });
+
+                console.log('Menu loading completed successfully');
+
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                alert('Error loading menu. Please try reloading the page.');
+                
+                // Show empty message for all categories if loading fails
+                categories.forEach(category => {
+                    const containerElement = document.getElementById(`${category.id}-items`);
+                    const emptyElement = document.getElementById(`${category.id}-empty`);
+                    if (containerElement) containerElement.innerHTML = '';
+                    if (emptyElement) emptyElement.style.display = 'block';
+                });
+            }
+        }
+
+        // Function to reload the menu
+        async function reloadMenu() {            // Clear all category containers first
+            const categoryIds = ['rice-curry', 'chinese', 'seafood', 'kottu', 'juices', 'desserts', 'others'];
+            categoryIds.forEach(id => {
+                const container = document.getElementById(`${id}-items`);
+                if (container) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">Reloading...</p>';
+                }
+            });
+
+            // Reload the menu
+            await loadMenuByCategories();
+            
+            // Show success message
+            alert('Menu reloaded successfully!');
+        }
+
+        // Function to scroll to category sections
+        function scrollToCategory(categoryId) {
+            const categorySection = document.getElementById(categoryId);
+            if (categorySection) {
+                categorySection.scrollIntoView({ behavior: 'smooth' });
+                
+                // Highlight the selected category button
+                const categoryButtons = document.querySelectorAll('.category-button');
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        }
+
+        // User Authentication Management
+        async function checkUserAuthentication() {
+            try {
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+
+                const guestLinks = document.getElementById('guestLinks');
+                const userLinks = document.getElementById('userLinks');
+
+                if (result.logged_in) {
+                    guestLinks.style.display = 'none';
+                    userLinks.style.display = 'inline';
+                } else {
+                    guestLinks.style.display = 'inline';
+                    userLinks.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Authentication check error:', error);
+                // Default to guest state on error
+                document.getElementById('guestLinks').style.display = 'inline';
+                document.getElementById('userLinks').style.display = 'none';
+            }
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetch('api/auth.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'logout'
+                        })
+                    });
+
+                    // Clear localStorage
+                    localStorage.removeItem('user');
+                    
+                    // Refresh authentication state
+                    checkUserAuthentication();
+                    
+                    alert('Logged out successfully!');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

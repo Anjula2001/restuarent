@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Delete Functionality</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+            font-style: italic;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .soft-delete {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .hard-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .load-menu {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel Delete Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Current Menu Items</h2>
+        <p class="info">These are all menu items currently in the database (including hidden ones):</p>
+        <div id="menuItems">Loading...</div>
+        <button class="load-menu" onclick="loadMenu()">Refresh Menu</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Delete Functions</h2>
+        <p class="info">Select a menu item ID to test different delete operations:</p>
+        <input type="number" id="testItemId" placeholder="Enter menu item ID" min="1">
+        <br><br>
+        <button class="soft-delete" onclick="testSoftDelete()">Test Soft Delete (Hide)</button>
+        <button class="hard-delete" onclick="testHardDelete()">Test Hard Delete (Permanent)</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'api';
+
+        async function loadMenu() {
+            try {
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const items = await response.json();
+                
+                let html = '<table border="1" style="width: 100%; border-collapse: collapse;">';
+                html += '<tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Available</th></tr>';
+                
+                items.forEach(item => {
+                    html += `<tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.category}</td>
+                        <td>Rs. ${item.price}</td>
+                        <td style="color: ${item.is_available ? 'green' : 'red'};">${item.is_available ? 'Yes' : 'No'}</td>
+                    </tr>`;
+                });
+                
+                html += '</table>';
+                document.getElementById('menuItems').innerHTML = html;
+                
+                addResult('Menu loaded successfully', 'success');
+            } catch (error) {
+                document.getElementById('menuItems').innerHTML = 'Error loading menu: ' + error.message;
+                addResult('Error loading menu: ' + error.message, 'error');
+            }
+        }
+
+        async function testSoftDelete() {
+            const itemId = document.getElementById('testItemId').value;
+            if (!itemId) {
+                alert('Please enter a menu item ID');
+                return;
+            }
+
+            if (!confirm(`Soft delete (hide) item ${itemId}? This will set is_available = 0`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/menu.php?id=${itemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    addResult(`Soft delete successful for item ${itemId}`, 'success');
+                    loadMenu(); // Refresh menu
+                } else {
+                    const errorData = await response.json();
+                    addResult(`Soft delete failed: ${errorData.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                addResult(`Soft delete error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHardDelete() {
+            const itemId = document.getElementById('testItemId').value;
+            if (!itemId) {
+                alert('Please enter a menu item ID');
+                return;
+            }
+
+            if (!confirm(`PERMANENTLY delete item ${itemId} from database? This cannot be undone!`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/menu.php?id=${itemId}&hard=true`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    addResult(`Hard delete successful for item ${itemId}`, 'success');
+                    loadMenu(); // Refresh menu
+                } else {
+                    const errorData = await response.json();
+                    addResult(`Hard delete failed: ${errorData.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                addResult(`Hard delete error: ${error.message}`, 'error');
+            }
+        }
+
+        function addResult(message, type) {
+            const resultsDiv = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+        }
+
+        // Load menu on page load
+        loadMenu();
+    </script>
+</body>
+</html>

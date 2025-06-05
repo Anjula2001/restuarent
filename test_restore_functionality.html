@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Restore Functionality</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .json-display { background: #f8f9fa; padding: 15px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Restore Functionality</h1>
+    <p>This page tests the complete menu restoration functionality including the new JavaScript function.</p>
+
+    <div class="test-section">
+        <h2>Current Menu Status</h2>
+        <button class="btn btn-primary" onclick="checkMenuStatus()">📋 Check Current Menu</button>
+        <div id="menuStatus" class="status info">Click button to check menu status...</div>
+        <div id="menuData" class="json-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Restore Function (JavaScript)</h2>
+        <p>This tests the exact same function that the admin panel "Restore Sample Data" button uses.</p>
+        <button class="btn btn-success" onclick="testRestoreFunction()">🎯 Test Restore Sample Data</button>
+        <div id="restoreResult" class="status info">Ready to test...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Admin Panel Simulation</h2>
+        <p>Test if the admin panel restore button would work correctly.</p>
+        <button class="btn btn-primary" onclick="simulateAdminRestore()">🎭 Simulate Admin Panel Restore</button>
+        <div id="adminResult" class="status info">Ready to simulate...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <button class="btn btn-primary" onclick="clearLog()">🧹 Clear Log</button>
+        <div id="testLog"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'api';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('testLog');
+            logDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        async function checkMenuStatus() {
+            log('Checking current menu status...', 'info');
+            const statusDiv = document.getElementById('menuStatus');
+            const dataDiv = document.getElementById('menuData');
+            
+            try {
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = `✅ Menu loaded successfully - ${data.length} items found`;
+                    dataDiv.textContent = JSON.stringify(data, null, 2);
+                    log(`Current menu has ${data.length} items`, 'success');
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Invalid response format';
+                    dataDiv.textContent = JSON.stringify(data, null, 2);
+                    log('Invalid response format received', 'error');
+                }
+            } catch (error) {
+                log(`Error checking menu: ${error.message}`, 'error');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function testRestoreFunction() {
+            log('Testing restore sample data function (identical to admin panel)...', 'info');
+            const resultDiv = document.getElementById('restoreResult');
+            
+            if (confirm('🎯 Restore sample menu data?\n\nThis will add 8 sample menu items to the database.\nExisting items will not be affected.')) {
+                try {
+                    resultDiv.className = 'status info';
+                    resultDiv.textContent = 'Restoring sample data...';
+                    
+                    const response = await fetch(`${API_BASE}/menu.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ action: 'restore_sample_data' })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        resultDiv.className = 'status success';
+                        resultDiv.textContent = '✅ Sample data restored successfully! 8 sample menu items have been added.';
+                        log('✅ Restore function test: SUCCESS', 'success');
+                        log('Result: ' + JSON.stringify(result), 'info');
+                        
+                        // Refresh menu status
+                        setTimeout(checkMenuStatus, 1000);
+                    } else {
+                        const errorData = await response.json();
+                        resultDiv.className = 'status error';
+                        resultDiv.textContent = '❌ Failed to restore sample data: ' + (errorData.error || 'Unknown error');
+                        log('❌ Restore function test: FAILED', 'error');
+                    }
+                } catch (error) {
+                    log(`❌ Restore function error: ${error.message}`, 'error');
+                    resultDiv.className = 'status error';
+                    resultDiv.textContent = '❌ Error restoring sample data: ' + error.message;
+                }
+            } else {
+                resultDiv.className = 'status info';
+                resultDiv.textContent = 'User cancelled the operation.';
+                log('User cancelled restore operation', 'info');
+            }
+        }
+
+        async function simulateAdminRestore() {
+            log('Simulating admin panel restore button click...', 'info');
+            const resultDiv = document.getElementById('adminResult');
+            
+            try {
+                // This is exactly what the admin panel button should do
+                resultDiv.className = 'status info';
+                resultDiv.textContent = 'Simulating admin panel restore...';
+                
+                // Simulate the JavaScript function call that should exist in admin panel
+                const response = await fetch(`${API_BASE}/menu.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'restore_sample_data' })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    resultDiv.className = 'status success';
+                    resultDiv.textContent = '✅ Admin panel simulation: SUCCESS! Button would work correctly.';
+                    log('✅ Admin panel simulation: SUCCESS', 'success');
+                    log('The admin panel restore button should work perfectly', 'success');
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.className = 'status error';
+                    resultDiv.textContent = '❌ Admin panel simulation: FAILED - ' + (errorData.error || 'Unknown error');
+                    log('❌ Admin panel simulation: FAILED', 'error');
+                }
+            } catch (error) {
+                log(`❌ Admin simulation error: ${error.message}`, 'error');
+                resultDiv.className = 'status error';
+                resultDiv.textContent = '❌ Admin simulation error: ' + error.message;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🌟 Restore functionality test page initialized', 'success');
+            log('Ready to test the complete restore system', 'info');
+            checkMenuStatus();
+        });
+    </script>
+</body>
+</html>

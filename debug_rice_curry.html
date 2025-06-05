@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Debug - Rice & Curry</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-container { margin: 20px 0; padding: 20px; border: 2px solid #ddd; border-radius: 8px; }
+        .test-image { max-width: 300px; height: 200px; object-fit: cover; margin: 10px 0; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>Rice & Curry Images Debug</h1>
+    <div id="debug-container"></div>
+
+    <script>
+        const riceUrls = [
+            {
+                name: "Beef Curry with Rice",
+                url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                name: "Chicken Fried Rice", 
+                url: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                name: "Mutton Biryani",
+                url: "https://images.unsplash.com/photo-1563379091339-03246963d1ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                name: "Seafood Fried Rice",
+                url: "https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                name: "Vegetable Fried Rice",
+                url: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            }
+        ];
+
+        const container = document.getElementById('debug-container');
+
+        riceUrls.forEach((item, index) => {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-container';
+            testDiv.innerHTML = `
+                <h3>${item.name}</h3>
+                <div class="status loading" id="status-${index}">Loading...</div>
+                <img class="test-image" id="img-${index}" alt="${item.name}">
+                <p><strong>URL:</strong> ${item.url}</p>
+            `;
+            container.appendChild(testDiv);
+
+            const img = document.getElementById(`img-${index}`);
+            const status = document.getElementById(`status-${index}`);
+
+            img.onload = function() {
+                status.className = 'status success';
+                status.textContent = '✅ Image loaded successfully!';
+            };
+
+            img.onerror = function() {
+                status.className = 'status error';
+                status.textContent = '❌ Image failed to load. Trying fallback...';
+                
+                // Try fallback
+                this.src = 'images/popular/2.png';
+                this.onload = function() {
+                    status.textContent += ' Fallback image loaded.';
+                };
+                this.onerror = function() {
+                    status.textContent += ' Fallback also failed!';
+                };
+            };
+
+            // Set the source to start loading
+            img.src = item.url;
+        });
+    </script>
+</body>
+</html>

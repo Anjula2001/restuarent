@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Visibility Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .food-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .food-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .food-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            background-color: #f0f0f0;
+        }
+
+        .food-card-content {
+            padding: 20px;
+        }
+
+        .food-card-content h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Image Visibility Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Image URLs</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            <div>
+                <h4>images/popular/1.png</h4>
+                <img src="images/popular/1.png" style="width: 100%; height: 150px; border: 2px solid #ccc;" 
+                     onload="this.style.borderColor='green'; document.getElementById('test1-1').className='status success'; document.getElementById('test1-1').textContent='✅ Image 1 loaded successfully'"
+                     onerror="this.style.borderColor='red'; document.getElementById('test1-1').className='status error'; document.getElementById('test1-1').textContent='❌ Image 1 failed to load'">
+                <div id="test1-1" class="status warning">⏳ Loading...</div>
+            </div>
+            <div>
+                <h4>images/popular/2.png</h4>
+                <img src="images/popular/2.png" style="width: 100%; height: 150px; border: 2px solid #ccc;" 
+                     onload="this.style.borderColor='green'; document.getElementById('test1-2').className='status success'; document.getElementById('test1-2').textContent='✅ Image 2 loaded successfully'"
+                     onerror="this.style.borderColor='red'; document.getElementById('test1-2').className='status error'; document.getElementById('test1-2').textContent='❌ Image 2 failed to load'">
+                <div id="test1-2" class="status warning">⏳ Loading...</div>
+            </div>
+            <div>
+                <h4>images/popular/3.png</h4>
+                <img src="images/popular/3.png" style="width: 100%; height: 150px; border: 2px solid #ccc;" 
+                     onload="this.style.borderColor='green'; document.getElementById('test1-3').className='status success'; document.getElementById('test1-3').textContent='✅ Image 3 loaded successfully'"
+                     onerror="this.style.borderColor='red'; document.getElementById('test1-3').className='status error'; document.getElementById('test1-3').textContent='❌ Image 3 failed to load'">
+                <div id="test1-3" class="status warning">⏳ Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Exact Homepage Structure</h2>
+        <div class="food-cards">
+            <div class="food-card">
+                <img src="images/popular/1.png?v=2" alt="String Hoppers" 
+                     onload="document.getElementById('test2-1').className='status success'; document.getElementById('test2-1').textContent='✅ String Hoppers image loaded'"
+                     onerror="document.getElementById('test2-1').className='status error'; document.getElementById('test2-1').textContent='❌ String Hoppers image failed'; this.src='images/2.png';">
+                <div class="food-card-content">
+                    <h3>String Hoppers</h3>
+                    <p>A Sri Lankan delicacy, perfect for breakfast or dinner.</p>
+                </div>
+                <div id="test2-1" class="status warning">⏳ Loading...</div>
+            </div>
+            <div class="food-card">
+                <img src="images/popular/2.png?v=2" alt="Kottu Roti" 
+                     onload="document.getElementById('test2-2').className='status success'; document.getElementById('test2-2').textContent='✅ Kottu Roti image loaded'"
+                     onerror="document.getElementById('test2-2').className='status error'; document.getElementById('test2-2').textContent='❌ Kottu Roti image failed'; this.src='images/2.png';">
+                <div class="food-card-content">
+                    <h3>Kottu Roti</h3>
+                    <p>A flavorful Sri Lankan street food favorite.</p>
+                </div>
+                <div id="test2-2" class="status warning">⏳ Loading...</div>
+            </div>
+            <div class="food-card">
+                <img src="images/popular/3.png?v=2" alt="Fish Ambulthiyal" 
+                     onload="document.getElementById('test2-3').className='status success'; document.getElementById('test2-3').textContent='✅ Fish Ambulthiyal image loaded'"
+                     onerror="document.getElementById('test2-3').className='status error'; document.getElementById('test2-3').textContent='❌ Fish Ambulthiyal image failed'; this.src='images/3.png';">
+                <div class="food-card-content">
+                    <h3>Fish Ambulthiyal</h3>
+                    <p>A tangy and spicy fish curry, unique to Sri Lanka.</p>
+                </div>
+                <div id="test2-3" class="status warning">⏳ Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Network Debugging</h2>
+        <div id="network-test">
+            <button onclick="testImagePaths()">Test All Image Paths</button>
+            <div id="network-results"></div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🔍 Image Visibility Test Started');
+        console.log('Base URL:', window.location.origin + window.location.pathname.replace('/image_visibility_test.html', '/'));
+        
+        // Test image paths programmatically
+        function testImagePaths() {
+            const resultDiv = document.getElementById('network-results');
+            resultDiv.innerHTML = '<p>Testing image paths...</p>';
+            
+            const imagePaths = [
+                'images/popular/1.png',
+                'images/popular/2.png', 
+                'images/popular/3.png',
+                'images/2.png',
+                'images/3.png'
+            ];
+            
+            const results = [];
+            
+            imagePaths.forEach((path, index) => {
+                const img = new Image();
+                img.onload = function() {
+                    results.push(`✅ ${path} - LOADED (${this.naturalWidth}x${this.naturalHeight})`);
+                    updateResults();
+                };
+                img.onerror = function() {
+                    results.push(`❌ ${path} - FAILED`);
+                    updateResults();
+                };
+                img.src = path;
+            });
+            
+            function updateResults() {
+                if (results.length === imagePaths.length) {
+                    resultDiv.innerHTML = '<h4>Network Test Results:</h4>' + 
+                        results.map(r => `<div style="margin: 5px 0; padding: 5px; background: ${r.includes('✅') ? '#d4edda' : '#f8d7da'};">${r}</div>`).join('');
+                }
+            }
+        }
+        
+        // Auto-run network test after 2 seconds
+        setTimeout(testImagePaths, 2000);
+    </script>
+</body>
+</html>

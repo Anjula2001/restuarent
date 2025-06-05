@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        button { margin: 5px; padding: 10px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <h1>Registration System Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Valid Registration</h2>
+        <button onclick="testValidRegistration()">Test Valid Registration</button>
+        <div id="test1Result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Duplicate Email</h2>
+        <button onclick="testDuplicateEmail()">Test Duplicate Email</button>
+        <div id="test2Result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Invalid Email</h2>
+        <button onclick="testInvalidEmail()">Test Invalid Email</button>
+        <div id="test3Result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Short Password</h2>
+        <button onclick="testShortPassword()">Test Short Password</button>
+        <div id="test4Result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Missing Fields</h2>
+        <button onclick="testMissingFields()">Test Missing Fields</button>
+        <div id="test5Result" class="result"></div>
+    </div>
+
+    <script>
+        async function testValidRegistration() {
+            const resultDiv = document.getElementById('test1Result');
+            const testEmail = 'user' + Date.now() + '@test.com';
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        first_name: 'Test',
+                        last_name: 'User',
+                        email: testEmail,
+                        password: 'password123',
+                        phone: '123-456-7890',
+                        address: '123 Test St'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<span class="success">✓ PASS: ${result.message}</span><br>User ID: ${result.user_id}`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ FAIL: ${result.message}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ ERROR: ${error.message}</span>`;
+            }
+        }
+
+        async function testDuplicateEmail() {
+            const resultDiv = document.getElementById('test2Result');
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        first_name: 'Test',
+                        last_name: 'User',
+                        email: 'test@example.com', // This should already exist
+                        password: 'password123'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success && result.message.includes('already exists')) {
+                    resultDiv.innerHTML = `<span class="success">✓ PASS: Correctly rejected duplicate email</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ FAIL: Should have rejected duplicate email</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ ERROR: ${error.message}</span>`;
+            }
+        }
+
+        async function testInvalidEmail() {
+            const resultDiv = document.getElementById('test3Result');
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        first_name: 'Test',
+                        last_name: 'User',
+                        email: 'invalid-email',
+                        password: 'password123'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success && result.message.includes('Invalid email')) {
+                    resultDiv.innerHTML = `<span class="success">✓ PASS: Correctly rejected invalid email</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ FAIL: Should have rejected invalid email</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ ERROR: ${error.message}</span>`;
+            }
+        }
+
+        async function testShortPassword() {
+            const resultDiv = document.getElementById('test4Result');
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        first_name: 'Test',
+                        last_name: 'User',
+                        email: 'shortpass@test.com',
+                        password: '123'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success && result.message.includes('at least 6 characters')) {
+                    resultDiv.innerHTML = `<span class="success">✓ PASS: Correctly rejected short password</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ FAIL: Should have rejected short password</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ ERROR: ${error.message}</span>`;
+            }
+        }
+
+        async function testMissingFields() {
+            const resultDiv = document.getElementById('test5Result');
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        first_name: 'Test',
+                        // Missing last_name, email, and password
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success && result.error && result.error.includes('Missing required fields')) {
+                    resultDiv.innerHTML = `<span class="success">✓ PASS: Correctly rejected missing fields</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ FAIL: Should have rejected missing fields</span><br>Response: ${JSON.stringify(result)}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ ERROR: ${error.message}</span>`;
+            }
+        }
+
+        // Run all tests
+        function runAllTests() {
+            setTimeout(() => testValidRegistration(), 100);
+            setTimeout(() => testDuplicateEmail(), 500);
+            setTimeout(() => testInvalidEmail(), 900);
+            setTimeout(() => testShortPassword(), 1300);
+            setTimeout(() => testMissingFields(), 1700);
+        }
+    </script>
+
+    <hr>
+    <button onclick="runAllTests()" style="background: #007cba; color: white; padding: 15px 30px; font-size: 16px;">Run All Tests</button>
+</body>
+</html>

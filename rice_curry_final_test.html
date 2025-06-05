@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rice & Curry Final Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .food-card { 
+            border: 1px solid #ddd; 
+            margin: 10px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            max-width: 300px; 
+            display: inline-block;
+            vertical-align: top;
+        }
+        .food-card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+            border: 2px solid transparent;
+        }
+        .food-card img.loaded { border-color: green; }
+        .food-card img.failed { border-color: red; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Rice & Curry Final Test</h1>
+    <div id="status"></div>
+    <div id="rice-curry-items"></div>
+
+    <script>
+        async function testRiceCurry() {
+            const statusDiv = document.getElementById('status');
+            const container = document.getElementById('rice-curry-items');
+            
+            try {
+                statusDiv.innerHTML = '<div class="status">Loading Rice & Curry items...</div>';
+                
+                const response = await fetch('api/menu.php?category=Rice%20%26%20Curry');
+                const items = await response.json();
+                
+                statusDiv.innerHTML = `<div class="status success">✅ Loaded ${items.length} Rice & Curry items</div>`;
+                
+                if (items.length > 0) {
+                    container.innerHTML = items.map(item => `
+                        <div class="food-card">
+                            <img src="${item.image_url || 'images/popular/2.png'}" 
+                                 alt="${item.name}" 
+                                 onload="this.className='loaded'; console.log('✅ Image loaded: ${item.name}');"
+                                 onerror="this.className='failed'; this.src='images/popular/2.png'; console.log('❌ Image failed: ${item.name}');">
+                            <div class="food-card-content">
+                                <h3>${item.name}</h3>
+                                <p>${item.description || 'Delicious ' + item.name.toLowerCase()}</p>
+                                <p class="food-price">Rs. ${parseFloat(item.price).toFixed(2)}</p>
+                                <p><small>Image: ${item.image_url || 'FALLBACK'}</small></p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="error">No Rice & Curry items found!</div>';
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        testRiceCurry();
+    </script>
+</body>
+</html>

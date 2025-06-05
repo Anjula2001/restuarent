@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Grand Restaurant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .demo-credentials {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .demo-credentials h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .demo-credentials p {
+            color: #6c757d;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>GRAND</h1>
+            <p>RESTAURANT</p>
+            <h3 style="margin-top: 10px; color: #666;">Admin Panel</h3>
+        </div>
+
+        <div class="demo-credentials">
+            <h4>Demo Login Credentials:</h4>
+            <p><strong>Username:</strong> admin</p>
+            <p><strong>Password:</strong> admin123</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="admin" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" value="admin123" required>
+            </div>
+
+            <button type="submit" class="login-btn">LOGIN</button>
+            <div class="loading" id="loading"></div>
+        </form>
+
+        <div class="back-link">
+            <a href="../index.html">← Back to Restaurant</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '../api';
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE}/admin_auth.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                loading.style.display = 'none';
+
+                if (result.success) {
+                    successMessage.textContent = 'Login successful! Redirecting...';
+                    successMessage.style.display = 'block';
+                    
+                    // Store admin session
+                    localStorage.setItem('admin_logged_in', 'true');
+                    localStorage.setItem('admin_username', username);
+                    localStorage.setItem('admin_role', result.user.role);
+                    
+                    // Redirect to admin dashboard
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    errorMessage.textContent = result.message || 'Login failed. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                errorMessage.textContent = 'Connection error. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Check if already logged in
+        if (localStorage.getItem('admin_logged_in') === 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            min-height: 100vh;
+            background: #f8f9fa;
+            padding-top: 100px;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: #333;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-badge {
+            background: #d4af37;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .order-item, .reservation-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-item:last-child, .reservation-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .item-details h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .item-details p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .item-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-preparing { background: #cce5ff; color: #004085; }
+        .status-ready { background: #d4edda; color: #155724; }
+        .status-delivered { background: #d1ecf1; color: #0c5460; }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state img {
+            width: 80px;
+            height: 80px;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .edit-profile-btn {
+            background: #d4af37;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .edit-profile-btn:hover {
+            background: #b8941f;
+            transform: translateY(-2px);
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header .container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .quick-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="container">
+        <header>
+            <div class="logo">
+                <a href="index.html">
+                    <h1>GRAND</h1>
+                    <p>RESTAURANT</p>
+                </a>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search menu..." id="searchInput">
+                </div>
+                <div class="cart-icon" id="cart-toggle" onclick="toggleCart()">
+                    <span>🛒</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+                <!-- Authentication Buttons -->
+                <div class="auth-buttons" id="authButtons">
+                    <div id="guestLinks" style="display: inline;">
+                        <a href="login.html" class="auth-btn login">LOGIN</a>
+                        <a href="register.html" class="auth-btn register">REGISTER</a>
+                    </div>
+                    <div id="userLinks" style="display: none;">
+                        <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
+                        <a href="profile.html" class="auth-btn profile">PROFILE</a>
+                        <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cart Dropdown -->
+        <div class="cart-dropdown" id="cartDropdown" style="display: none;">
+            <div class="cart-header">
+                <h3>Shopping Cart</h3>
+                <button class="close-cart" id="close-cart">×</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <p class="empty-cart">Your cart is empty</p>
+            </div>
+            <div class="cart-footer" id="cart-footer" style="display: none;">
+                <div class="cart-total">
+                    <strong>Total: Rs. <span id="cart-total">0.00</span></strong>
+                </div>
+                <button class="checkout-btn" onclick="goToOrderPage()">View Cart & Checkout</button>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="main-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="menu.html">MENU</a></li>
+                <li><a href="reservation.html">RESERVATION</a></li>
+                <li><a href="order.html">ORDER ONLINE</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="container">
+                <div class="welcome-section">
+                    <h1 id="welcomeMessage">Welcome back!</h1>
+                    <p id="welcomeSubtext">Manage your orders, reservations, and profile</p>
+                </div>
+                <div class="quick-actions">
+                    <a href="menu.html" class="quick-action-btn">Browse Menu</a>
+                    <a href="order.html" class="quick-action-btn">Place Order</a>
+                    <a href="reservation.html" class="quick-action-btn">Make Reservation</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Loading your dashboard...</p>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="profile-section" style="display: none;">
+                <div class="profile-header">
+                    <h2>My Profile</h2>
+                    <a href="profile.html" class="edit-profile-btn">Edit Profile</a>
+                </div>
+                <div class="profile-info" id="profileInfo">
+                    <!-- Profile info will be loaded here -->
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div id="dashboardContent" class="dashboard-grid" style="display: none;">
+                <!-- Recent Orders -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Recent Orders</h3>
+                        <span class="card-badge" id="ordersCount">0</span>
+                    </div>
+                    <div class="card-content" id="ordersContent">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Upcoming Reservations -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Upcoming Reservations</h3>
+                        <span class="card-badge" id="reservationsCount">0</span>
+                    </div>
+                    <div class="card-content" id="reservationsContent">
+                        <!-- Reservations will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize authentication state first
+            checkAuthenticationState();
+            // Then initialize dashboard
+            initializeDashboard();
+        });
+
+        async function checkAuthenticationState() {
+            try {
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+                
+                if (result.logged_in) {
+                    updateAuthButtons(true, result.user_name);
+                } else {
+                    updateAuthButtons(false);
+                }
+            } catch (error) {
+                console.error('Authentication check error:', error);
+                updateAuthButtons(false);
+            }
+        }
+
+        async function initializeDashboard() {
+            try {
+                // Check if user is logged in
+                const sessionResponse = await fetch('api/auth.php?action=check_session');
+                const sessionResult = await sessionResponse.json();
+
+                if (!sessionResult.logged_in) {
+                    // Redirect to login if not logged in
+                    window.location.href = 'login.html?return=dashboard.html';
+                    return;
+                }
+
+                // Update authentication buttons for logged-in user
+                updateAuthButtons(true, sessionResult.user_name);
+
+                // Load user profile
+                await loadUserProfile();
+                
+                // Load user orders and reservations
+                await loadUserOrders();
+                await loadUserReservations();
+
+                // Update welcome message
+                updateWelcomeMessage(sessionResult.user_name);
+
+                // Hide loading state
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
+                document.getElementById('dashboardContent').style.display = 'grid';
+
+            } catch (error) {
+                console.error('Dashboard initialization error:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <p style="color: #dc3545;">Error loading dashboard. Please try again.</p>
+                    <button onclick="location.reload()" class="edit-profile-btn">Reload</button>
+                `;
+            }
+        }
+
+        function updateAuthButtons(isLoggedIn, userName = '') {
+            const guestLinks = document.getElementById('guestLinks');
+            const userLinks = document.getElementById('userLinks');
+            
+            if (isLoggedIn) {
+                guestLinks.style.display = 'none';
+                userLinks.style.display = 'inline';
+            } else {
+                guestLinks.style.display = 'inline';
+                userLinks.style.display = 'none';
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('api/auth.php?action=profile');
+                const result = await response.json();
+
+                if (result.success) {
+                    displayUserProfile(result.user);
+                } else {
+                    throw new Error(result.error || 'Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Profile loading error:', error);
+            }
+        }
+
+        function displayUserProfile(user) {
+            const profileInfo = document.getElementById('profileInfo');
+            profileInfo.innerHTML = `
+                <div class="info-item">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">${user.first_name} ${user.last_name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">${user.email}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">${user.phone || 'Not provided'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">${user.address || 'Not provided'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Member Since</span>
+                    <span class="info-value">${new Date(user.created_at).toLocaleDateString()}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Login</span>
+                    <span class="info-value">${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'First time'}</span>
+                </div>
+            `;
+        }
+
+        async function loadUserOrders() {
+            try {
+                const response = await fetch('api/auth.php?action=orders&limit=5');
+                const result = await response.json();
+
+                if (result.success) {
+                    displayUserOrders(result.orders);
+                } else {
+                    throw new Error(result.error || 'Failed to load orders');
+                }
+            } catch (error) {
+                console.error('Orders loading error:', error);
+                document.getElementById('ordersContent').innerHTML = `
+                    <div class="empty-state">
+                        <p>Unable to load orders</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayUserOrders(orders) {
+            const ordersContent = document.getElementById('ordersContent');
+            const ordersCount = document.getElementById('ordersCount');
+            
+            ordersCount.textContent = orders.length;
+
+            if (orders.length === 0) {
+                ordersContent.innerHTML = `
+                    <div class="empty-state">
+                        <p>No orders yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersContent.innerHTML = orders.map(order => `
+                <div class="order-item">
+                    <div class="item-details">
+                        <h4>Order #${order.id}</h4>
+                        <p>${order.items || 'Order details'}</p>
+                        <p>${new Date(order.created_at).toLocaleDateString()} - $${parseFloat(order.total_amount).toFixed(2)}</p>
+                    </div>
+                    <span class="item-status status-${order.status}">${order.status}</span>
+                </div>
+            `).join('');
+        }
+
+        async function loadUserReservations() {
+            try {
+                const response = await fetch('api/auth.php?action=reservations&limit=5');
+                const result = await response.json();
+
+                if (result.success) {
+                    displayUserReservations(result.reservations);
+                } else {
+                    throw new Error(result.error || 'Failed to load reservations');
+                }
+            } catch (error) {
+                console.error('Reservations loading error:', error);
+                document.getElementById('reservationsContent').innerHTML = `
+                    <div class="empty-state">
+                        <p>Unable to load reservations</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayUserReservations(reservations) {
+            const reservationsContent = document.getElementById('reservationsContent');
+            const reservationsCount = document.getElementById('reservationsCount');
+            
+            reservationsCount.textContent = reservations.length;
+
+            if (reservations.length === 0) {
+                reservationsContent.innerHTML = `
+                    <div class="empty-state">
+                        <p>No reservations yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            reservationsContent.innerHTML = reservations.map(reservation => `
+                <div class="reservation-item">
+                    <div class="item-details">
+                        <h4>${new Date(reservation.reservation_date).toLocaleDateString()}</h4>
+                        <p>${reservation.reservation_time} - ${reservation.party_size} guests</p>
+                        <p>${reservation.special_requests || 'No special requests'}</p>
+                    </div>
+                    <span class="item-status status-${reservation.status}">${reservation.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateWelcomeMessage(userName) {
+            if (userName) {
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${userName}!`;
+            }
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetch('api/auth.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'logout'
+                        })
+                    });
+
+                    // Clear localStorage
+                    localStorage.removeItem('user');
+                    
+                    // Redirect to home page
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        }
+
+        // Cart and search functionality
+        function toggleCart() {
+            const cartDropdown = document.getElementById('cartDropdown');
+            if (cartDropdown.style.display === 'none' || cartDropdown.style.display === '') {
+                cartDropdown.style.display = 'block';
+            } else {
+                cartDropdown.style.display = 'none';
+            }
+        }
+
+        function searchMenu() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                window.location.href = `menu.html?search=${encodeURIComponent(searchTerm)}`;
+            }
+        }
+
+        function goToOrderPage() {
+            window.location.href = 'order.html';
+        }
+
+        // Close cart when clicking outside
+        document.addEventListener('click', function(event) {
+            const cartIcon = document.getElementById('cart-toggle');
+            const cartDropdown = document.getElementById('cartDropdown');
+            const closeBtn = document.getElementById('close-cart');
+            
+            if (closeBtn && event.target === closeBtn) {
+                cartDropdown.style.display = 'none';
+            }
+            
+            if (!cartIcon.contains(event.target) && !cartDropdown.contains(event.target)) {
+                cartDropdown.style.display = 'none';
+            }
+        });
+
+        // Initialize cart functionality
+        if (typeof initializeCart === 'function') {
+            initializeCart();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Restaurant - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .nav-btn.active {
+            background-color: #28a745;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status.pending { background-color: #ffc107; color: #000; }
+        .status.confirmed { background-color: #28a745; color: #fff; }
+        .status.preparing { background-color: #fd7e14; color: #fff; }
+        .status.ready { background-color: #17a2b8; color: #fff; }
+        .status.delivered { background-color: #28a745; color: #fff; }
+        .status.cancelled { background-color: #dc3545; color: #fff; }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .action-btn.confirm { background-color: #28a745; color: white; }
+        .action-btn.cancel { background-color: #dc3545; color: white; }
+        .action-btn.approve { background-color: #007bff; color: white; }
+        .action-btn.reject { background-color: #6c757d; color: white; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        /* Form Styles */
+        #menuItemForm {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .form-group label input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        /* Logout button */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Grand Restaurant - Admin Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showSection('overview')">Overview</button>
+            <button class="nav-btn" onclick="showSection('orders')">Orders</button>
+            <button class="nav-btn" onclick="showSection('reservations')">Reservations</button>
+            <button class="nav-btn" onclick="showSection('reviews')">Reviews</button>
+            <button class="nav-btn" onclick="showSection('menu')">Menu</button>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="todayOrders">-</div>
+                    <div>Orders Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingOrders">-</div>
+                    <div>Pending Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayRevenue">-</div>
+                    <div>Today's Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgRating">-</div>
+                    <div>Average Rating</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders" class="section">
+            <div class="card">
+                <h3>Recent Orders</h3>
+                <div class="loading" id="ordersLoading">Loading orders...</div>
+                <div id="ordersTable"></div>
+            </div>
+        </div>
+
+        <!-- Reservations Section -->
+        <div id="reservations" class="section">
+            <div class="card">
+                <h3>Recent Reservations</h3>
+                <div class="loading" id="reservationsLoading">Loading reservations...</div>
+                <div id="reservationsTable"></div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div id="reviews" class="section">
+            <div class="card">
+                <h3>Pending Reviews</h3>
+                <div class="loading" id="reviewsLoading">Loading reviews...</div>
+                <div id="reviewsTable"></div>
+            </div>
+        </div>
+
+        <!-- Menu Section -->
+        <div id="menu" class="section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Menu Items Management</h3>
+                    <div>
+                        <select id="categoryFilter" onchange="filterMenuByCategory()" style="padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">All Categories</option>
+                            <option value="Traditional">Traditional</option>
+                            <option value="Rice & Curry">Rice & Curry</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Seafood">Seafood</option>
+                            <option value="Kottu">Kottu</option>
+                            <option value="Street Food">Street Food</option>
+                            <option value="Juices">Juices</option>
+                            <option value="Desserts">Desserts</option>
+                            <option value="Curry">Curry</option>
+                            <option value="Fusion">Fusion</option>
+                        </select>
+                        <button class="action-btn" onclick="loadMenu()" style="background-color: #007bff; margin-right: 10px;">🔄 Refresh Menu</button>
+                        <button class="action-btn" onclick="openBulkAddModal()" style="background-color: #17a2b8; margin-right: 10px;">📦 Bulk Add Items</button>
+                        <button class="action-btn" onclick="openCategoryModal()" style="background-color: #6f42c1; margin-right: 10px;">🏷️ Manage Categories</button>
+                        <button class="action-btn" onclick="restoreSampleData()" style="background-color: #28a745; margin-right: 10px;">🎯 Restore Sample Data</button>
+                        <button class="action-btn confirm" onclick="openAddItemModal()">+ Add New Item</button>
+                    </div>
+                </div>
+                <div class="menu-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 id="totalItems">0</h4>
+                        <p>Total Items</p>
+                    </div>
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 id="availableItems">0</h4>
+                        <p>Available Items</p>
+                    </div>
+                    <div style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 id="totalCategories">0</h4>
+                        <p>Categories</p>
+                    </div>
+                </div>
+                <div class="loading" id="menuLoading">Loading menu...</div>
+                <div id="menuTable"></div>
+            </div>
+        </div>
+
+        <!-- Add/Edit Menu Item Modal -->
+        <div id="menuModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Add New Menu Item</h3>
+                    <span class="close" onclick="closeMenuModal()">&times;</span>
+                </div>
+                <form id="menuItemForm">
+                    <input type="hidden" id="itemId" name="id">
+                    
+                    <div class="form-group">
+                        <label for="itemName">Item Name</label>
+                        <input type="text" id="itemName" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemDescription">Description</label>
+                        <textarea id="itemDescription" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemPrice">Price (Rs.)</label>
+                            <input type="number" id="itemPrice" name="price" step="0.01" min="0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="itemCategory">Category</label>
+                            <select id="itemCategory" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="Traditional">Traditional</option>
+                                <option value="Rice & Curry">Rice & Curry</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Seafood">Seafood</option>
+                                <option value="Kottu">Kottu</option>
+                                <option value="Street Food">Street Food</option>
+                                <option value="Juices">Juices</option>
+                                <option value="Desserts">Desserts</option>
+                                <option value="Curry">Curry</option>
+                                <option value="Fusion">Fusion</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemImage">Image</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="url" id="itemImage" name="image_url" placeholder="https://example.com/image.jpg" style="flex: 1;">
+                            <span style="color: #666;">or</span>
+                            <input type="file" id="itemImageFile" accept="image/*" style="flex: 1;" onchange="handleImageUpload(this)">
+                        </div>
+                        <small style="color: #666; font-size: 12px;">
+                            You can either paste an image URL or upload an image file
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="itemAvailable" name="is_available" checked>
+                            Available for ordering
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="action-btn cancel" onclick="closeMenuModal()">Cancel</button>
+                        <button type="submit" class="action-btn confirm">Save Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bulk Add Menu Items Modal -->
+        <div id="bulkModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Bulk Add Menu Items</h3>
+                    <span class="close" onclick="closeBulkModal()">&times;</span>
+                </div>
+                <form id="bulkItemForm">
+                    <div class="form-group">
+                        <label for="bulkCategory">Category for all items</label>
+                        <select id="bulkCategory" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Traditional">Traditional</option>
+                            <option value="Rice & Curry">Rice & Curry</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Seafood">Seafood</option>
+                            <option value="Kottu">Kottu</option>
+                            <option value="Street Food">Street Food</option>
+                            <option value="Juices">Juices</option>
+                            <option value="Desserts">Desserts</option>
+                            <option value="Curry">Curry</option>
+                            <option value="Fusion">Fusion</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bulkItems">Items (One per line, format: Name | Description | Price | Image URL)</label>
+                        <textarea id="bulkItems" name="items" rows="10" placeholder="Example:
+Chicken Fried Rice | Delicious fried rice with chicken | 850.00 | https://example.com/image.jpg
+Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/beef.jpg"></textarea>
+                        <small style="color: #666; font-size: 12px;">
+                            Each line should contain: Item Name | Description | Price | Image URL (optional)<br>
+                            Separate each field with a pipe symbol (|). Image URL is optional.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="bulkAvailable" name="is_available" checked>
+                            All items available for ordering
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="action-btn cancel" onclick="closeBulkModal()">Cancel</button>
+                        <button type="submit" class="action-btn confirm">Add All Items</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bulk Add Menu Items Modal -->
+        <div id="bulkModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Bulk Add Menu Items</h3>
+                    <span class="close" onclick="closeBulkModal()">&times;</span>
+                </div>
+                <form id="bulkItemForm">
+                    <div class="form-group">
+                        <label for="bulkCategory">Category for all items</label>
+                        <select id="bulkCategory" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Traditional">Traditional</option>
+                            <option value="Rice & Curry">Rice & Curry</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Seafood">Seafood</option>
+                            <option value="Kottu">Kottu</option>
+                            <option value="Street Food">Street Food</option>
+                            <option value="Juices">Juices</option>
+                            <option value="Desserts">Desserts</option>
+                            <option value="Curry">Curry</option>
+                            <option value="Fusion">Fusion</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bulkItems">Items (One per line, format: Name | Description | Price | Image URL)</label>
+                        <textarea id="bulkItems" name="items" rows="10" placeholder="Example:
+Chicken Fried Rice | Delicious fried rice with chicken | 850.00 | https://example.com/image.jpg
+Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/beef.jpg"></textarea>
+                        <small style="color: #666; font-size: 12px;">
+                            Each line should contain: Item Name | Description | Price | Image URL (optional)<br>
+                            Separate each field with a pipe symbol (|). Image URL is optional.
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="bulkAvailable" name="is_available" checked>
+                            All items available for ordering
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="action-btn cancel" onclick="closeBulkModal()">Cancel</button>
+                        <button type="submit" class="action-btn confirm">Add All Items</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Category Management Modal -->
+        <div id="categoryModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Manage Categories</h3>
+                    <span class="close" onclick="closeCategoryModal()">&times;</span>
+                </div>
+                <div style="padding: 20px;">
+                    <div class="form-group">
+                        <label for="newCategoryName">Add New Category</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="newCategoryName" placeholder="Enter category name" style="flex: 1;">
+                            <button class="action-btn confirm" onclick="addCategory()">Add Category</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Current Categories</label>
+                        <div id="categoryList" style="border: 1px solid #ddd; border-radius: 5px; padding: 10px; max-height: 300px; overflow-y: auto;">
+                            <div class="loading">Loading categories...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="action-btn cancel" onclick="closeCategoryModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '../api';
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load data for the section
+            loadSectionData(sectionName);
+        }
+
+        function loadSectionData(section) {
+            switch(section) {
+                case 'overview':
+                    loadOverviewData();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'reservations':
+                    loadReservations();
+                    break;
+                case 'reviews':
+                    loadReviews();
+                    break;
+                case 'menu':
+                    loadMenu();
+                    break;
+            }
+        }
+
+        async function loadOverviewData() {
+            try {
+                // Load order statistics
+                const orderStats = await fetch(`${API_BASE}/orders.php?statistics=1`).then(r => r.json());
+                document.getElementById('todayOrders').textContent = orderStats.today || 0;
+                document.getElementById('pendingOrders').textContent = orderStats.pending || 0;
+                document.getElementById('todayRevenue').textContent = `Rs. ${orderStats.revenue_today || 0}`;
+
+                // Load review statistics
+                const reviewStats = await fetch(`${API_BASE}/reviews.php?statistics=1`).then(r => r.json());
+                document.getElementById('avgRating').textContent = reviewStats.average_rating ? `${reviewStats.average_rating}/5` : 'N/A';
+            } catch (error) {
+                console.error('Error loading overview:', error);
+            }
+        }
+
+        async function loadOrders() {
+            const container = document.getElementById('ordersTable');
+            const loading = document.getElementById('ordersLoading');
+            
+            try {
+                console.log('Loading orders...');
+                const response = await fetch(`${API_BASE}/orders.php`);
+                console.log('Orders response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const orders = await response.json();
+                console.log('Orders received:', orders);
+                
+                if (!Array.isArray(orders)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                if (orders.length === 0) {
+                    container.innerHTML = '<p>No orders found.</p>';
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                const table = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Type</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => `
+                                <tr>
+                                    <td>#${order.id}</td>
+                                    <td>${order.customer_name}</td>
+                                    <td>${order.order_type}</td>
+                                    <td>${order.items || 'N/A'}</td>
+                                    <td>Rs. ${order.total_amount}</td>
+                                    <td><span class="status ${order.status}">${order.status}</span></td>
+                                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        ${order.status === 'pending' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'preparing')">Start Preparing</button>` : ''}
+                                        ${order.status === 'preparing' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'ready')">Mark Ready</button>` : ''}
+                                        ${order.status === 'ready' ? `<button class="action-btn confirm" onclick="updateOrderStatus(${order.id}, 'delivered')">Mark Delivered</button>` : ''}
+                                        <button class="action-btn cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Cancel</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                container.innerHTML = table;
+                loading.style.display = 'none';
+                console.log('Orders loaded successfully');
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                container.innerHTML = `<div class="error">Error loading orders: ${error.message}</div>`;
+                loading.style.display = 'none';
+            }
+        }
+
+        async function loadReservations() {
+            const container = document.getElementById('reservationsTable');
+            const loading = document.getElementById('reservationsLoading');
+            
+            try {
+                const reservations = await fetch(`${API_BASE}/reservations.php`).then(r => r.json());
+                
+                if (reservations.length === 0) {
+                    container.innerHTML = '<p>No reservations found.</p>';
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                const table = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Guests</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reservations.map(reservation => `
+                                <tr>
+                                    <td>#${reservation.id}</td>
+                                    <td>${reservation.name}</td>
+                                    <td>${reservation.email}</td>
+                                    <td>${reservation.date}</td>
+                                    <td>${reservation.time}</td>
+                                    <td>${reservation.guests}</td>
+                                    <td><span class="status ${reservation.status}">${reservation.status}</span></td>
+                                    <td>
+                                        ${reservation.status === 'pending' ? `<button class="action-btn confirm" onclick="updateReservationStatus(${reservation.id}, 'confirmed')">Confirm</button>` : ''}
+                                        <button class="action-btn cancel" onclick="updateReservationStatus(${reservation.id}, 'cancelled')">Cancel</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                container.innerHTML = table;
+                loading.style.display = 'none';
+            } catch (error) {
+                container.innerHTML = '<div class="error">Error loading reservations</div>';
+                loading.style.display = 'none';
+            }
+        }
+
+        async function loadReviews() {
+            const container = document.getElementById('reviewsTable');
+            const loading = document.getElementById('reviewsLoading');
+            
+            try {
+                console.log('Loading reviews...');
+                const response = await fetch(`${API_BASE}/reviews.php?admin=1`);
+                console.log('Reviews response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const reviews = await response.json();
+                console.log('Reviews received:', reviews);
+                
+                if (!Array.isArray(reviews)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                if (reviews.length === 0) {
+                    container.innerHTML = '<p>No reviews found.</p>';
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                const table = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Rating</th>
+                                <th>Review</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reviews.map(review => `
+                                <tr>
+                                    <td>#${review.id}</td>
+                                    <td>${review.customer_name}</td>
+                                    <td>${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</td>
+                                    <td>${review.review_text.substring(0, 100)}${review.review_text.length > 100 ? '...' : ''}</td>
+                                    <td><span class="status ${review.is_approved ? 'confirmed' : 'pending'}">${review.is_approved ? 'Approved' : 'Pending'}</span></td>
+                                    <td>${new Date(review.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        ${!review.is_approved ? `<button class="action-btn approve" onclick="updateReviewStatus(${review.id}, 'approve')">Approve</button>` : ''}
+                                        <button class="action-btn reject" onclick="updateReviewStatus(${review.id}, 'reject')">Reject</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                container.innerHTML = table;
+                loading.style.display = 'none';
+                console.log('Reviews loaded successfully');
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                container.innerHTML = `<div class="error">Error loading reviews: ${error.message}</div>`;
+                loading.style.display = 'none';
+            }
+        }
+
+        let allMenuItems = []; // Store all menu items for filtering
+
+        async function loadMenu() {
+            const container = document.getElementById('menuTable');
+            const loading = document.getElementById('menuLoading');
+            
+            try {
+                console.log('Loading menu items...'); // Debug log
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                console.log('Response status:', response.status); // Debug log
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the response text first to check for errors
+                const responseText = await response.text();
+                console.log('Raw response:', responseText.substring(0, 200)); // Debug log (first 200 chars)
+                
+                // Try to parse as JSON
+                let menuItems;
+                try {
+                    menuItems = JSON.parse(responseText);
+                } catch (jsonError) {
+                    console.error('JSON parsing error:', jsonError);
+                    console.error('Response text:', responseText);
+                    throw new Error(`Invalid JSON response: ${jsonError.message}. Response: ${responseText.substring(0, 100)}...`);
+                }
+                
+                console.log('Menu items received:', menuItems); // Debug log
+                
+                if (!Array.isArray(menuItems)) {
+                    throw new Error('Invalid response format - expected array');
+                }
+
+                // Store all items for filtering
+                allMenuItems = menuItems;
+                
+                // Update statistics
+                updateMenuStatistics(menuItems);
+                
+                if (menuItems.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px;"><p>No menu items found.</p><p>Start by adding your first menu item!</p></div>';
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                displayMenuItems(menuItems);
+                loading.style.display = 'none';
+                console.log('Menu loaded successfully'); // Debug log
+            } catch (error) {
+                console.error('Error loading menu:', error); // Debug log
+                container.innerHTML = `<div class="error">Error loading menu: ${error.message}</div>`;
+                loading.style.display = 'none';
+            }
+        }
+
+        function updateMenuStatistics(menuItems) {
+            const totalItems = menuItems.length;
+            const availableItems = menuItems.filter(item => item.is_available == 1).length;
+            const categories = [...new Set(menuItems.map(item => item.category))].length;
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('availableItems').textContent = availableItems;
+            document.getElementById('totalCategories').textContent = categories;
+        }
+
+        function displayMenuItems(menuItems) {
+            const container = document.getElementById('menuTable');
+            
+            if (menuItems.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px;"><p>No items found for the selected filter.</p></div>';
+                return;
+            }
+
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Available</th>
+                            <th>Actions (Edit | Toggle | Hide | Delete)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${menuItems.map(item => `
+                            <tr>
+                                <td>#${item.id}</td>
+                                <td>${item.name}</td>
+                                <td><span class="category-badge" style="background-color: ${getCategoryColor(item.category)}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">${item.category}</span></td>
+                                <td>Rs. ${item.price}</td>
+                                <td><span class="status ${item.is_available ? 'confirmed' : 'cancelled'}">${item.is_available ? 'Yes' : 'No'}</span></td>
+                                <td>
+                                    <button class="action-btn confirm" onclick="editMenuItem(${item.id})" title="Edit Item">✏️ Edit</button>
+                                    <button class="action-btn ${item.is_available ? 'cancel' : 'confirm'}" onclick="toggleMenuItem(${item.id}, ${!item.is_available})" title="${item.is_available ? 'Disable' : 'Enable'} Item">
+                                        ${item.is_available ? '🔒 Disable' : '🔓 Enable'}
+                                    </button>
+                                    <button class="action-btn" onclick="softDeleteMenuItem(${item.id})" title="Hide from customers (can be restored)" style="background-color: #ffc107; color: #000;">👁️ Hide</button>
+                                    <button class="action-btn reject" onclick="hardDeleteMenuItem(${item.id})" title="Permanently delete from database">🗑️ Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = table;
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                'Traditional': '#8B4513',
+                'Rice & Curry': '#228B22',
+                'Chinese': '#DC143C',
+                'Seafood': '#4682B4',
+                'Kottu': '#FF6347',
+                'Street Food': '#FF8C00',
+                'Juices': '#32CD32',
+                'Desserts': '#DA70D6',
+                'Curry': '#B8860B',
+                'Fusion': '#9370DB'
+            };
+            return colors[category] || '#6c757d';
+        }
+
+        function filterMenuByCategory() {
+            const selectedCategory = document.getElementById('categoryFilter').value;
+            
+            if (!selectedCategory) {
+                displayMenuItems(allMenuItems);
+            } else {
+                const filteredItems = allMenuItems.filter(item => item.category === selectedCategory);
+                displayMenuItems(filteredItems);
+            }
+        }
+
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`${API_BASE}/orders.php`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: orderId, status: status })
+                });
+
+                if (response.ok) {
+                    loadOrders(); // Reload orders
+                    loadOverviewData(); // Update overview stats
+                } else {
+                    alert('Failed to update order status');
+                }
+            } catch (error) {
+                alert('Error updating order status');
+            }
+        }
+
+        async function updateReservationStatus(reservationId, status) {
+            try {
+                const response = await fetch(`${API_BASE}/reservations.php`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: reservationId, status: status })
+                });
+
+                if (response.ok) {
+                    loadReservations(); // Reload reservations
+                } else {
+                    alert('Failed to update reservation status');
+                }
+            } catch (error) {
+                alert('Error updating reservation status');
+            }
+        }
+
+        async function updateReviewStatus(reviewId, action) {
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: reviewId, action: action })
+                });
+
+                if (response.ok) {
+                    loadReviews(); // Reload reviews
+                    loadOverviewData(); // Update overview stats
+                } else {
+                    alert('Failed to update review status');
+                }
+            } catch (error) {
+                alert('Error updating review status');
+            }
+        }
+
+        async function toggleMenuItem(itemId, isAvailable) {
+            try {
+                const response = await fetch(`${API_BASE}/menu.php`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        id: itemId, 
+                        is_available: isAvailable ? 1 : 0 
+                    })
+                });
+
+                if (response.ok) {
+                    loadMenu(); // Reload menu
+                    alert(`Menu item ${isAvailable ? 'enabled' : 'disabled'} successfully`);
+                } else {
+                    alert('Failed to update menu item');
+                }
+            } catch (error) {
+                alert('Error updating menu item');
+            }
+        }
+
+        // Menu Modal Functions
+        function openAddItemModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Menu Item';
+            document.getElementById('menuItemForm').reset();
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemAvailable').checked = true;
+            document.getElementById('menuModal').style.display = 'flex';
+        }
+
+        async function editMenuItem(itemId) {
+            try {
+                const response = await fetch(`${API_BASE}/menu.php?id=${itemId}&admin=true`);
+                const item = await response.json();
+                
+                if (item) {
+                    document.getElementById('modalTitle').textContent = 'Edit Menu Item';
+                    document.getElementById('itemId').value = item.id;
+                    document.getElementById('itemName').value = item.name;
+                    document.getElementById('itemDescription').value = item.description || '';
+                    document.getElementById('itemPrice').value = item.price;
+                    document.getElementById('itemCategory').value = item.category;
+                    document.getElementById('itemImage').value = item.image_url || '';
+                    document.getElementById('itemAvailable').checked = item.is_available == 1;
+                    document.getElementById('menuModal').style.display = 'flex';
+                } else {
+                    alert('Menu item not found');
+                }
+            } catch (error) {
+                alert('Error loading menu item');
+            }
+        }
+
+        function closeMenuModal() {
+            document.getElementById('menuModal').style.display = 'none';
+        }
+
+        // Bulk Add Functions
+        function openBulkAddModal() {
+            document.getElementById('bulkModal').style.display = 'flex';
+            document.getElementById('bulkItemForm').reset();
+        }
+
+        function closeBulkModal() {
+            document.getElementById('bulkModal').style.display = 'none';
+        }
+
+        // Category Management Functions
+        function openCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'flex';
+            loadCategories();
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+
+        async function loadCategories() {
+            const container = document.getElementById('categoryList');
+            
+            try {
+                // Get all unique categories from current menu items
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const menuItems = await response.json();
+                
+                if (!Array.isArray(menuItems)) {
+                    throw new Error('Invalid response format');
+                }
+                
+                const categories = [...new Set(menuItems.map(item => item.category))].sort();
+                
+                if (categories.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #666;">No categories found. Add some menu items first.</p>';
+                    return;
+                }
+                
+                const categoryHtml = categories.map((category, index) => {
+                    const itemCount = menuItems.filter(item => item.category === category).length;
+                    return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; ${index === categories.length - 1 ? 'border-bottom: none;' : ''}">
+                            <div>
+                                <span class="category-badge" style="background-color: ${getCategoryColor(category)}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.9em; margin-right: 10px;">${category}</span>
+                                <span style="color: #666; font-size: 0.9em;">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div>
+                                <button class="action-btn" onclick="editCategory('${category}')" style="background-color: #ffc107; color: #000; margin-right: 5px;">✏️ Rename</button>
+                                <button class="action-btn reject" onclick="deleteCategory('${category}')" ${itemCount > 0 ? 'disabled title="Cannot delete category with items"' : ''}>🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                container.innerHTML = categoryHtml;
+            } catch (error) {
+                container.innerHTML = '<div class="error">Error loading categories: ' + error.message + '</div>';
+            }
+        }
+
+        async function addCategory() {
+            const categoryName = document.getElementById('newCategoryName').value.trim();
+            
+            if (!categoryName) {
+                alert('Please enter a category name');
+                return;
+            }
+            
+            // Check if category already exists
+            const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+            const menuItems = await response.json();
+            const existingCategories = [...new Set(menuItems.map(item => item.category))];
+            
+            if (existingCategories.includes(categoryName)) {
+                alert('Category already exists');
+                return;
+            }
+            
+            // Add a placeholder item to create the category
+            try {
+                const addResponse = await fetch(`${API_BASE}/menu.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'add',
+                        name: `${categoryName} - Placeholder`,
+                        description: 'Temporary placeholder item. Please add real menu items to this category.',
+                        price: 0,
+                        category: categoryName,
+                        image_url: 'https://via.placeholder.com/300x200?text=Add+Items+Here',
+                        availability: 0 // Make it unavailable
+                    })
+                });
+
+                if (addResponse.ok) {
+                    document.getElementById('newCategoryName').value = '';
+                    loadCategories();
+                    updateCategorySelectors(); // Update all category dropdowns
+                    alert(`Category "${categoryName}" created successfully! A placeholder item was added - please add real menu items to this category.`);
+                } else {
+                    throw new Error('Failed to create category');
+                }
+            } catch (error) {
+                alert('Error creating category: ' + error.message);
+            }
+        }
+
+        async function editCategory(oldCategory) {
+            const newCategory = prompt(`Rename category "${oldCategory}" to:`, oldCategory);
+            
+            if (!newCategory || newCategory.trim() === '' || newCategory === oldCategory) {
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to rename "${oldCategory}" to "${newCategory}"? This will update all items in this category.`)) {
+                try {
+                    // Get all items in the old category
+                    const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                    const menuItems = await response.json();
+                    const itemsToUpdate = menuItems.filter(item => item.category === oldCategory);
+                    
+                    // Update each item's category
+                    for (const item of itemsToUpdate) {
+                        const updateResponse = await fetch(`${API_BASE}/menu.php`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: item.id,
+                                name: item.name,
+                                description: item.description,
+                                price: item.price,
+                                category: newCategory,
+                                image_url: item.image_url,
+                                is_available: item.is_available
+                            })
+                        });
+                        
+                        if (!updateResponse.ok) {
+                            throw new Error(`Failed to update item: ${item.name}`);
+                        }
+                    }
+                    
+                    loadCategories();
+                    updateCategorySelectors();
+                    loadMenu(); // Reload menu to show updated categories
+                    alert(`Category renamed successfully! ${itemsToUpdate.length} items updated.`);
+                } catch (error) {
+                    alert('Error renaming category: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteCategory(category) {
+            if (confirm(`Are you sure you want to delete the "${category}" category? This action cannot be undone.`)) {
+                try {
+                    // Get all items in the category
+                    const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                    const menuItems = await response.json();
+                    const itemsInCategory = menuItems.filter(item => item.category === category);
+                    
+                    if (itemsInCategory.length > 0) {
+                        alert('Cannot delete category with existing items. Please move or delete all items first.');
+                        return;
+                    }
+                    
+                    loadCategories();
+                    updateCategorySelectors();
+                    alert(`Category "${category}" deleted successfully.`);
+                } catch (error) {
+                    alert('Error deleting category: ' + error.message);
+                }
+            }
+        }
+
+        function updateCategorySelectors() {
+            // This function would update all category dropdowns in the UI
+            // For now, we'll just reload the page to refresh all selectors
+            // In a production app, you'd update each dropdown individually
+            console.log('Category selectors should be updated here');
+        }
+
+        async function processBulkAdd(category, items, isAvailable) {
+            const results = [];
+            const errors = [];
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                try {
+                    const response = await fetch(`${API_BASE}/menu.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'add',
+                            name: item.name,
+                            description: item.description,
+                            price: parseFloat(item.price),
+                            category: category,
+                            image_url: item.image_url || '',
+                            availability: isAvailable ? 1 : 0
+                        })
+                    });
+
+                    if (response.ok) {
+                        results.push(`✅ ${item.name} - Added successfully`);
+                    } else {
+                        const errorData = await response.json();
+                        errors.push(`❌ ${item.name} - ${errorData.message || 'Failed to add'}`);
+                    }
+                } catch (error) {
+                    errors.push(`❌ ${item.name} - ${error.message}`);
+                }
+            }
+
+            return { results, errors };
+        }
+
+        // Image Upload Handler
+        async function handleImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // Show loading state
+            const originalText = document.getElementById('itemImage').value;
+            document.getElementById('itemImage').value = 'Uploading...';
+            document.getElementById('itemImage').disabled = true;
+            
+            try {
+                // Create FormData for file upload
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                // Upload the file
+                const response = await fetch(`${API_BASE}/upload_image.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Set the uploaded image URL
+                    document.getElementById('itemImage').value = result.url;
+                    document.getElementById('itemImage').disabled = false;
+                    
+                    // Show preview
+                    showImagePreview(result.url);
+                    
+                    alert('Image uploaded successfully!');
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                document.getElementById('itemImage').value = originalText;
+                document.getElementById('itemImage').disabled = false;
+                alert('Failed to upload image: ' + error.message);
+            }
+        }
+        
+        function showImagePreview(imageUrl) {
+            // Remove existing preview
+            const existingPreview = document.getElementById('imagePreview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            // Create new preview
+            const preview = document.createElement('div');
+            preview.id = 'imagePreview';
+            preview.style.marginTop = '10px';
+            preview.innerHTML = `
+                <img src="${imageUrl}" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 5px; border: 1px solid #ddd;">
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">Image Preview</div>
+            `;
+            
+            // Insert after the image input group
+            const imageGroup = document.getElementById('itemImage').closest('.form-group');
+            imageGroup.appendChild(preview);
+        }
+
+        // Soft delete - hide from customers but keep in database
+        async function softDeleteMenuItem(itemId) {
+            if (confirm('Hide this menu item from customers? It will remain in the database and can be restored later.')) {
+                try {
+                    const response = await fetch(`${API_BASE}/menu.php?id=${itemId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadMenu(); // Reload menu
+                        alert('Menu item hidden from customers (can be restored)');
+                    } else {
+                        const errorData = await response.json();
+                        alert('Failed to hide menu item: ' + (errorData.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Hide error:', error);
+                    alert('Error hiding menu item: ' + error.message);
+                }
+            }
+        }
+
+        // Hard delete - permanently remove from database
+        async function hardDeleteMenuItem(itemId) {
+            if (confirm('⚠️ PERMANENTLY DELETE this menu item from the database?\n\nThis action CANNOT be undone!\n\nThe item will be completely removed and cannot be recovered.')) {
+                try {
+                    const response = await fetch(`${API_BASE}/menu.php?id=${itemId}&hard=true`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadMenu(); // Reload menu
+                        alert('Menu item permanently deleted from database');
+                    } else {
+                        const errorData = await response.json();
+                        alert('Failed to delete menu item: ' + (errorData.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    alert('Error deleting menu item: ' + error.message);
+                }
+            }
+        }
+
+        // Legacy function - now redirects to hard delete for backwards compatibility
+        async function deleteMenuItem(itemId) {
+            hardDeleteMenuItem(itemId);
+        }
+
+        // Restore sample data function
+        async function restoreSampleData() {
+            if (confirm('🎯 Restore sample menu data?\n\nThis will add 8 sample menu items to the database.\nExisting items will not be affected.')) {
+                try {
+                    const response = await fetch(`${API_BASE}/menu.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ action: 'restore_sample_data' })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        loadMenu(); // Reload menu to show new items
+                        alert('✅ Sample data restored successfully!\n\n8 sample menu items have been added.');
+                    } else {
+                        const errorData = await response.json();
+                        alert('❌ Failed to restore sample data: ' + (errorData.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Sample data restoration error:', error);
+                    alert('❌ Error restoring sample data: ' + error.message);
+                }
+            }
+        }
+
+        // Handle menu item form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('menuItemForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const itemData = {
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    price: parseFloat(formData.get('price')),
+                    category: formData.get('category'),
+                    image_url: formData.get('image_url'),
+                    is_available: formData.get('is_available') ? 1 : 0
+                };
+
+                const itemId = formData.get('id');
+                const isEdit = itemId && itemId !== '';
+
+                try {
+                    const response = await fetch(`${API_BASE}/menu.php`, {
+                        method: isEdit ? 'PUT' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(isEdit ? { ...itemData, id: itemId } : itemData)
+                    });
+
+                    if (response.ok) {
+                        closeMenuModal();
+                        loadMenu(); // Reload menu
+                        alert(`Menu item ${isEdit ? 'updated' : 'added'} successfully`);
+                    } else {
+                        const error = await response.json();
+                        alert(error.error || 'Failed to save menu item');
+                    }
+                } catch (error) {
+                    alert('Error saving menu item');
+                }
+            });
+
+            // Bulk Add Form Handler
+            document.getElementById('bulkItemForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const category = document.getElementById('bulkCategory').value;
+                const itemsText = document.getElementById('bulkItems').value.trim();
+                const isAvailable = document.getElementById('bulkAvailable').checked;
+                
+                if (!category || !itemsText) {
+                    alert('Please select a category and enter items');
+                    return;
+                }
+                
+                // Parse items from text
+                const lines = itemsText.split('\n').filter(line => line.trim());
+                const items = [];
+                const invalidLines = [];
+                
+                lines.forEach((line, index) => {
+                    const parts = line.split('|').map(part => part.trim());
+                    if (parts.length >= 3) {
+                        items.push({
+                            name: parts[0],
+                            description: parts[1],
+                            price: parts[2],
+                            image_url: parts[3] || ''
+                        });
+                    } else {
+                        invalidLines.push(`Line ${index + 1}: ${line}`);
+                    }
+                });
+                
+                if (invalidLines.length > 0) {
+                    alert(`Invalid format on the following lines:\n${invalidLines.join('\n')}\n\nPlease use format: Name | Description | Price | Image URL`);
+                    return;
+                }
+                
+                if (items.length === 0) {
+                    alert('No valid items found');
+                    return;
+                }
+                
+                // Confirm bulk add
+                if (!confirm(`Are you sure you want to add ${items.length} items to the "${category}" category?`)) {
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Processing...';
+                submitBtn.disabled = true;
+                
+                try {
+                    const { results, errors } = await processBulkAdd(category, items, isAvailable);
+                    
+                    // Show results
+                    let message = `Bulk add completed!\n\n`;
+                    if (results.length > 0) {
+                        message += `Successfully added:\n${results.join('\n')}\n\n`;
+                    }
+                    if (errors.length > 0) {
+                        message += `Errors:\n${errors.join('\n')}`;
+                    }
+                    
+                    alert(message);
+                    
+                    if (results.length > 0) {
+                        loadMenu(); // Reload menu to show new items
+                        closeBulkModal();
+                    }
+                } catch (error) {
+                    alert('Error during bulk add: ' + error.message);
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Close bulk modal when clicking outside of it
+            document.getElementById('bulkModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeBulkModal();
+                }
+            });
+
+            // Close modal when clicking outside of it
+            document.getElementById('menuModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeMenuModal();
+                }
+            });
+
+            // Close category modal when clicking outside of it
+            document.getElementById('categoryModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCategoryModal();
+                }
+            });
+        });
+
+        // Authentication Functions
+        function logout() {
+            localStorage.removeItem('admin_logged_in');
+            localStorage.removeItem('admin_username');
+            window.location.href = 'login.html';
+        }
+
+        // Check if user is logged in
+        function checkAuth() {
+            if (localStorage.getItem('admin_logged_in') !== 'true') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load initial data
+        checkAuth(); // Check authentication first
+        showSection('overview'); // Start with overview section
+        loadOverviewData();
+    </script>
+</body>
+</html>

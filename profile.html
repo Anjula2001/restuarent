@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profile-container {
+            min-height: 100vh;
+            background: #f8f9fa;
+            padding-top: 120px;
+            padding-bottom: 40px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .profile-header h1 {
+            color: #d4af37;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .profile-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e1e1;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .password-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 600px) {
+            .profile-card {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            .profile-header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="container">
+        <header>
+            <div class="logo">
+                <a href="index.html">
+                    <h1>GRAND</h1>
+                    <p>RESTAURANT</p>
+                </a>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search menu..." id="searchInput">
+                </div>
+                <div class="cart-icon" id="cart-toggle" onclick="toggleCart()">
+                    <span>🛒</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+                <!-- Authentication Buttons -->
+                <div class="auth-buttons" id="authButtons">
+                    <div id="guestLinks" style="display: inline;">
+                        <a href="login.html" class="auth-btn login">LOGIN</a>
+                        <a href="register.html" class="auth-btn register">REGISTER</a>
+                    </div>
+                    <div id="userLinks" style="display: none;">
+                        <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
+                        <a href="profile.html" class="auth-btn profile">PROFILE</a>
+                        <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cart Dropdown -->
+        <div class="cart-dropdown" id="cartDropdown" style="display: none;">
+            <div class="cart-header">
+                <h3>Shopping Cart</h3>
+                <button class="close-cart" id="close-cart">×</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <p class="empty-cart">Your cart is empty</p>
+            </div>
+            <div class="cart-footer" id="cart-footer" style="display: none;">
+                <div class="cart-total">
+                    <strong>Total: Rs. <span id="cart-total">0.00</span></strong>
+                </div>
+                <button class="checkout-btn" onclick="goToOrderPage()">View Cart & Checkout</button>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="main-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="menu.html">MENU</a></li>
+                <li><a href="reservation.html">RESERVATION</a></li>
+                <li><a href="order.html">ORDER ONLINE</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <h1>Edit Profile</h1>
+                <p>Update your personal information and preferences</p>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Loading your profile...</p>
+            </div>
+
+            <!-- Profile Form -->
+            <div id="profileForm" style="display: none;">
+                <form id="updateProfileForm">
+                    <div class="form-section">
+                        <h3 class="section-title">Personal Information</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first_name">First Name *</label>
+                                <input type="text" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="last_name">Last Name *</label>
+                                <input type="text" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" readonly style="background: #f8f9fa; cursor: not-allowed;">
+                            <small style="color: #666; font-size: 0.85rem;">Email cannot be changed. Contact support if needed.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date_of_birth">Date of Birth</label>
+                            <input type="date" id="date_of_birth" name="date_of_birth">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" placeholder="Enter your delivery address..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" id="updateBtn">
+                            Update Profile
+                        </button>
+                        <a href="dashboard.html" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Password Change Section -->
+                <div class="password-section">
+                    <h3 class="section-title">Change Password</h3>
+                    
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="current_password">Current Password</label>
+                            <input type="password" id="current_password" name="current_password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_password">New Password</label>
+                            <input type="password" id="new_password" name="new_password" required>
+                            <div class="password-requirements">
+                                Password must be at least 6 characters long
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_new_password">Confirm New Password</label>
+                            <input type="password" id="confirm_new_password" name="confirm_new_password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger" id="changePasswordBtn">
+                            Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProfile();
+        });
+
+        async function initializeProfile() {
+            try {
+                // Check if user is logged in
+                const sessionResponse = await fetch('api/auth.php?action=check_session');
+                const sessionResult = await sessionResponse.json();
+
+                if (!sessionResult.logged_in) {
+                    window.location.href = 'login.html?return=profile.html';
+                    return;
+                }
+
+                // Load user profile data
+                await loadUserProfile();
+
+                // Show profile form
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('profileForm').style.display = 'block';
+
+                // Setup form handlers
+                setupFormHandlers();
+
+            } catch (error) {
+                console.error('Profile initialization error:', error);
+                showAlert('Error loading profile. Please try again.', 'error');
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('api/auth.php?action=profile');
+                const result = await response.json();
+
+                if (result.success) {
+                    populateProfileForm(result.user);
+                } else {
+                    throw new Error(result.error || 'Failed to load profile');
+                }
+            } catch (error) {
+                console.error('Profile loading error:', error);
+                throw error;
+            }
+        }
+
+        function populateProfileForm(user) {
+            document.getElementById('first_name').value = user.first_name || '';
+            document.getElementById('last_name').value = user.last_name || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('date_of_birth').value = user.date_of_birth || '';
+            document.getElementById('address').value = user.address || '';
+        }
+
+        function setupFormHandlers() {
+            const updateForm = document.getElementById('updateProfileForm');
+            const passwordForm = document.getElementById('changePasswordForm');
+            const newPasswordField = document.getElementById('new_password');
+            const confirmPasswordField = document.getElementById('confirm_new_password');
+
+            // Profile update form
+            updateForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await updateProfile();
+            });
+
+            // Password change form
+            passwordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await changePassword();
+            });
+
+            // Password confirmation validation
+            confirmPasswordField.addEventListener('input', function() {
+                if (this.value && newPasswordField.value && this.value !== newPasswordField.value) {
+                    this.setCustomValidity('Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            newPasswordField.addEventListener('input', function() {
+                if (confirmPasswordField.value && this.value !== confirmPasswordField.value) {
+                    confirmPasswordField.setCustomValidity('Passwords do not match');
+                } else {
+                    confirmPasswordField.setCustomValidity('');
+                }
+            });
+        }
+
+        async function updateProfile() {
+            const updateBtn = document.getElementById('updateBtn');
+            const formData = new FormData(document.getElementById('updateProfileForm'));
+
+            const firstName = formData.get('first_name');
+            const lastName = formData.get('last_name');
+
+            if (!firstName || !lastName) {
+                showAlert('First name and last name are required', 'error');
+                return;
+            }
+
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_profile',
+                        first_name: firstName,
+                        last_name: lastName,
+                        phone: formData.get('phone') || '',
+                        date_of_birth: formData.get('date_of_birth') || null,
+                        address: formData.get('address') || ''
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Profile updated successfully!', 'success');
+                    
+                    // Update localStorage user data
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    user.first_name = firstName;
+                    user.last_name = lastName;
+                    localStorage.setItem('user', JSON.stringify(user));
+                } else {
+                    showAlert(result.message || 'Failed to update profile', 'error');
+                }
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+            } finally {
+                updateBtn.disabled = false;
+                updateBtn.textContent = 'Update Profile';
+            }
+        }
+
+        async function changePassword() {
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            const formData = new FormData(document.getElementById('changePasswordForm'));
+
+            const currentPassword = formData.get('current_password');
+            const newPassword = formData.get('new_password');
+            const confirmPassword = formData.get('confirm_new_password');
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showAlert('All password fields are required', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showAlert('New passwords do not match', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showAlert('New password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            changePasswordBtn.disabled = true;
+            changePasswordBtn.textContent = 'Changing...';
+
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'change_password',
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Password changed successfully!', 'success');
+                    
+                    // Clear password form
+                    document.getElementById('changePasswordForm').reset();
+                } else {
+                    showAlert(result.message || 'Failed to change password', 'error');
+                }
+            } catch (error) {
+                console.error('Password change error:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+            } finally {
+                changePasswordBtn.disabled = false;
+                changePasswordBtn.textContent = 'Change Password';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+            }
+
+            // Scroll to top to show alert
+            window.scrollTo(0, 0);
+        }
+
+        // Initialize cart functionality
+        if (typeof initializeCart === 'function') {
+            initializeCart();
+        }
+    </script>
+</body>
+</html>

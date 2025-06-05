@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Page Behavior Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .monitor { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #dee2e6; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        iframe { width: 100%; height: 400px; border: 1px solid #ddd; margin: 10px 0; }
+        button { padding: 8px 16px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Menu Page Behavior Monitor</h1>
+    
+    <div class="monitor">
+        <h2>Test Controls</h2>
+        <button class="btn-primary" onclick="testMenuPage()">🧪 Test Menu Page Load</button>
+        <button class="btn-success" onclick="testReloadFunction()">🔄 Test Reload Function</button>
+        <button class="btn-warning" onclick="simulateUserBehavior()">👤 Simulate User Behavior</button>
+        <button onclick="clearLog()">🧹 Clear Log</button>
+    </div>
+
+    <div class="monitor">
+        <h2>Current Status</h2>
+        <div id="status-display">
+            <div class="status info">Waiting for tests to run...</div>
+        </div>
+    </div>
+
+    <div class="monitor">
+        <h2>Test Results Log</h2>
+        <div id="test-log" class="log">
+            Monitor ready. Click a test button to begin...
+        </div>
+    </div>
+
+    <div class="monitor">
+        <h2>Menu Page (Embedded)</h2>
+        <iframe id="menu-frame" src="menu.html"></iframe>
+    </div>
+
+    <script>
+        let logEntries = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            logEntries.push(entry);
+            
+            const logDiv = document.getElementById('test-log');
+            const statusDiv = document.getElementById('status-display');
+            
+            logDiv.innerHTML += `<div class="${type}">${entry}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            // Update status
+            const statusClass = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            statusDiv.innerHTML = `<div class="status ${statusClass}">${message}</div>`;
+            
+            console.log(entry);
+        }
+
+        async function testMenuPage() {
+            log('🧪 Starting menu page load test...', 'info');
+            
+            try {
+                // Test 1: Direct API call
+                log('📡 Testing direct API call...', 'info');
+                const apiResponse = await fetch('api/menu.php?test=1');
+                const apiData = await apiResponse.json();
+                
+                const riceItems = apiData.filter(item => {
+                    const cat = item.category.toLowerCase();
+                    return cat.includes('rice') || cat.includes('curry');
+                });
+                
+                log(`✅ API Test: ${riceItems.length} rice items found`, riceItems.length > 0 ? 'success' : 'error');
+                
+                // Test 2: Check iframe content
+                log('🖼️ Checking iframe content...', 'info');
+                const iframe = document.getElementById('menu-frame');
+                
+                setTimeout(() => {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        const riceContainer = iframeDoc.getElementById('rice-curry-items');
+                        
+                        if (riceContainer) {
+                            const itemCount = riceContainer.children.length;
+                            log(`✅ Iframe Test: Rice container found with ${itemCount} items`, itemCount > 0 ? 'success' : 'warning');
+                            
+                            if (itemCount === 0) {
+                                log('⚠️ Container is empty - this might be the issue!', 'warning');
+                            }
+                        } else {
+                            log('❌ Rice container not found in iframe', 'error');
+                        }
+                    } catch (error) {
+                        log(`❌ Iframe access error: ${error.message}`, 'error');
+                    }
+                }, 2000); // Wait 2 seconds for content to load
+                
+            } catch (error) {
+                log(`❌ Menu page test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testReloadFunction() {
+            log('🔄 Testing reload function...', 'info');
+            
+            try {
+                const iframe = document.getElementById('menu-frame');
+                const iframeWindow = iframe.contentWindow;
+                
+                if (iframeWindow && iframeWindow.reloadMenu) {
+                    log('📡 Calling reloadMenu() function...', 'info');
+                    
+                    // Monitor the reload process
+                    setTimeout(async () => {
+                        try {
+                            await iframeWindow.reloadMenu();
+                            log('✅ Reload function executed successfully', 'success');
+                            
+                            // Check results after reload
+                            setTimeout(() => {
+                                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                                const riceContainer = iframeDoc.getElementById('rice-curry-items');
+                                
+                                if (riceContainer) {
+                                    const itemCount = riceContainer.children.length;
+                                    log(`📊 After reload: ${itemCount} items in rice container`, itemCount > 0 ? 'success' : 'warning');
+                                }
+                            }, 1000);
+                            
+                        } catch (error) {
+                            log(`❌ Reload function error: ${error.message}`, 'error');
+                        }
+                    }, 1000);
+                    
+                } else {
+                    log('❌ reloadMenu function not found', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Reload test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function simulateUserBehavior() {
+            log('👤 Simulating user behavior...', 'info');
+            
+            // Simulate fresh page load
+            log('1️⃣ Simulating fresh page load...', 'info');
+            const iframe = document.getElementById('menu-frame');
+            iframe.src = iframe.src; // Force reload
+            
+            setTimeout(() => {
+                log('2️⃣ Checking initial load results...', 'info');
+                
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const riceContainer = iframeDoc.getElementById('rice-curry-items');
+                    
+                    if (riceContainer) {
+                        const initialCount = riceContainer.children.length;
+                        log(`📊 Initial load: ${initialCount} items displayed`, initialCount > 0 ? 'success' : 'warning');
+                        
+                        // Simulate clicking reload button
+                        setTimeout(async () => {
+                            log('3️⃣ Simulating reload button click...', 'info');
+                            
+                            const reloadBtn = iframeDoc.querySelector('.reload-menu-btn');
+                            if (reloadBtn) {
+                                reloadBtn.click();
+                                
+                                setTimeout(() => {
+                                    const afterReloadCount = riceContainer.children.length;
+                                    log(`📊 After reload: ${afterReloadCount} items displayed`, afterReloadCount > 0 ? 'success' : 'warning');
+                                    
+                                    // Compare results
+                                    if (initialCount !== afterReloadCount) {
+                                        log(`🔍 INCONSISTENCY DETECTED: Initial=${initialCount}, After Reload=${afterReloadCount}`, 'error');
+                                    } else if (initialCount === 0 && afterReloadCount === 0) {
+                                        log('🔍 BOTH STATES SHOW EMPTY - This is the core issue!', 'error');
+                                    } else {
+                                        log('✅ Consistent behavior detected', 'success');
+                                    }
+                                }, 2000);
+                                
+                            } else {
+                                log('❌ Reload button not found', 'error');
+                            }
+                        }, 2000);
+                        
+                    } else {
+                        log('❌ Rice container not found after load', 'error');
+                    }
+                    
+                } catch (error) {
+                    log(`❌ User behavior simulation error: ${error.message}`, 'error');
+                }
+            }, 3000); // Wait for initial load
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = 'Log cleared...';
+            document.getElementById('status-display').innerHTML = '<div class="status info">Ready for new tests...</div>';
+            logEntries = [];
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🌟 Menu Behavior Monitor initialized', 'success');
+            log('📋 Use the test buttons above to diagnose menu behavior', 'info');
+        });
+    </script>
+</body>
+</html>

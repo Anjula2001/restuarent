@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rice & Curry Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .food-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Rice & Curry Display Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h2>Step 1: API Response Test</h2>
+        <button onclick="testAPI()">Test API Response</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Step 2: Category Matching Test</h2>
+        <button onclick="testCategoryMatching()">Test Category Matching</button>
+        <div id="category-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Step 3: HTML Element Test</h2>
+        <button onclick="testHTMLElements()">Test HTML Elements</button>
+        <div id="element-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Step 4: Full Simulation</h2>
+        <button onclick="simulateFullProcess()">Simulate Full Process</button>
+        <div id="simulation-result"></div>
+        
+        <!-- Test containers -->
+        <div id="rice-curry-items" style="border: 2px solid blue; padding: 10px; margin: 10px 0;">
+            <h3>Rice & Curry Items Container:</h3>
+        </div>
+        <div id="rice-curry-empty" style="display: none; color: red;">
+            No rice & curry items available
+        </div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p class="info">Testing API...</p>';
+            
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`api/menu.php?_t=${timestamp}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const data = await response.json();
+                
+                const riceItems = data.filter(item => {
+                    const category = item.category.toLowerCase().trim();
+                    return category.includes('rice') || category.includes('curry');
+                });
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✓ API working! Total items: ${data.length}</p>
+                    <p class="success">✓ Rice-related items found: ${riceItems.length}</p>
+                    <details>
+                        <summary>Rice Items Details</summary>
+                        <pre>${JSON.stringify(riceItems, null, 2)}</pre>
+                    </details>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ API Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testCategoryMatching() {
+            const resultDiv = document.getElementById('category-result');
+            resultDiv.innerHTML = '<p class="info">Testing category matching...</p>';
+            
+            try {
+                const response = await fetch('api/menu.php');
+                const allItems = await response.json();
+                
+                const matches = ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'];
+                const matchedItems = allItems.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    return matches.some(match => 
+                        itemCategory === match || itemCategory.includes(match)
+                    );
+                });
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✓ Category matching test complete</p>
+                    <p>Matched items: ${matchedItems.length}</p>
+                    <details>
+                        <summary>Matching Details</summary>
+                        ${matchedItems.map(item => `
+                            <div>
+                                <strong>${item.name}</strong> - Category: "${item.category}"
+                            </div>
+                        `).join('')}
+                    </details>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ Matching Error: ${error.message}</p>`;
+            }
+        }
+
+        function testHTMLElements() {
+            const resultDiv = document.getElementById('element-result');
+            
+            const containerElement = document.getElementById('rice-curry-items');
+            const emptyElement = document.getElementById('rice-curry-empty');
+            
+            if (containerElement && emptyElement) {
+                resultDiv.innerHTML = `
+                    <p class="success">✓ HTML elements found</p>
+                    <p>Container element: ${containerElement ? 'Found' : 'Not found'}</p>
+                    <p>Empty element: ${emptyElement ? 'Found' : 'Not found'}</p>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <p class="error">✗ HTML elements missing</p>
+                    <p>Container element: ${containerElement ? 'Found' : 'NOT FOUND'}</p>
+                    <p>Empty element: ${emptyElement ? 'Found' : 'NOT FOUND'}</p>
+                `;
+            }
+        }
+
+        async function simulateFullProcess() {
+            const resultDiv = document.getElementById('simulation-result');
+            resultDiv.innerHTML = '<p class="info">Simulating full process...</p>';
+            
+            try {
+                // Step 1: Fetch data
+                const timestamp = new Date().getTime();
+                const response = await fetch(`api/menu.php?_t=${timestamp}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const allItems = await response.json();
+                
+                // Step 2: Filter rice items
+                const matches = ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'];
+                const riceItems = allItems.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    return matches.some(match => 
+                        itemCategory === match || itemCategory.includes(match)
+                    );
+                });
+                
+                // Step 3: Update HTML
+                const containerElement = document.getElementById('rice-curry-items');
+                const emptyElement = document.getElementById('rice-curry-empty');
+                
+                if (riceItems.length > 0) {
+                    containerElement.innerHTML = `
+                        <h3>Rice & Curry Items Container:</h3>
+                        ${riceItems.map(item => `
+                            <div class="food-card">
+                                <h4>${item.name}</h4>
+                                <p>${item.description}</p>
+                                <p><strong>Rs. ${parseFloat(item.price).toFixed(2)}</strong></p>
+                                <p><em>Category: ${item.category}</em></p>
+                            </div>
+                        `).join('')}
+                    `;
+                    emptyElement.style.display = 'none';
+                    
+                    resultDiv.innerHTML = `
+                        <p class="success">✓ Full simulation successful!</p>
+                        <p>Items displayed: ${riceItems.length}</p>
+                    `;
+                } else {
+                    containerElement.innerHTML = '<h3>Rice & Curry Items Container:</h3>';
+                    emptyElement.style.display = 'block';
+                    
+                    resultDiv.innerHTML = `
+                        <p class="error">✗ No items found to display</p>
+                        <p>Total items from API: ${allItems.length}</p>
+                    `;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ Simulation Error: ${error.message}</p>`;
+                console.error('Simulation error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

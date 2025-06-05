@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rice & Curry Timing Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 2px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .food-card { border: 1px solid #ccc; margin: 10px; padding: 10px; border-radius: 5px; display: inline-block; width: 200px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Rice & Curry Timing Issue Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Initial Page Load Simulation</h2>
+        <button onclick="testInitialLoad()">🔄 Test Initial Load</button>
+        <div id="initial-results"></div>
+        <div id="initial-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Reload Button Simulation</h2>
+        <button onclick="testReloadButton()">⚡ Test Reload Button</button>
+        <div id="reload-results"></div>
+        <div id="reload-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Compare Both Methods</h2>
+        <button onclick="compareResults()">📊 Compare Results</button>
+        <div id="comparison-results"></div>
+    </div>
+
+    <script>
+        let initialLoadItems = [];
+        let reloadButtonItems = [];
+
+        // Exact loadMenuByCategories function from menu.html
+        async function loadMenuByCategories() {
+            const categories = [
+                { 
+                    id: 'rice-curry', 
+                    name: 'Rice & Curry', 
+                    matches: ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'] 
+                },
+                { 
+                    id: 'chinese', 
+                    name: 'Chinese', 
+                    matches: ['chinese'] 
+                },
+                { 
+                    id: 'seafood', 
+                    name: 'Seafood', 
+                    matches: ['seafood'] 
+                },
+                { 
+                    id: 'kottu', 
+                    name: 'Kottu', 
+                    matches: ['kottu'] 
+                },
+                { 
+                    id: 'juices', 
+                    name: 'Juices', 
+                    matches: ['juices', 'juice'] 
+                },
+                { 
+                    id: 'desserts', 
+                    name: 'Desserts', 
+                    matches: ['desserts', 'dessert'] 
+                },
+                { 
+                    id: 'others', 
+                    name: 'Other Specialties', 
+                    matches: ['pasta', 'salad', 'other'] 
+                }
+            ];
+
+            const response = await fetch('api/menu.php');
+            const allItems = await response.json();
+
+            // Find rice-curry category
+            const riceCurryCategory = categories.find(cat => cat.id === 'rice-curry');
+            const categoryItems = allItems.filter(item => {
+                const itemCategory = item.category.toLowerCase().trim();
+                return riceCurryCategory.matches.some(match => {
+                    return itemCategory === match || itemCategory.includes(match);
+                });
+            });
+
+            return categoryItems;
+        }
+
+        async function testInitialLoad() {
+            const resultsDiv = document.getElementById('initial-results');
+            const displayDiv = document.getElementById('initial-display');
+            
+            resultsDiv.innerHTML = '<div class="result">🔄 Testing initial page load behavior...</div>';
+            displayDiv.innerHTML = '';
+
+            try {
+                // Simulate the exact timing of initial page load
+                const startTime = performance.now();
+                initialLoadItems = await loadMenuByCategories();
+                const endTime = performance.now();
+
+                resultsDiv.innerHTML = `
+                    <div class="result success">✅ Initial Load: Found ${initialLoadItems.length} items in ${(endTime - startTime).toFixed(2)}ms</div>
+                    <div class="result">Items: ${initialLoadItems.map(item => item.name).join(', ')}</div>
+                `;
+
+                // Display items
+                displayDiv.innerHTML = initialLoadItems.map(item => `
+                    <div class="food-card">
+                        <h4>${item.name}</h4>
+                        <p>Category: "${item.category}"</p>
+                        <p>Price: Rs. ${item.price}</p>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">❌ Initial Load Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testReloadButton() {
+            const resultsDiv = document.getElementById('reload-results');
+            const displayDiv = document.getElementById('reload-display');
+            
+            resultsDiv.innerHTML = '<div class="result">⚡ Testing reload button behavior...</div>';
+            displayDiv.innerHTML = '<p style="text-align: center; color: #666;">Reloading...</p>';
+
+            try {
+                // Simulate reload button delay
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const startTime = performance.now();
+                reloadButtonItems = await loadMenuByCategories();
+                const endTime = performance.now();
+
+                resultsDiv.innerHTML = `
+                    <div class="result success">✅ Reload Button: Found ${reloadButtonItems.length} items in ${(endTime - startTime).toFixed(2)}ms</div>
+                    <div class="result">Items: ${reloadButtonItems.map(item => item.name).join(', ')}</div>
+                `;
+
+                // Display items
+                displayDiv.innerHTML = reloadButtonItems.map(item => `
+                    <div class="food-card">
+                        <h4>${item.name}</h4>
+                        <p>Category: "${item.category}"</p>
+                        <p>Price: Rs. ${item.price}</p>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">❌ Reload Button Error: ${error.message}</div>`;
+            }
+        }
+
+        async function compareResults() {
+            const resultsDiv = document.getElementById('comparison-results');
+            
+            if (initialLoadItems.length === 0 || reloadButtonItems.length === 0) {
+                resultsDiv.innerHTML = '<div class="result warning">⚠️ Please run both tests first!</div>';
+                return;
+            }
+
+            const initialIds = initialLoadItems.map(item => item.id).sort();
+            const reloadIds = reloadButtonItems.map(item => item.id).sort();
+            
+            const idsMatch = JSON.stringify(initialIds) === JSON.stringify(reloadIds);
+            
+            resultsDiv.innerHTML = `
+                <div class="result ${idsMatch ? 'success' : 'error'}">
+                    <h3>📊 Comparison Results</h3>
+                    <p><strong>Initial Load:</strong> ${initialLoadItems.length} items (IDs: ${initialIds.join(', ')})</p>
+                    <p><strong>Reload Button:</strong> ${reloadButtonItems.length} items (IDs: ${reloadIds.join(', ')})</p>
+                    <p><strong>Results Match:</strong> ${idsMatch ? '✅ YES' : '❌ NO'}</p>
+                </div>
+            `;
+
+            if (!idsMatch) {
+                const missingInInitial = reloadIds.filter(id => !initialIds.includes(id));
+                const missingInReload = initialIds.filter(id => !reloadIds.includes(id));
+                
+                resultsDiv.innerHTML += `
+                    <div class="result error">
+                        <p><strong>Missing in Initial Load:</strong> ${missingInInitial.length > 0 ? missingInInitial.join(', ') : 'None'}</p>
+                        <p><strong>Missing in Reload:</strong> ${missingInReload.length > 0 ? missingInReload.join(', ') : 'None'}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test browser caching behavior
+        async function testCaching() {
+            console.log('Testing browser caching...');
+            
+            // Test with cache headers
+            const response1 = await fetch('api/menu.php', { cache: 'default' });
+            const data1 = await response1.json();
+            
+            const response2 = await fetch('api/menu.php', { cache: 'no-cache' });
+            const data2 = await response2.json();
+            
+            console.log('Cached response length:', data1.length);
+            console.log('No-cache response length:', data2.length);
+            console.log('Results identical:', JSON.stringify(data1) === JSON.stringify(data2));
+        }
+
+        // Run caching test on page load
+        document.addEventListener('DOMContentLoaded', testCaching);
+    </script>
+</body>
+</html>

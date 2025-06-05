@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Debug - Rice & Curry</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-info { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .food-card { border: 1px solid #ddd; margin: 10px; padding: 15px; border-radius: 8px; max-width: 300px; }
+        .food-card img { width: 100%; height: 200px; object-fit: cover; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Rice & Curry Menu Debug</h1>
+    <div id="debug-output"></div>
+    <div id="rice-curry-items"></div>
+
+    <script>
+        async function debugRiceCurry() {
+            const debugOutput = document.getElementById('debug-output');
+            const container = document.getElementById('rice-curry-items');
+            
+            try {
+                debugOutput.innerHTML += '<div class="debug-info">📡 Fetching API data...</div>';
+                
+                const response = await fetch('api/menu.php');
+                const allItems = await response.json();
+                
+                debugOutput.innerHTML += `<div class="debug-info success">✅ API Response: ${allItems.length} items total</div>`;
+                
+                // Filter Rice & Curry items
+                const riceCurryItems = allItems.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    const matches = ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'];
+                    return matches.some(match => itemCategory === match || itemCategory.includes(match));
+                });
+                
+                debugOutput.innerHTML += `<div class="debug-info">🍛 Found ${riceCurryItems.length} Rice & Curry items:</div>`;
+                
+                riceCurryItems.forEach(item => {
+                    debugOutput.innerHTML += `<div class="debug-info">
+                        <strong>${item.name}</strong><br>
+                        Category: "${item.category}"<br>
+                        Image URL: ${item.image_url || 'EMPTY'}<br>
+                        Price: Rs. ${item.price}
+                    </div>`;
+                });
+                
+                // Render the items
+                if (riceCurryItems.length > 0) {
+                    container.innerHTML = riceCurryItems.map(item => `
+                        <div class="food-card">
+                            <h3>${item.name}</h3>
+                            <p><strong>Image URL:</strong> ${item.image_url || 'EMPTY'}</p>
+                            <img src="${item.image_url || 'images/popular/2.png'}" 
+                                 alt="${item.name}" 
+                                 onload="this.style.border='3px solid green'; console.log('✅ Image loaded: ${item.name}');"
+                                 onerror="this.style.border='3px solid red'; this.src='images/popular/2.png'; console.log('❌ Image failed: ${item.name}');">
+                            <p>${item.description || 'No description'}</p>
+                            <p class="food-price">Rs. ${parseFloat(item.price).toFixed(2)}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="error">No Rice & Curry items found!</div>';
+                }
+                
+            } catch (error) {
+                debugOutput.innerHTML += `<div class="debug-info error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Run the debug function
+        debugRiceCurry();
+    </script>
+</body>
+</html>
