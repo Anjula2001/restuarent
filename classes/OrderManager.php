@@ -184,5 +184,27 @@ class OrderManager {
 
         return $stats;
     }
+
+    // Bulk delete delivered and cancelled orders
+    public function clearProcessedOrders() {
+        $query = "DELETE FROM " . $this->orders_table . " WHERE status IN ('delivered', 'cancelled')";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute();
+    }
+
+    // Get count of orders by status
+    public function getOrderCountByStatus() {
+        $query = "SELECT status, COUNT(*) as count FROM " . $this->orders_table . " GROUP BY status";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        
+        $counts = [];
+        $results = $stmt->fetchAll();
+        foreach ($results as $result) {
+            $counts[$result['status']] = $result['count'];
+        }
+        
+        return $counts;
+    }
 }
 ?>

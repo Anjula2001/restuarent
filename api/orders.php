@@ -107,6 +107,33 @@ switch ($method) {
         }
         break;
 
+    case 'DELETE':
+        // Check if this is a bulk clear operation
+        if (isset($_GET['clear_processed']) && $_GET['clear_processed'] === 'true') {
+            // Clear all delivered and cancelled orders (admin only)
+            $counts = $order_manager->getOrderCountByStatus();
+            $toDelete = ($counts['delivered'] ?? 0) + ($counts['cancelled'] ?? 0);
+            
+            if ($toDelete === 0) {
+                sendJsonResponse(['message' => 'No delivered or cancelled orders to clear']);
+                break;
+            }
+            
+            $result = $order_manager->clearProcessedOrders();
+
+            if ($result) {
+                sendJsonResponse([
+                    'message' => "Successfully cleared {$toDelete} processed orders",
+                    'cleared_count' => $toDelete
+                ]);
+            } else {
+                sendJsonResponse(['error' => 'Failed to clear orders'], 500);
+            }
+        } else {
+            sendJsonResponse(['error' => 'Operation not supported'], 400);
+        }
+        break;
+
     default:
         sendJsonResponse(['error' => 'Method not allowed'], 405);
         break;
