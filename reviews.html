@@ -596,7 +596,46 @@
                 </p>
             </div>
 
+            <!-- Toggle Review Form Button -->
+            <div class="write-review-toggle">
+                <button class="toggle-form-btn" id="toggleReviewForm">✏️ Write a Review</button>
+            </div>
+
+            <!-- Review Submission Form (initially hidden) -->
+            <div class="review-submission" id="reviewSubmissionForm" style="display: none;">
+                <h3>Submit Your Review</h3>
+                <div class="form-message" id="formMessage"></div>
+                <div class="form-group">
+                    <label for="reviewerName">Your Name</label>
+                    <input type="text" id="reviewerName" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="reviewRating">Rating</label>
+                    <div class="star-rating">
+                        <div class="stars-container">
+                            <input type="radio" name="rating" value="5" id="star5" class="star-input">
+                            <label for="star5" class="star-label">★</label>
+                            <input type="radio" name="rating" value="4" id="star4" class="star-input">
+                            <label for="star4" class="star-label">★</label>
+                            <input type="radio" name="rating" value="3" id="star3" class="star-input">
+                            <label for="star3" class="star-label">★</label>
+                            <input type="radio" name="rating" value="2" id="star2" class="star-input">
+                            <label for="star2" class="star-label">★</label>
+                            <input type="radio" name="rating" value="1" id="star1" class="star-input">
+                            <label for="star1" class="star-label">★</label>
+                        </div>
+                        <div class="rating-text" id="ratingText">Please select a rating</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reviewText">Your Review</label>
+                    <textarea id="reviewText" placeholder="Write your review here"></textarea>
+                </div>
+                <button class="submit-review-btn" id="submitReviewBtn">Submit Review</button>
+            </div>
+
             <!-- Reviews Statistics -->
+            <div style="margin-top: 40px;"></div>
             <div class="reviews-stats" id="reviewsStats">
                 <div class="stat-card slide-up">
                     <div class="stat-number" id="totalReviews">-</div>
@@ -646,44 +685,6 @@
                     <span id="pageNumbers"></span>
                     <button class="page-btn" id="nextPage" onclick="nextPage()">Next →</button>
                 </div>
-            </div>
-
-            <!-- Toggle Review Form Button -->
-            <div class="write-review-toggle">
-                <button class="toggle-form-btn" id="toggleReviewForm">✏️ Write a Review</button>
-            </div>
-
-            <!-- Review Submission Form (initially hidden) -->
-            <div class="review-submission" id="reviewSubmissionForm" style="display: none;">
-                <h3>Submit Your Review</h3>
-                <div class="form-message" id="formMessage"></div>
-                <div class="form-group">
-                    <label for="reviewerName">Your Name</label>
-                    <input type="text" id="reviewerName" placeholder="Enter your name">
-                </div>
-                <div class="form-group">
-                    <label for="reviewRating">Rating</label>
-                    <div class="star-rating">
-                        <div class="stars-container">
-                            <input type="radio" name="rating" value="5" id="star5" class="star-input">
-                            <label for="star5" class="star-label">★</label>
-                            <input type="radio" name="rating" value="4" id="star4" class="star-input">
-                            <label for="star4" class="star-label">★</label>
-                            <input type="radio" name="rating" value="3" id="star3" class="star-input">
-                            <label for="star3" class="star-label">★</label>
-                            <input type="radio" name="rating" value="2" id="star2" class="star-input">
-                            <label for="star2" class="star-label">★</label>
-                            <input type="radio" name="rating" value="1" id="star1" class="star-input">
-                            <label for="star1" class="star-label">★</label>
-                        </div>
-                        <div class="rating-text" id="ratingText">Please select a rating</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="reviewText">Your Review</label>
-                    <textarea id="reviewText" placeholder="Write your review here"></textarea>
-                </div>
-                <button class="submit-review-btn" id="submitReviewBtn">Submit Review</button>
             </div>
         </section>
 
