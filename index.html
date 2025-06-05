@@ -68,11 +68,33 @@
 
         .review-card p {
             margin-bottom: 15px;
-        }
-
-        .review-card .reviewer {
+        }        .review-card .reviewer {
             font-weight: bold;
             text-align: right;
+        }
+
+        .see-all-reviews {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .see-all-link {
+            display: inline-block;
+            background: #8B5A2B;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .see-all-link:hover {
+            background: #654321;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
 
         /* Cart Styles */
@@ -236,9 +258,7 @@
             <h2>Popular Food Items</h2>            <div class="food-cards">
                 <!-- Popular food items will be loaded dynamically by JavaScript -->
             </div>
-        </section>
-
-        <section class="customer-reviews">
+        </section>        <section class="customer-reviews">
             <h2>Customer Reviews</h2>
             <div class="review-cards">
                 <div class="review-card">
@@ -253,6 +273,9 @@
                     <p>"Best String Hoppers I've ever had! Will definitely be back."</p>
                     <p class="reviewer">- Mike L.</p>
                 </div>
+            </div>
+            <div class="see-all-reviews">
+                <a href="reviews.html" class="see-all-link">See All Reviews</a>
             </div>
         </section>
 

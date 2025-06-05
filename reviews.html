@@ -405,10 +405,6 @@
                     <div class="stat-label">Average Rating</div>
                 </div>
                 <div class="stat-card slide-up" style="animation-delay: 0.2s">
-                    <div class="stat-number" id="fiveStarPercent">-</div>
-                    <div class="stat-label">5-Star Reviews</div>
-                </div>
-                <div class="stat-card slide-up" style="animation-delay: 0.3s">
                     <div class="stat-number" id="recommendPercent">100%</div>
                     <div class="stat-label">Would Recommend</div>
                 </div>
@@ -507,16 +503,6 @@
         function displayReviewsStatistics(stats) {
             document.getElementById('totalReviews').textContent = stats.total_reviews || 0;
             document.getElementById('averageRating').textContent = stats.average_rating ? `${stats.average_rating}/5` : 'N/A';
-            
-            // Calculate 5-star percentage
-            if (stats.rating_distribution && stats.total_reviews > 0) {
-                const fiveStarReviews = stats.rating_distribution.find(r => r.rating == 5);
-                const fiveStarCount = fiveStarReviews ? fiveStarReviews.count : 0;
-                const percentage = Math.round((fiveStarCount / stats.total_reviews) * 100);
-                document.getElementById('fiveStarPercent').textContent = `${percentage}%`;
-            } else {
-                document.getElementById('fiveStarPercent').textContent = '0%';
-            }
         }
 
         // Display reviews in grid format
