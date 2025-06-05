@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Duplicate Prevention Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Final Duplicate Prevention Test</h1>
+    <p><strong>Testing Date:</strong> <span id="testDate"></span></p>
+    
+    <div class="test-section">
+        <h2>Test 1: Single Reservation Creation</h2>
+        <button onclick="testSingleReservation()">Create Single Reservation</button>
+        <div id="singleResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Duplicate Prevention</h2>
+        <button onclick="testDuplicatePrevention()">Test Duplicate Prevention</button>
+        <div id="duplicateResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Rapid Click Simulation</h2>
+        <button onclick="testRapidClicks()">Simulate Rapid Clicks</button>
+        <div id="rapidResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Current Reservations</h2>
+        <button onclick="showCurrentReservations()">Show All Reservations</button>
+        <div id="reservationsResult"></div>
+    </div>
+
+    <script>
+        document.getElementById('testDate').textContent = new Date().toLocaleString();
+        
+        async function testSingleReservation() {
+            const resultDiv = document.getElementById('singleResult');
+            resultDiv.innerHTML = '<p>Testing single reservation creation...</p>';
+            
+            const testData = {
+                name: "Single Test User",
+                email: "single.test@example.com",
+                phone: "555-SINGLE",
+                date: "2025-06-12",
+                time: "18:00",
+                guests: 2,
+                special_requests: "Single reservation test"
+            };
+            
+            try {
+                const response = await fetch('/restuarent/api/reservations.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `<div class="success">
+                        <h3>✅ SUCCESS</h3>
+                        <p>Reservation created successfully with ID: ${result.id}</p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">
+                        <h3>❌ FAILED</h3>
+                        <p>Failed to create reservation</p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h3>❌ ERROR</h3>
+                    <p>Request failed: ${error.message}</p>
+                </div>`;
+            }
+        }
+        
+        async function testDuplicatePrevention() {
+            const resultDiv = document.getElementById('duplicateResult');
+            resultDiv.innerHTML = '<p>Testing duplicate prevention...</p>';
+            
+            const testData = {
+                name: "Duplicate Test User",
+                email: "duplicate.test@example.com",
+                phone: "555-DUPE",
+                date: "2025-06-13",
+                time: "19:30",
+                guests: 3,
+                special_requests: "Duplicate prevention test"
+            };
+            
+            try {
+                // First request
+                const response1 = await fetch('/restuarent/api/reservations.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                const result1 = await response1.json();
+                
+                // Immediate second request (should be blocked)
+                const response2 = await fetch('/restuarent/api/reservations.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                const result2 = await response2.json();
+                
+                let html = '<h3>Test Results:</h3>';
+                
+                if (response1.ok && result1.success) {
+                    html += `<div class="success">
+                        <p>✅ First request: SUCCESS (ID: ${result1.id})</p>
+                    </div>`;
+                } else {
+                    html += `<div class="error">
+                        <p>❌ First request: FAILED</p>
+                        <pre>${JSON.stringify(result1, null, 2)}</pre>
+                    </div>`;
+                }
+                
+                if (!response2.ok || result2.error) {
+                    html += `<div class="success">
+                        <p>✅ Second request: PROPERLY BLOCKED</p>
+                        <p>Message: ${result2.error || result2.message}</p>
+                    </div>`;
+                } else {
+                    html += `<div class="error">
+                        <p>❌ Second request: NOT BLOCKED (This is bad!)</p>
+                        <pre>${JSON.stringify(result2, null, 2)}</pre>
+                    </div>`;
+                }
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h3>❌ ERROR</h3>
+                    <p>Request failed: ${error.message}</p>
+                </div>`;
+            }
+        }
+        
+        async function testRapidClicks() {
+            const resultDiv = document.getElementById('rapidResult');
+            resultDiv.innerHTML = '<p>Testing rapid click simulation...</p>';
+            
+            const testData = {
+                name: "Rapid Test User",
+                email: "rapid.test@example.com",
+                phone: "555-RAPID",
+                date: "2025-06-14",
+                time: "20:00",
+                guests: 4,
+                special_requests: "Rapid click test"
+            };
+            
+            try {
+                // Simulate 5 rapid requests
+                const promises = [];
+                for (let i = 0; i < 5; i++) {
+                    promises.push(
+                        fetch('/restuarent/api/reservations.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(testData)
+                        })
+                    );
+                }
+                
+                const responses = await Promise.all(promises);
+                const results = await Promise.all(responses.map(r => r.json()));
+                
+                let successCount = 0;
+                let blockedCount = 0;
+                let html = '<h3>Rapid Click Results:</h3>';
+                
+                results.forEach((result, index) => {
+                    if (result.success) {
+                        successCount++;
+                        html += `<p>Request ${index + 1}: ✅ SUCCESS (ID: ${result.id})</p>`;
+                    } else {
+                        blockedCount++;
+                        html += `<p>Request ${index + 1}: 🚫 BLOCKED (${result.error || result.message})</p>`;
+                    }
+                });
+                
+                html += `<div class="${successCount === 1 ? 'success' : 'error'}">
+                    <h4>Summary:</h4>
+                    <p>Successful reservations: ${successCount}</p>
+                    <p>Blocked duplicates: ${blockedCount}</p>
+                    <p>${successCount === 1 ? '✅ PERFECT! Only one reservation created.' : '❌ Multiple reservations created - fix needed!'}</p>
+                </div>`;
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h3>❌ ERROR</h3>
+                    <p>Request failed: ${error.message}</p>
+                </div>`;
+            }
+        }
+        
+        async function showCurrentReservations() {
+            const resultDiv = document.getElementById('reservationsResult');
+            resultDiv.innerHTML = '<p>Fetching current reservations...</p>';
+            
+            try {
+                const response = await fetch('/restuarent/api/reservations.php');
+                const reservations = await response.json();
+                
+                if (Array.isArray(reservations)) {
+                    let html = `<h3>Current Reservations (${reservations.length} total)</h3>`;
+                    html += '<table border="1" style="width:100%; border-collapse: collapse;">';
+                    html += '<tr><th>ID</th><th>Name</th><th>Email</th><th>Date</th><th>Time</th><th>Status</th><th>Created</th></tr>';
+                    
+                    reservations.forEach(res => {
+                        html += `<tr>
+                            <td>${res.id}</td>
+                            <td>${res.name}</td>
+                            <td>${res.email}</td>
+                            <td>${res.date}</td>
+                            <td>${res.time}</td>
+                            <td>${res.status}</td>
+                            <td>${res.created_at}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</table>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">
+                        <p>Unexpected response format</p>
+                        <pre>${JSON.stringify(reservations, null, 2)}</pre>
+                    </div>`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h3>❌ ERROR</h3>
+                    <p>Failed to fetch reservations: ${error.message}</p>
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

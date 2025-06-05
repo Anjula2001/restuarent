@@ -221,53 +221,9 @@
             console.log('DOM loaded, initializing reservation page...');
             checkUserAuthentication();
             populateUserDataIfLoggedIn();
-              // Add direct form handler as backup
-            const form = document.getElementById('reservationForm');
-            if (form) {
-                console.log('Found reservation form, adding event listener...');
-                form.addEventListener('submit', async function(e) {
-                    console.log('Form submitted!', e);
-                    e.preventDefault();
-                    
-                    const formData = new FormData(form);
-                    const reservationData = {
-                        name: formData.get('name'),
-                        email: formData.get('email'),
-                        phone: formData.get('phone'),
-                        date: formData.get('date'),
-                        time: formData.get('time'),
-                        guests: parseInt(formData.get('guests')),
-                        special_requests: formData.get('special_requests') || ''
-                    };
-
-                    console.log('Submitting reservation:', reservationData);
-
-                    try {
-                        const response = await fetch('api/reservations.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(reservationData)
-                        });
-
-                        const result = await response.json();
-                        console.log('API Response:', result);
-                        
-                        if (response.ok) {
-                            alert('Reservation submitted successfully! We will confirm shortly.');
-                            form.reset();
-                        } else {
-                            alert(result.error || 'Failed to submit reservation');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error submitting reservation. Please try again.');
-                    }
-                });
-            } else {
-                console.log('No reservation form found!');
-            }
+            
+            // Note: Form submission is handled by js/script.js setupReservationForm()
+            // Do not add another event listener here to avoid duplicates
         });
 
         // User Authentication Management

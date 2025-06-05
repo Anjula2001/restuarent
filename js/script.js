@@ -567,6 +567,18 @@ function setupReservationForm() {
         console.log('Form submit event triggered!');
         e.preventDefault();
         
+        // Prevent multiple submissions
+        const submitButton = reservationForm.querySelector('button[type="submit"]');
+        if (submitButton.disabled) {
+            console.log('Form submission already in progress, ignoring...');
+            return;
+        }
+        
+        // Disable submit button and change text
+        submitButton.disabled = true;
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Submitting...';
+        
         const formData = new FormData(reservationForm);
         const reservationData = {
             name: formData.get('name'),
@@ -585,6 +597,9 @@ function setupReservationForm() {
         for (const field of requiredFields) {
             if (!reservationData[field]) {
                 alert(`Please fill in the ${field.replace('_', ' ')} field`);
+                // Re-enable button on validation error
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
                 return;
             }
         }
@@ -612,6 +627,10 @@ function setupReservationForm() {
         } catch (error) {
             console.error('Reservation submission error:', error);
             alert('Error submitting reservation. Please try again.');
+        } finally {
+            // Re-enable submit button
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
         }
     });
 

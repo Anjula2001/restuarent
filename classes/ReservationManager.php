@@ -12,6 +12,24 @@ class ReservationManager {
 
     // Create new reservation
     public function createReservation($name, $email, $phone, $date, $time, $guests, $special_requests = '') {
+        // Check for duplicate reservation (same email, date, time within last 5 minutes)
+        $duplicate_check = "SELECT id FROM " . $this->table_name . " 
+                           WHERE customer_email = :email 
+                           AND reservation_date = :date 
+                           AND reservation_time = :time 
+                           AND created_at > datetime('now', '-5 minutes')
+                           LIMIT 1";
+        
+        $dup_stmt = $this->conn->prepare($duplicate_check);
+        $dup_stmt->bindParam(':email', $email);
+        $dup_stmt->bindParam(':date', $date);
+        $dup_stmt->bindParam(':time', $time);
+        $dup_stmt->execute();
+        
+        if ($dup_stmt->fetch()) {
+            return ['success' => false, 'message' => 'A reservation with these details was just submitted. Please wait before trying again.'];
+        }
+        
         // Check if the date/time slot is available
         if (!$this->isTimeSlotAvailable($date, $time)) {
             return ['success' => false, 'message' => 'This time slot is not available'];
