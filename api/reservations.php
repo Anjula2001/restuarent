@@ -111,17 +111,40 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        // Cancel reservation
-        if (!isset($_GET['id'])) {
-            sendJsonResponse(['error' => 'Reservation ID is required'], 400);
-        }
+        // Check if this is a bulk clear operation
+        if (isset($_GET['clear_processed']) && $_GET['clear_processed'] === 'true') {
+            // Clear all cancelled and confirmed reservations (admin only)
+            $counts = $reservation_manager->getReservationCountByStatus();
+            $toDelete = ($counts['cancelled'] ?? 0) + ($counts['confirmed'] ?? 0);
+            
+            if ($toDelete === 0) {
+                sendJsonResponse(['message' => 'No cancelled or confirmed reservations to clear']);
+                break;
+            }
+            
+            $result = $reservation_manager->clearProcessedReservations();
 
-        $result = $reservation_manager->cancelReservation($_GET['id']);
-
-        if ($result) {
-            sendJsonResponse(['message' => 'Reservation cancelled successfully']);
+            if ($result) {
+                sendJsonResponse([
+                    'message' => "Successfully cleared {$toDelete} processed reservations",
+                    'cleared_count' => $toDelete
+                ]);
+            } else {
+                sendJsonResponse(['error' => 'Failed to clear reservations'], 500);
+            }
         } else {
-            sendJsonResponse(['error' => 'Failed to cancel reservation'], 500);
+            // Cancel single reservation
+            if (!isset($_GET['id'])) {
+                sendJsonResponse(['error' => 'Reservation ID is required'], 400);
+            }
+
+            $result = $reservation_manager->cancelReservation($_GET['id']);
+
+            if ($result) {
+                sendJsonResponse(['message' => 'Reservation cancelled successfully']);
+            } else {
+                sendJsonResponse(['error' => 'Failed to cancel reservation'], 500);
+            }
         }
         break;
 

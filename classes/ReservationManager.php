@@ -160,5 +160,27 @@ class ReservationManager {
     public function confirmReservation($id) {
         return $this->updateReservationStatus($id, 'confirmed');
     }
+
+    // Bulk delete cancelled and confirmed reservations
+    public function clearProcessedReservations() {
+        $query = "DELETE FROM " . $this->table_name . " WHERE status IN ('cancelled', 'confirmed')";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute();
+    }
+
+    // Get count of reservations by status
+    public function getReservationCountByStatus() {
+        $query = "SELECT status, COUNT(*) as count FROM " . $this->table_name . " GROUP BY status";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        
+        $counts = [];
+        $results = $stmt->fetchAll();
+        foreach ($results as $result) {
+            $counts[$result['status']] = $result['count'];
+        }
+        
+        return $counts;
+    }
 }
 ?>

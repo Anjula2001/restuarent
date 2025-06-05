@@ -366,7 +366,12 @@
         <!-- Reservations Section -->
         <div id="reservations" class="section">
             <div class="card">
-                <h3>Recent Reservations</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>Recent Reservations</h3>
+                    <button id="clearReservationsBtn" class="action-btn cancel" onclick="clearProcessedReservations()" style="font-size: 12px; padding: 6px 12px;">
+                        🗑️ Clear Processed
+                    </button>
+                </div>
                 <div class="loading" id="reservationsLoading">Loading reservations...</div>
                 <div id="reservationsTable"></div>
             </div>
@@ -1060,6 +1065,51 @@ Beef Curry | Spicy beef curry with coconut milk | 950.00 | https://example.com/b
                 }
             } catch (error) {
                 alert('Error updating reservation status');
+            }
+        }
+
+        async function clearProcessedReservations() {
+            // Confirmation dialog
+            const confirmed = confirm(
+                'Are you sure you want to clear all cancelled and confirmed reservations?\n\n' +
+                'This action cannot be undone and will permanently delete processed reservations from the database.'
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+
+            const clearBtn = document.getElementById('clearReservationsBtn');
+            const originalText = clearBtn.textContent;
+            
+            try {
+                // Disable button and show loading state
+                clearBtn.disabled = true;
+                clearBtn.textContent = '🔄 Clearing...';
+
+                const response = await fetch(`${API_BASE}/reservations.php?clear_processed=true`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ ${result.message}`);
+                    loadReservations(); // Reload reservations to show updated list
+                    loadOverviewData(); // Update overview stats
+                } else {
+                    alert(`❌ Error: ${result.error || 'Failed to clear reservations'}`);
+                }
+            } catch (error) {
+                console.error('Error clearing reservations:', error);
+                alert('❌ Network error occurred while clearing reservations');
+            } finally {
+                // Re-enable button
+                clearBtn.disabled = false;
+                clearBtn.textContent = originalText;
             }
         }
 
