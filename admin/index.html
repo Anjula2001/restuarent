@@ -129,6 +129,7 @@
         .action-btn.cancel { background-color: #dc3545; color: white; }
         .action-btn.approve { background-color: #007bff; color: white; }
         .action-btn.reject { background-color: #6c757d; color: white; }
+        .action-btn.delete { background-color: #e74c3c; color: white; }
 
         /* Fix table row height and action column */
         td:last-child {
@@ -765,6 +766,7 @@
                                     <td>
                                         ${!review.is_approved ? `<button class="action-btn approve" onclick="updateReviewStatus(${review.id}, 'approve')">Approve</button>` : ''}
                                         <button class="action-btn reject" onclick="updateReviewStatus(${review.id}, 'reject')">Reject</button>
+                                        <button class="action-btn delete" onclick="deleteReview(${review.id})">Remove</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -1066,6 +1068,36 @@
                 }
             } catch (error) {
                 alert('Error updating review status');
+            }
+        }
+
+        async function deleteReview(reviewId) {
+            // Show confirmation dialog
+            const confirmed = confirm(
+                'Are you sure you want to permanently delete this review?\n\n' +
+                'This action cannot be undone and will remove the review from the database.'
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php?id=${reviewId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('✅ Review deleted successfully');
+                    loadReviews(); // Reload reviews list
+                    loadOverviewData(); // Update overview statistics
+                } else {
+                    const error = await response.json();
+                    alert('❌ Failed to delete review: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                alert('❌ Network error occurred while deleting review');
             }
         }
 
