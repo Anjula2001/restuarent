@@ -184,29 +184,225 @@ function updatePopularFoods(items) {
     console.log('Popular foods section updated successfully');
 }
 
-// Load customer reviews dynamically
+// Load customer reviews dynamically with carousel functionality
+let allCustomerReviews = [];
+let currentReviewSlide = 0;
+let reviewsPerSlide = 3;
+
 async function loadReviews() {
+    console.log('Loading customer reviews...');
     try {
-        const response = await fetch(`${API_BASE}/reviews.php?limit=3`);
+        const response = await fetch(`${API_BASE}/reviews.php`); // Get all reviews
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const reviews = await response.json();
+        console.log('Reviews loaded:', reviews);
         
-        updateReviewsSection(reviews);
+        allCustomerReviews = reviews;
+        initializeReviewsCarousel();
     } catch (error) {
         console.error('Error loading reviews:', error);
+        showReviewsError();
     }
 }
 
-// Update reviews section
-function updateReviewsSection(reviews) {
-    const reviewCards = document.querySelector('.review-cards');
-    if (!reviewCards || reviews.length === 0) return;
+function initializeReviewsCarousel() {
+    if (!allCustomerReviews || allCustomerReviews.length === 0) {
+        showNoReviews();
+        return;
+    }
 
-    reviewCards.innerHTML = reviews.map(review => `
-        <div class="review-card">
-            <p>"${review.review_text}"</p>
-            <p class="reviewer">- ${review.customer_name} (${'★'.repeat(review.rating)})</p>
+    updateReviewsCarousel();
+    setupCarouselIndicators();
+    setupCarouselEventListeners();
+    
+    // Auto-rotate carousel every 5 seconds
+    setInterval(() => {
+        if (allCustomerReviews.length > reviewsPerSlide) {
+            nextReviews();
+        }
+    }, 5000);
+}
+
+function setupCarouselEventListeners() {
+    const prevBtn = document.getElementById('prevReview');
+    const nextBtn = document.getElementById('nextReview');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', previousReviews);
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', nextReviews);
+    }
+}
+
+function updateReviewsCarousel() {
+    const carousel = document.getElementById('reviewsCarousel');
+    if (!carousel) return;
+
+    const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+    
+    // Create slides
+    let slidesHTML = '';
+    for (let i = 0; i < totalSlides; i++) {
+        const slideStart = i * reviewsPerSlide;
+        const slideEnd = Math.min(slideStart + reviewsPerSlide, allCustomerReviews.length);
+        const slideReviews = allCustomerReviews.slice(slideStart, slideEnd);
+        
+        slidesHTML += `
+            <div class="review-slide">
+                ${slideReviews.map(review => `
+                    <div class="review-card">
+                        <div class="review-text">${review.review_text}</div>
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">${review.customer_name}</div>
+                            <div class="reviewer-rating">${'★'.repeat(review.rating)}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    carousel.innerHTML = slidesHTML;
+    
+    // Update navigation buttons
+    updateNavigationButtons(totalSlides);
+}
+
+function setupCarouselIndicators() {
+    const indicatorsContainer = document.getElementById('carouselIndicators');
+    if (!indicatorsContainer || allCustomerReviews.length <= reviewsPerSlide) {
+        indicatorsContainer.style.display = 'none';
+        return;
+    }
+    
+    const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+    let indicatorsHTML = '';
+      for (let i = 0; i < totalSlides; i++) {
+        indicatorsHTML += `
+            <div class="indicator ${i === currentReviewSlide ? 'active' : ''}" 
+                 data-slide="${i}"></div>
+        `;
+    }
+    
+    indicatorsContainer.innerHTML = indicatorsHTML;
+    indicatorsContainer.style.display = 'flex';
+    
+    // Add click event listeners to indicators
+    const indicators = indicatorsContainer.querySelectorAll('.indicator');
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => goToReviewSlide(index));
+    });
+}
+
+function updateNavigationButtons(totalSlides) {
+    const prevBtn = document.getElementById('prevReview');
+    const nextBtn = document.getElementById('nextReview');
+    
+    if (totalSlides <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        return;
+    }
+    
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    prevBtn.disabled = currentReviewSlide === 0;
+    nextBtn.disabled = currentReviewSlide === totalSlides - 1;
+}
+
+function previousReviews() {
+    if (currentReviewSlide > 0) {
+        currentReviewSlide--;
+        animateCarousel();
+        updateIndicators();
+        updateNavigationButtons(Math.ceil(allCustomerReviews.length / reviewsPerSlide));
+    }
+}
+
+function nextReviews() {
+    const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+    if (currentReviewSlide < totalSlides - 1) {
+        currentReviewSlide++;
+        animateCarousel();
+        updateIndicators();
+        updateNavigationButtons(totalSlides);
+    } else {
+        // Loop back to first slide
+        currentReviewSlide = 0;
+        animateCarousel();
+        updateIndicators();
+        updateNavigationButtons(totalSlides);
+    }
+}
+
+function goToReviewSlide(slideIndex) {
+    currentReviewSlide = slideIndex;
+    animateCarousel();
+    updateIndicators();
+    updateNavigationButtons(Math.ceil(allCustomerReviews.length / reviewsPerSlide));
+}
+
+function animateCarousel() {
+    const carousel = document.getElementById('reviewsCarousel');
+    if (!carousel) return;
+    
+    const translateX = -currentReviewSlide * 100;
+    carousel.style.transform = `translateX(${translateX}%)`;
+}
+
+function updateIndicators() {
+    const indicators = document.querySelectorAll('.indicator');
+    indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === currentReviewSlide);
+    });
+}
+
+function showNoReviews() {
+    const carousel = document.getElementById('reviewsCarousel');
+    if (!carousel) return;
+    
+    carousel.innerHTML = `
+        <div class="review-slide">
+            <div class="review-loading">
+                No reviews available at the moment. 
+                <a href="contact.html" style="color: #8B5A2B;">Be the first to leave a review!</a>
+            </div>
         </div>
-    `).join('');
+    `;
+    
+    // Hide navigation
+    document.getElementById('prevReview').style.display = 'none';
+    document.getElementById('nextReview').style.display = 'none';
+    document.getElementById('carouselIndicators').style.display = 'none';
+}
+
+function showReviewsError() {
+    const carousel = document.getElementById('reviewsCarousel');
+    if (!carousel) return;
+    
+    carousel.innerHTML = `
+        <div class="review-slide">
+            <div class="review-loading">
+                Unable to load reviews at the moment. Please try again later.
+            </div>
+        </div>
+    `;
+    
+    // Hide navigation
+    document.getElementById('prevReview').style.display = 'none';
+    document.getElementById('nextReview').style.display = 'none';
+    document.getElementById('carouselIndicators').style.display = 'none';
+}
+
+// Legacy function for backward compatibility
+function updateReviewsSection(reviews) {
+    // This function is now handled by the carousel system
+    allCustomerReviews = reviews || [];
+    initializeReviewsCarousel();
 }
 
 // Search functionality
@@ -970,6 +1166,11 @@ async function loadFullMenu() {
         }
     }
 }
+
+// Make carousel functions globally accessible
+window.previousReviews = previousReviews;
+window.nextReviews = nextReviews;
+window.goToReviewSlide = goToReviewSlide;
 
 // Export functions for global access
 window.updateOrderQuantity = updateOrderQuantity;

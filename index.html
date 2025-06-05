@@ -43,34 +43,233 @@
 
         .food-card-content h3 {
             margin-bottom: 10px;
-        }
-
-        .customer-reviews {
+        }        .customer-reviews {
             padding: 50px 20px;
             text-align: center;
             background-color: #f0f0f0;
         }
 
-        .review-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        /* Reviews Carousel Container */
+        .reviews-carousel-container {
+            position: relative;
             max-width: 1200px;
             margin: 0 auto;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+
+        .reviews-carousel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            gap: 20px;
+        }
+
+        .review-slide {
+            display: flex;
+            gap: 20px;
+            min-width: 100%;
+            flex-shrink: 0;
         }
 
         .review-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
         }
 
-        .review-card p {
-            margin-bottom: 15px;
-        }        .review-card .reviewer {
+        .review-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4em;
+            color: #8B5A2B;
+            opacity: 0.2;
+            font-family: serif;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .review-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .reviewer-name {
             font-weight: bold;
-            text-align: right;
+            color: #8B5A2B;
+            font-size: 1.1em;
+        }
+
+        .reviewer-rating {
+            color: #f39c12;
+            font-size: 1.2em;
+        }
+
+        /* Carousel Navigation */
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(139, 90, 43, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .carousel-nav:hover {
+            background: rgba(139, 90, 43, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-nav.prev {
+            left: -25px;
+        }
+
+        .carousel-nav.next {
+            right: -25px;
+        }
+
+        .carousel-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        /* Carousel Indicators */
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(139, 90, 43, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #8B5A2B;
+            transform: scale(1.2);
+        }
+
+        .review-loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }        /* Responsive Design */
+        @media (max-width: 768px) {
+            .review-slide {
+                flex-direction: column;
+            }
+            
+            .review-card {
+                margin-bottom: 20px;
+            }
+            
+            .carousel-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+            
+            .carousel-nav.prev {
+                left: -20px;
+            }
+            
+            .carousel-nav.next {
+                right: -20px;
+            }
+            
+            .customer-reviews {
+                padding: 30px 10px;
+            }
+            
+            .reviews-carousel-container {
+                margin: 0 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .customer-reviews {
+                padding: 30px 10px;
+            }
+            
+            .review-card {
+                padding: 20px;
+            }
+            
+            .review-text {
+                font-size: 1em;
+            }
+            
+            .carousel-nav.prev {
+                left: -15px;
+            }
+            
+            .carousel-nav.next {
+                right: -15px;
+            }
+            
+            .reviews-carousel-container {
+                margin: 0 5px;
+            }
+            
+            .review-slide {
+                gap: 15px;
+            }
+        }
+
+        /* Single column layout for mobile */
+        @media (max-width: 768px) {
+            .reviews-carousel {
+                gap: 0;
+            }
+            
+            .review-slide {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 10px;
+            }
         }
 
         .see-all-reviews {
@@ -260,20 +459,21 @@
             </div>
         </section>        <section class="customer-reviews">
             <h2>Customer Reviews</h2>
-            <div class="review-cards">
-                <div class="review-card">
-                    <p>"The food was amazing! Highly recommend the Kottu Roti."</p>
-                    <p class="reviewer">- John D.</p>
+            <div class="reviews-carousel-container">
+                <div class="reviews-carousel" id="reviewsCarousel">
+                    <!-- Reviews will be loaded dynamically from the database -->
+                    <div class="review-slide">
+                        <div class="review-loading">Loading customer reviews...</div>
+                    </div>
                 </div>
-                <div class="review-card">
-                    <p>"Great atmosphere and excellent service. The Fish Ambulthiyal was delicious."</p>
-                    <p class="reviewer">- Jane S.</p>
-                </div>
-                <div class="review-card">
-                    <p>"Best String Hoppers I've ever had! Will definitely be back."</p>
-                    <p class="reviewer">- Mike L.</p>
-                </div>
+                  <!-- Navigation Arrows -->
+                <button class="carousel-nav prev" id="prevReview">❮</button>
+                <button class="carousel-nav next" id="nextReview">❯</button>
             </div>
+            
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators" id="carouselIndicators"></div>
+            
             <div class="see-all-reviews">
                 <a href="reviews.html" class="see-all-link">See All Reviews</a>
             </div>
@@ -293,9 +493,7 @@
                     <p>&copy; 2024 Grand Restaurant. All Rights Reserved.</p>
                 </div>
             </div>
-        </footer>    </div>
-
-    <script>
+        </footer>    </div>    <script>
         // Ensure images load properly
         document.addEventListener('DOMContentLoaded', function() {
             const images = document.querySelectorAll('.food-card img');
@@ -310,10 +508,10 @@
         });
     </script>
     <script src="js/script.js"></script>
-    <script>
-        // User Authentication Management
+    <script>        // User Authentication Management
         document.addEventListener('DOMContentLoaded', function() {
             checkUserAuthentication();
+            loadReviews(); // Load dynamic customer reviews
         });
 
         async function checkUserAuthentication() {
