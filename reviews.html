@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Reviews - Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .reviews-section {
+            padding: 50px 20px;
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 200px);
+        }
+
+        .reviews-header {
+            text-align: center;
+            margin-bottom: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .reviews-header h1 {
+            font-size: 3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .reviews-header p {
+            font-size: 1.2em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .reviews-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto 50px auto;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #8B5A2B;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .reviews-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .reviews-filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: white;
+            border: 2px solid #8B5A2B;
+            color: #8B5A2B;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #8B5A2B;
+            color: white;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .reviewer-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B5A2B, #D2B48C);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .reviewer-info h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .review-date {
+            color: #888;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+
+        .star {
+            color: #ffd700;
+            font-size: 1.3em;
+        }
+
+        .star.empty {
+            color: #ddd;
+        }
+
+        .review-text {
+            color: #555;
+            line-height: 1.7;
+            font-size: 1.05em;
+            margin-bottom: 20px;
+        }
+
+        .review-text::before {
+            content: """;
+            font-size: 3em;
+            color: #8B5A2B;
+            opacity: 0.3;
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-family: serif;
+        }
+
+        .review-text::after {
+            content: """;
+            font-size: 3em;
+            color: #8B5A2B;
+            opacity: 0.3;
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-family: serif;
+        }
+
+        .review-helpful {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .helpful-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .helpful-btn:hover {
+            background: #8B5A2B;
+            color: white;
+            border-color: #8B5A2B;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .no-reviews {
+            text-align: center;
+            padding: 100px 20px;
+            color: #999;
+        }
+
+        .no-reviews h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .no-reviews p {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .write-review-btn {
+            background: #8B5A2B;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .write-review-btn:hover {
+            background: #654321;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 50px;
+        }
+
+        .page-btn {
+            background: white;
+            border: 2px solid #8B5A2B;
+            color: #8B5A2B;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: #8B5A2B;
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .reviews-header h1 {
+                font-size: 2.5em;
+            }
+
+            .reviews-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .review-card {
+                padding: 20px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-number {
+                font-size: 2.5em;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .slide-up {
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.6s forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div class="logo">
+                <a href="index.html">
+                    <h1>GRAND</h1>
+                    <p>RESTAURANT</p>
+                </a>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Food">
+                </div>
+                <div class="cart-icon" id="cart-toggle">
+                    <span>🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>
+                <!-- Authentication Buttons -->
+                <div class="auth-buttons" id="authButtons">
+                    <div id="guestLinks" style="display: inline;">
+                        <a href="login.html" class="auth-btn login">LOGIN</a>
+                        <a href="register.html" class="auth-btn register">REGISTER</a>
+                    </div>
+                    <div id="userLinks" style="display: none;">
+                        <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
+                        <a href="profile.html" class="auth-btn profile">PROFILE</a>
+                        <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="main-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="menu.html">MENU</a></li>
+                <li><a href="reservation.html">RESERVATION</a></li>
+                <li><a href="order.html">ORDER ONLINE</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li><a href="reviews.html" class="active">REVIEWS</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>What Our Customers Say</h2>
+            <h3>Real Reviews from Real Customers</h3>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="reviews-section">
+            <div class="reviews-header fade-in">
+                <h1>Customer Reviews</h1>
+                <p>
+                    Discover what our valued customers are saying about their dining experiences at Grand Restaurant. 
+                    Every review helps us continue to deliver exceptional Sri Lankan cuisine and outstanding service.
+                </p>
+            </div>
+
+            <!-- Reviews Statistics -->
+            <div class="reviews-stats" id="reviewsStats">
+                <div class="stat-card slide-up">
+                    <div class="stat-number" id="totalReviews">-</div>
+                    <div class="stat-label">Total Reviews</div>
+                </div>
+                <div class="stat-card slide-up" style="animation-delay: 0.1s">
+                    <div class="stat-number" id="averageRating">-</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-card slide-up" style="animation-delay: 0.2s">
+                    <div class="stat-number" id="fiveStarPercent">-</div>
+                    <div class="stat-label">5-Star Reviews</div>
+                </div>
+                <div class="stat-card slide-up" style="animation-delay: 0.3s">
+                    <div class="stat-number" id="recommendPercent">100%</div>
+                    <div class="stat-label">Would Recommend</div>
+                </div>
+            </div>
+
+            <div class="reviews-container">
+                <!-- Rating Filters -->
+                <div class="reviews-filters" id="reviewsFilters">
+                    <button class="filter-btn active" data-rating="all">All Reviews</button>
+                    <button class="filter-btn" data-rating="5">5 Stars</button>
+                    <button class="filter-btn" data-rating="4">4 Stars</button>
+                    <button class="filter-btn" data-rating="3">3 Stars</button>
+                    <button class="filter-btn" data-rating="2">2 Stars</button>
+                    <button class="filter-btn" data-rating="1">1 Star</button>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading" id="reviewsLoading">
+                    <div>Loading customer reviews...</div>
+                </div>
+
+                <!-- Reviews Grid -->
+                <div class="reviews-grid" id="reviewsGrid" style="display: none;">
+                    <!-- Reviews will be loaded here dynamically -->
+                </div>
+
+                <!-- No Reviews State -->
+                <div class="no-reviews" id="noReviews" style="display: none;">
+                    <h3>No Reviews Yet</h3>
+                    <p>Be the first to share your experience at Grand Restaurant!</p>
+                    <a href="contact.html" class="write-review-btn">Write a Review</a>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <button class="page-btn" id="prevPage" onclick="previousPage()">← Previous</button>
+                    <span id="pageNumbers"></span>
+                    <button class="page-btn" id="nextPage" onclick="nextPage()">Next →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Section (initially hidden) -->
+        <div id="cart-container">
+            <!-- Cart content will be loaded by JavaScript -->
+        </div>
+
+        <footer>
+            <div class="footer-container">
+                <div class="footer-section">
+                    <p>&copy; 2024 Grand Restaurant. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Reviews page specific variables
+        let allReviews = [];
+        let currentPage = 1;
+        let reviewsPerPage = 6;
+        let currentFilter = 'all';
+        const API_BASE = 'api';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserAuthentication();
+            loadReviewsPage();
+            setupFilters();
+        });
+
+        // Load all reviews and statistics
+        async function loadReviewsPage() {
+            try {
+                // Load reviews and statistics in parallel
+                const [reviewsResponse, statsResponse] = await Promise.all([
+                    fetch(`${API_BASE}/reviews.php`),
+                    fetch(`${API_BASE}/reviews.php?statistics=1`)
+                ]);
+
+                const reviews = await reviewsResponse.json();
+                const stats = await statsResponse.json();
+
+                allReviews = reviews;
+                displayReviewsStatistics(stats);
+                displayReviews(reviews);
+
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                showErrorState();
+            }
+        }
+
+        // Display review statistics
+        function displayReviewsStatistics(stats) {
+            document.getElementById('totalReviews').textContent = stats.total_reviews || 0;
+            document.getElementById('averageRating').textContent = stats.average_rating ? `${stats.average_rating}/5` : 'N/A';
+            
+            // Calculate 5-star percentage
+            if (stats.rating_distribution && stats.total_reviews > 0) {
+                const fiveStarReviews = stats.rating_distribution.find(r => r.rating == 5);
+                const fiveStarCount = fiveStarReviews ? fiveStarReviews.count : 0;
+                const percentage = Math.round((fiveStarCount / stats.total_reviews) * 100);
+                document.getElementById('fiveStarPercent').textContent = `${percentage}%`;
+            } else {
+                document.getElementById('fiveStarPercent').textContent = '0%';
+            }
+        }
+
+        // Display reviews in grid format
+        function displayReviews(reviews) {
+            const reviewsGrid = document.getElementById('reviewsGrid');
+            const reviewsLoading = document.getElementById('reviewsLoading');
+            const noReviews = document.getElementById('noReviews');
+
+            reviewsLoading.style.display = 'none';
+
+            if (!reviews || reviews.length === 0) {
+                noReviews.style.display = 'block';
+                reviewsGrid.style.display = 'none';
+                return;
+            }
+
+            noReviews.style.display = 'none';
+            reviewsGrid.style.display = 'grid';
+
+            // Filter reviews based on current filter
+            const filteredReviews = currentFilter === 'all' 
+                ? reviews 
+                : reviews.filter(review => review.rating == currentFilter);
+
+            // Paginate reviews
+            const startIndex = (currentPage - 1) * reviewsPerPage;
+            const endIndex = startIndex + reviewsPerPage;
+            const paginatedReviews = filteredReviews.slice(startIndex, endIndex);
+
+            // Generate review cards
+            reviewsGrid.innerHTML = paginatedReviews.map((review, index) => `
+                <div class="review-card slide-up" style="animation-delay: ${index * 0.1}s">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">
+                            ${review.customer_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="reviewer-info">
+                            <h3>${review.customer_name}</h3>
+                            <div class="review-date">${formatDate(review.created_at)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="review-rating">
+                        ${generateStarRating(review.rating)}
+                    </div>
+                    
+                    <div class="review-text">
+                        ${review.review_text}
+                    </div>
+                    
+                    <div class="review-helpful">
+                        <button class="helpful-btn" onclick="markHelpful(${review.id})">
+                            👍 Helpful
+                        </button>
+                        <span style="color: #888; font-size: 0.9em;">
+                            ${Math.floor(Math.random() * 10) + 1} people found this helpful
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Setup pagination
+            setupPagination(filteredReviews.length);
+        }
+
+        // Generate star rating HTML
+        function generateStarRating(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<span class="star">★</span>';
+                } else {
+                    stars += '<span class="star empty">★</span>';
+                }
+            }
+            return stars;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Setup filter buttons
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update current filter
+                    currentFilter = this.dataset.rating;
+                    currentPage = 1; // Reset to first page
+                    
+                    // Re-display reviews with new filter
+                    displayReviews(allReviews);
+                });
+            });
+        }
+
+        // Setup pagination
+        function setupPagination(totalReviews) {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+
+            // Update previous/next buttons
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+
+            // Generate page numbers
+            const pageNumbers = document.getElementById('pageNumbers');
+            let pageNumbersHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbersHTML += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="goToPage(${i})">${i}</button>
+                `;
+            }
+            
+            pageNumbers.innerHTML = pageNumbersHTML;
+        }
+
+        // Pagination functions
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayReviews(allReviews);
+            }
+        }
+
+        function nextPage() {
+            const filteredReviews = currentFilter === 'all' 
+                ? allReviews 
+                : allReviews.filter(review => review.rating == currentFilter);
+            const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+            
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayReviews(allReviews);
+            }
+        }
+
+        function goToPage(pageNumber) {
+            currentPage = pageNumber;
+            displayReviews(allReviews);
+        }
+
+        // Mark review as helpful (placeholder function)
+        function markHelpful(reviewId) {
+            // This could be implemented to track helpful votes
+            alert('Thank you for your feedback!');
+        }
+
+        // Show error state
+        function showErrorState() {
+            const reviewsLoading = document.getElementById('reviewsLoading');
+            reviewsLoading.innerHTML = `
+                <div style="color: #dc3545;">
+                    <h3>Unable to load reviews</h3>
+                    <p>Please try again later or contact support if the problem persists.</p>
+                    <button onclick="loadReviewsPage()" class="write-review-btn">Retry</button>
+                </div>
+            `;
+        }
+
+        // User Authentication Management (reused from other pages)
+        async function checkUserAuthentication() {
+            try {
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+
+                const guestLinks = document.getElementById('guestLinks');
+                const userLinks = document.getElementById('userLinks');
+
+                if (result.logged_in) {
+                    guestLinks.style.display = 'none';
+                    userLinks.style.display = 'inline';
+                } else {
+                    guestLinks.style.display = 'inline';
+                    userLinks.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Authentication check error:', error);
+                document.getElementById('guestLinks').style.display = 'inline';
+                document.getElementById('userLinks').style.display = 'none';
+            }
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetch('api/auth.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'logout'
+                        })
+                    });
+
+                    localStorage.removeItem('user');
+                    checkUserAuthentication();
+                    alert('Logged out successfully!');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
