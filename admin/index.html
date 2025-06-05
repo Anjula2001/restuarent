@@ -1146,15 +1146,30 @@
             const container = document.getElementById('categoryList');
             
             try {
+                // Show loading state
+                container.innerHTML = '<div class="loading">Loading categories...</div>';
+                
                 // Get all unique categories from current menu items
                 const response = await fetch(`${API_BASE}/menu.php?admin=true`);
-                const menuItems = await response.json();
                 
-                if (!Array.isArray(menuItems)) {
-                    throw new Error('Invalid response format');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const categories = [...new Set(menuItems.map(item => item.category))].sort();
+                const responseText = await response.text();
+                
+                let menuItems;
+                try {
+                    menuItems = JSON.parse(responseText);
+                } catch (jsonError) {
+                    throw new Error(`Invalid JSON response: ${jsonError.message}`);
+                }
+                
+                if (!Array.isArray(menuItems)) {
+                    throw new Error('Invalid response format - expected array');
+                }
+                
+                const categories = [...new Set(menuItems.map(item => item.category))].filter(cat => cat && cat.trim()).sort();
                 
                 if (categories.length === 0) {
                     container.innerHTML = '<p style="text-align: center; color: #666;">No categories found. Add some menu items first.</p>';
@@ -1179,6 +1194,7 @@
                 
                 container.innerHTML = categoryHtml;
             } catch (error) {
+                console.error('Error loading categories:', error);
                 container.innerHTML = '<div class="error">Error loading categories: ' + error.message + '</div>';
             }
         }
