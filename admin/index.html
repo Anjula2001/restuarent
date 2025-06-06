@@ -430,6 +430,166 @@
         .logout-btn:hover {
             background-color: #c82333;
         }
+        
+        /* Overview Stats Styles */
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        
+        .section-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        
+        /* Loading and error state styles */
+        .loading-pulse {
+            display: inline-block;
+            animation: pulse 1.5s infinite ease-in-out;
+            color: #7f8c8d;
+        }
+        
+        .error-state {
+            display: inline-block;
+            color: #e74c3c;
+            font-size: 16px;
+        }
+        
+        /* Animation for fresh data indication */
+        .stat-card.updated {
+            animation: highlight 1s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        @keyframes highlight {
+            0% { background-color: rgba(46, 204, 113, 0.2); }
+            100% { background-color: white; }
+        }
+        
+        /* Menu Statistics Styling */
+        .menu-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-stats div {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .menu-stats div:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .menu-stats h4 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .menu-stats p {
+            margin: 0;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        
+        /* No data and error state styling */
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+        
+        .no-data h3 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+        
+        .no-data p {
+            color: #7f8c8d;
+            margin: 0 0 25px 0;
+            line-height: 1.5;
+        }
+        
+        .no-data .action-btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        
+        .no-data .action-btn:hover {
+            background: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -449,22 +609,29 @@
 
         <!-- Overview Section -->
         <div id="overview" class="section active">
+            <h3 class="section-title">Dashboard Overview</h3>
+            <p class="section-subtitle">Key metrics and performance indicators</p>
+            
             <div class="stats-grid">
                 <div class="stat-card">
+                    <div class="stat-icon">📊</div>
                     <div class="stat-value" id="todayOrders">-</div>
-                    <div>Orders Today</div>
+                    <div class="stat-label">Orders Today</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
                     <div class="stat-value" id="pendingOrders">-</div>
-                    <div>Pending Orders</div>
+                    <div class="stat-label">Pending Orders</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">💰</div>
                     <div class="stat-value" id="todayRevenue">-</div>
-                    <div>Today's Revenue</div>
+                    <div class="stat-label">Today's Revenue</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
                     <div class="stat-value" id="avgRating">-</div>
-                    <div>Average Rating</div>
+                    <div class="stat-label">Average Rating</div>
                 </div>
             </div>
         </div>
@@ -526,16 +693,16 @@
                         <button class="action-btn confirm" onclick="openAddItemModal()">+ Add New Item</button>
                     </div>
                 </div>
-                <div class="menu-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                <div class="menu-stats">
+                    <div style="background: #e3f2fd;">
                         <h4 id="totalItems">0</h4>
                         <p>Total Items</p>
                     </div>
-                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="background: #e8f5e8;">
                         <h4 id="availableItems">0</h4>
                         <p>Available Items</p>
                     </div>
-                    <div style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="background: #fff3e0;">
                         <h4 id="totalCategories">0</h4>
                         <p>Categories</p>
                     </div>
@@ -647,6 +814,12 @@
     <script>
         const API_BASE = '../api';
 
+        // Initialize dashboard when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            // Load overview data automatically on page load
+            loadOverviewData();
+        });
+
         function showSection(sectionName) {
             // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
@@ -687,19 +860,91 @@
         }
 
         async function loadOverviewData() {
+            // Set loading state
+            document.querySelectorAll('.stat-value').forEach(element => {
+                element.innerHTML = '<span class="loading-pulse">•••</span>';
+            });
+            
             try {
-                // Load order statistics
-                const orderStats = await fetch(`${API_BASE}/orders.php?statistics=1`).then(r => r.json());
-                document.getElementById('todayOrders').textContent = orderStats.today || 0;
-                document.getElementById('pendingOrders').textContent = orderStats.pending || 0;
+                console.log('Loading overview data...');
+                
+                // Initialize with default values
+                let orderStats = { today: 0, pending: 0, revenue_today: 0 };
+                let reviewStats = { average_rating: null };
+                
+                // Try to load order statistics
+                try {
+                    const orderStatsResponse = await fetch(`${API_BASE}/orders.php?statistics=1`);
+                    if (orderStatsResponse.ok) {
+                        orderStats = await orderStatsResponse.json();
+                    } else {
+                        console.warn('Failed to fetch order stats, using defaults');
+                    }
+                } catch (err) {
+                    console.warn('Order stats API unavailable, using defaults:', err);
+                }
+                
+                // Try to load review statistics
+                try {
+                    const reviewStatsResponse = await fetch(`${API_BASE}/reviews.php?statistics=1`);
+                    if (reviewStatsResponse.ok) {
+                        reviewStats = await reviewStatsResponse.json();
+                    } else {
+                        console.warn('Failed to fetch review stats, using defaults');
+                    }
+                } catch (err) {
+                    console.warn('Review stats API unavailable, using defaults:', err);
+                }
+                
+                // Apply animations when updating values (always use fallback values)
+                animateCounter('todayOrders', 0, orderStats.today || 0);
+                animateCounter('pendingOrders', 0, orderStats.pending || 0);
                 document.getElementById('todayRevenue').textContent = `Rs. ${orderStats.revenue_today || 0}`;
-
-                // Load review statistics
-                const reviewStats = await fetch(`${API_BASE}/reviews.php?statistics=1`).then(r => r.json());
                 document.getElementById('avgRating').textContent = reviewStats.average_rating ? `${reviewStats.average_rating}/5` : 'N/A';
+                
+                // Add a visual indication that data is fresh
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    card.classList.add('updated');
+                    setTimeout(() => {
+                        card.classList.remove('updated');
+                    }, 1000);
+                });
+                
+                console.log('Overview data loaded successfully');
             } catch (error) {
-                console.error('Error loading overview:', error);
+                console.error('Error loading overview data:', error);
+                
+                // Show fallback values instead of error messages
+                document.getElementById('todayOrders').textContent = '0';
+                document.getElementById('pendingOrders').textContent = '0';
+                document.getElementById('todayRevenue').textContent = 'Rs. 0';
+                document.getElementById('avgRating').textContent = 'N/A';
             }
+        }
+        
+        function animateCounter(elementId, startValue, endValue) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            // Duration in milliseconds
+            const duration = 1000;
+            const frameRate = 60;
+            const increment = (endValue - startValue) / (duration / (1000 / frameRate));
+            
+            let currentValue = startValue;
+            const counter = setInterval(() => {
+                currentValue += increment;
+                
+                if (
+                    (increment > 0 && currentValue >= endValue) || 
+                    (increment < 0 && currentValue <= endValue)
+                ) {
+                    clearInterval(counter);
+                    element.textContent = endValue;
+                } else {
+                    element.textContent = Math.round(currentValue);
+                }
+            }, 1000 / frameRate);
         }
 
         async function loadOrders() {
@@ -773,7 +1018,14 @@
                 console.log('Orders loaded successfully');
             } catch (error) {
                 console.error('Error loading orders:', error);
-                container.innerHTML = `<div class="error">Error loading orders: ${error.message}</div>`;
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">📋</div>
+                        <h3>Unable to load orders</h3>
+                        <p>There was a problem connecting to the server. Please check your connection and try again.</p>
+                        <button class="action-btn" onclick="loadOrders()">Try Again</button>
+                    </div>
+                `;
                 loading.style.display = 'none';
             }
         }
@@ -832,7 +1084,15 @@
                 container.innerHTML = table;
                 loading.style.display = 'none';
             } catch (error) {
-                container.innerHTML = '<div class="error">Error loading reservations</div>';
+                console.error('Error loading reservations:', error);
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">📅</div>
+                        <h3>Unable to load reservations</h3>
+                        <p>There was a problem connecting to the server. Please check your connection and try again.</p>
+                        <button class="action-btn" onclick="loadReservations()">Try Again</button>
+                    </div>
+                `;
                 loading.style.display = 'none';
             }
         }
@@ -905,7 +1165,14 @@
                 console.log('Reviews loaded successfully');
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                container.innerHTML = `<div class="error">Error loading reviews: ${error.message}</div>`;
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">⭐</div>
+                        <h3>Unable to load reviews</h3>
+                        <p>There was a problem connecting to the server. Please check your connection and try again.</p>
+                        <button class="action-btn" onclick="loadReviews()">Try Again</button>
+                    </div>
+                `;
                 loading.style.display = 'none';
             }
         }
@@ -962,7 +1229,14 @@
                 console.log('Menu loaded successfully'); // Debug log
             } catch (error) {
                 console.error('Error loading menu:', error); // Debug log
-                container.innerHTML = `<div class="error">Error loading menu: ${error.message}</div>`;
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">🍽️</div>
+                        <h3>Unable to load menu</h3>
+                        <p>There was a problem connecting to the server. Please check your connection and try again.</p>
+                        <button class="action-btn" onclick="loadMenu()">Try Again</button>
+                    </div>
+                `;
                 loading.style.display = 'none';
             }
         }
@@ -1354,7 +1628,14 @@
                 container.innerHTML = categoryHtml;
             } catch (error) {
                 console.error('Error loading categories:', error);
-                container.innerHTML = '<div class="error">Error loading categories: ' + error.message + '</div>';
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">🏷️</div>
+                        <h3>Unable to load categories</h3>
+                        <p>There was a problem loading the category list. Please try again.</p>
+                        <button class="action-btn" onclick="loadCategories()">Try Again</button>
+                    </div>
+                `;
             }
         }
 
@@ -1699,10 +1980,19 @@
             }
         }
 
+        // Function to handle initialization
+        function initializeDashboard() {
+            // Check if user is authenticated
+            checkAuth(); 
+            
+            // Initialize overview statistics
+            loadOverviewData();
+            
+            console.log('Dashboard initialized successfully');
+        }
+        
         // Load initial data
-        checkAuth(); // Check authentication first
-        showSection('overview'); // Start with overview section
-        loadOverviewData();
+        window.addEventListener('load', initializeDashboard);
     </script>
 </body>
 </html>

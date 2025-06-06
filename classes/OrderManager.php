@@ -164,7 +164,7 @@ class OrderManager {
         $stats = [];
 
         // Total orders today
-        $query = "SELECT COUNT(*) as total FROM " . $this->orders_table . " WHERE DATE(created_at) = CURDATE()";
+        $query = "SELECT COUNT(*) as total FROM " . $this->orders_table . " WHERE DATE(created_at) = DATE('now')";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $stats['today'] = $stmt->fetch()['total'];
@@ -177,7 +177,7 @@ class OrderManager {
 
         // Revenue today
         $query = "SELECT COALESCE(SUM(total_amount), 0) as revenue FROM " . $this->orders_table . " 
-                  WHERE DATE(created_at) = CURDATE() AND status != 'cancelled'";
+                  WHERE DATE(created_at) = DATE('now') AND status != 'cancelled'";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $stats['revenue_today'] = $stmt->fetch()['revenue'];
