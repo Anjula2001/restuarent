@@ -21,13 +21,21 @@
             gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
-        }
-
-        .food-card {
+        }        .food-card {
             background-color: white;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);        }
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .food-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
 
         .popular-foods .food-card img {
             width: 100% !important;
@@ -35,15 +43,74 @@
             object-fit: cover !important;
             display: block !important;
             background-color: #f0f0f0;
-        }
-
-        .food-card-content {
+        }        .food-card-content {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .food-card-content h3 {
             margin-bottom: 10px;
-        }        .customer-reviews {
+            color: #333;
+        }
+
+        .food-card-content p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            flex-grow: 1;
+        }
+
+        .food-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #8B5A2B;
+            margin-bottom: 15px;
+        }
+
+        .food-card-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-input {
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .add-to-cart-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #218838;
+        }
+
+        .add-to-cart-btn:active {
+            transform: scale(0.98);
+        }.customer-reviews {
             padding: 50px 20px;
             text-align: center;
             background-color: #f0f0f0;
