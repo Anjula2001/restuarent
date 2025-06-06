@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Popular Foods Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .food-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 10px;
+            display: inline-block;
+            width: 250px;
+            vertical-align: top;
+        }
+        
+        .food-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .food-card-content {
+            padding: 15px;
+        }
+        
+        .food-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .food-card p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .food-price {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 18px !important;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Dynamic Popular Foods System Test</h1>
+    
+    <div class="status info">
+        <strong>🔧 What This Tests:</strong><br>
+        ✅ New API endpoint: GET /api/menu.php?popular=true&limit=3<br>
+        ✅ Dynamic selection of popular items from database<br>
+        ✅ Updated JavaScript function to use real menu items<br>
+        ✅ Fallback mechanism when no data available
+    </div>
+
+    <div class="test-container">
+        <h2>📡 API Endpoint Test</h2>
+        <button onclick="testPopularAPI()">Test Popular Items API</button>
+        <div id="api-status"></div>
+        <div id="api-response" class="log"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🏠 Homepage Integration Test</h2>
+        <button onclick="testHomepageIntegration()">Test Homepage Integration</button>
+        <div id="homepage-status"></div>
+        <div id="homepage-display"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔄 Database Content Test</h2>
+        <button onclick="testDatabaseContent()">Check Database Menu Items</button>
+        <div id="db-status"></div>
+        <div id="db-content" class="log"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🎨 Visual Display Test</h2>
+        <div id="visual-display"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📝 Test Log</h2>
+        <div id="test-log" class="log">Ready - Click buttons above to run tests...</div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const typeIndicator = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            logDiv.innerHTML += `[${timestamp}] ${typeIndicator} ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function testPopularAPI() {
+            log('Testing popular items API endpoint...');
+            
+            try {
+                const response = await fetch('api/menu.php?popular=true&limit=3');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const popularItems = await response.json();
+                
+                document.getElementById('api-status').innerHTML = '<div class="status success">✅ API Test Successful</div>';
+                document.getElementById('api-response').textContent = JSON.stringify(popularItems, null, 2);
+                
+                log(`API Success: Received ${popularItems.length} popular items`, 'success');
+                
+                // Display the items visually
+                if (popularItems.length > 0) {
+                    const visualDiv = document.getElementById('visual-display');
+                    visualDiv.innerHTML = '<h3>🎨 Popular Items Retrieved:</h3>' + 
+                        popularItems.map(item => `
+                            <div class="food-card">
+                                <img src="${item.image_url || 'images/popular/2.png'}" alt="${item.name}" 
+                                     onerror="this.src='images/popular/2.png'">
+                                <div class="food-card-content">
+                                    <h3>${item.name}</h3>
+                                    <p>${item.description || 'No description'}</p>
+                                    <p class="food-price">Rs. ${parseFloat(item.price).toFixed(2)}</p>
+                                    <p><strong>Category:</strong> ${item.category}</p>
+                                    <p><strong>ID:</strong> ${item.id}</p>
+                                </div>
+                            </div>
+                        `).join('');
+                    log('Visual display updated with API results', 'success');
+                }
+                
+            } catch (error) {
+                document.getElementById('api-status').innerHTML = '<div class="status error">❌ API Test Failed</div>';
+                document.getElementById('api-response').textContent = `Error: ${error.message}`;
+                log(`API Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHomepageIntegration() {
+            log('Testing homepage integration...');
+            
+            try {
+                // Simulate the loadMenuItems function
+                const response = await fetch('api/menu.php?popular=true&limit=3');
+                const popularItems = await response.json();
+                
+                // Test the updatePopularFoods logic
+                let displayItems = [];
+                
+                if (popularItems && popularItems.length > 0) {
+                    displayItems = popularItems.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        description: item.description || `Delicious ${item.name.toLowerCase()}`,
+                        price: parseFloat(item.price).toFixed(2),
+                        image_url: item.image_url || 'images/popular/2.png'
+                    }));
+                    log('Using dynamic items from database', 'success');
+                } else {
+                    // Fallback items
+                    displayItems = [
+                        {
+                            id: 'popular-1',
+                            name: 'String Hoppers',
+                            description: 'A Sri Lankan delicacy, perfect for breakfast or dinner.',
+                            price: '350.00',
+                            image_url: 'images/popular/1.png'
+                        }
+                    ];
+                    log('Using fallback static items', 'info');
+                }
+                
+                document.getElementById('homepage-status').innerHTML = '<div class="status success">✅ Homepage Integration Test Successful</div>';
+                
+                const homepageDiv = document.getElementById('homepage-display');
+                homepageDiv.innerHTML = '<h3>🏠 Homepage Would Display:</h3>' + 
+                    displayItems.map(item => `
+                        <div class="food-card">
+                            <img src="${item.image_url}" alt="${item.name}" 
+                                 onerror="this.src='images/popular/2.png'">
+                            <div class="food-card-content">
+                                <h3>${item.name}</h3>
+                                <p>${item.description}</p>
+                                <p class="food-price">Rs. ${item.price}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                
+                log(`Homepage integration successful with ${displayItems.length} items`, 'success');
+                
+            } catch (error) {
+                document.getElementById('homepage-status').innerHTML = '<div class="status error">❌ Homepage Integration Test Failed</div>';
+                log(`Homepage integration error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabaseContent() {
+            log('Checking database menu items...');
+            
+            try {
+                const response = await fetch('api/menu.php');
+                const allItems = await response.json();
+                
+                document.getElementById('db-status').innerHTML = '<div class="status success">✅ Database Connection Successful</div>';
+                
+                const dbContent = `Total Menu Items: ${allItems.length}\n\n` +
+                    allItems.map((item, index) => 
+                        `${index + 1}. ${item.name} (${item.category}) - Rs. ${item.price}\n` +
+                        `   Description: ${item.description || 'No description'}\n` +
+                        `   Available: ${item.is_available ? 'Yes' : 'No'}\n` +
+                        `   Image: ${item.image_url || 'No image'}\n`
+                    ).join('\n');
+                
+                document.getElementById('db-content').textContent = dbContent;
+                log(`Database contains ${allItems.length} total items`, 'success');
+                
+                // Count available items by category
+                const availableItems = allItems.filter(item => item.is_available);
+                const categories = {};
+                availableItems.forEach(item => {
+                    categories[item.category] = (categories[item.category] || 0) + 1;
+                });
+                
+                log(`Available items: ${availableItems.length}`, 'info');
+                log(`Categories: ${Object.keys(categories).join(', ')}`, 'info');
+                
+            } catch (error) {
+                document.getElementById('db-status').innerHTML = '<div class="status error">❌ Database Test Failed</div>';
+                document.getElementById('db-content').textContent = `Error: ${error.message}`;
+                log(`Database error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Dynamic Popular Foods Test Tool loaded');
+            log('Click buttons above to test different aspects of the system');
+        });
+    </script>
+</body>
+</html>

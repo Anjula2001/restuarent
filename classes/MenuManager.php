@@ -158,5 +158,58 @@ class MenuManager {
             return false;
         }
     }
+
+    // Get popular menu items (public view)
+    public function getPopularItems($limit = 3) {
+        // Get diverse popular items from different categories
+        // First, try to get the highest-priced item from each category
+        $query = "
+            SELECT DISTINCT m1.id, m1.name, m1.description, m1.price, m1.category, m1.image_url
+            FROM " . $this->table_name . " m1
+            WHERE m1.is_available = 1
+            AND m1.price = (
+                SELECT MAX(m2.price) 
+                FROM " . $this->table_name . " m2 
+                WHERE m2.category = m1.category AND m2.is_available = 1
+            )
+            ORDER BY m1.price DESC, m1.category
+            LIMIT :limit
+        ";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $items = $stmt->fetchAll();
+        
+        // If we don't get enough items from category-based selection, 
+        // fill the rest with highest-priced available items
+        if (count($items) < $limit) {
+            $existing_ids = array_column($items, 'id');
+            $remaining_limit = $limit - count($items);
+            
+            $remaining_query = "SELECT id, name, description, price, category, image_url 
+                               FROM " . $this->table_name . " 
+                               WHERE is_available = 1";
+            
+            if (!empty($existing_ids)) {
+                $placeholders = str_repeat('?,', count($existing_ids) - 1) . '?';
+                $remaining_query .= " AND id NOT IN (" . $placeholders . ")";
+            }
+            
+            $remaining_query .= " ORDER BY price DESC LIMIT " . $remaining_limit;
+            
+            $stmt = $this->conn->prepare($remaining_query);
+            if (!empty($existing_ids)) {
+                $stmt->execute($existing_ids);
+            } else {
+                $stmt->execute();
+            }
+            
+            $additional_items = $stmt->fetchAll();
+            $items = array_merge($items, $additional_items);
+        }
+        
+        return $items;
+    }
 }
 ?>

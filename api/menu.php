@@ -26,6 +26,11 @@ switch ($method) {
             // Get all categories
             $categories = $menu_manager->getCategories();
             sendJsonResponse($categories);
+        } elseif (isset($_GET['popular'])) {
+            // Get popular menu items
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 3;
+            $items = $menu_manager->getPopularItems($limit);
+            sendJsonResponse($items);
         } else {
             // Get all menu items
             $category = isset($_GET['category']) ? $_GET['category'] : null;

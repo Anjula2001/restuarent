@@ -109,13 +109,16 @@ const API_BASE = 'api';
 // Load menu items dynamically
 async function loadMenuItems() {
     try {
-        const response = await fetch(`${API_BASE}/menu.php`);
-        const menuItems = await response.json();
+        // Load popular items from the new API endpoint
+        const response = await fetch(`${API_BASE}/menu.php?popular=true&limit=3`);
+        const popularItems = await response.json();
         
-        // Update popular foods section with real data
-        updatePopularFoods(menuItems.slice(0, 3));
+        // Update popular foods section with real data from database
+        updatePopularFoods(popularItems);
     } catch (error) {
-        console.error('Error loading menu items:', error);
+        console.error('Error loading popular menu items:', error);
+        // Fallback to static items if API fails
+        updatePopularFoods([]);
     }
 }
 
@@ -128,42 +131,57 @@ function updatePopularFoods(items) {
     }
     
     const foodCards = document.querySelector('.food-cards');
-    if (!foodCards || items.length === 0) {
-        console.log('No food cards container found or no items to display');
+    if (!foodCards) {
+        console.log('No food cards container found');
         return;
     }
 
     console.log('Updating popular foods with items:', items);
 
-    // Use predefined popular items with correct images instead of random items
-    const popularItems = [
-        {
-            id: 'popular-1',
-            name: 'String Hoppers',
-            description: 'A Sri Lankan delicacy, perfect for breakfast or dinner.',
-            price: '350.00',
-            image_url: 'images/popular/1.png'
-        },
-        {
-            id: 'popular-2', 
-            name: 'Kottu Roti',
-            description: 'A flavorful Sri Lankan street food favorite.',
-            price: '750.00',
-            image_url: 'images/popular/2.png'
-        },
-        {
-            id: 'popular-3',
-            name: 'Fish Ambulthiyal', 
-            description: 'A tangy and spicy fish curry, unique to Sri Lanka.',
-            price: '950.00',
-            image_url: 'images/popular/3.png'
-        }
-    ];
+    let popularItems = [];
+
+    // Use dynamic items from database if available
+    if (items && items.length > 0) {
+        popularItems = items.map(item => ({
+            id: item.id,
+            name: item.name,
+            description: item.description || `Delicious ${item.name.toLowerCase()}`,
+            price: parseFloat(item.price).toFixed(2),
+            image_url: item.image_url || 'images/popular/2.png' // Fallback image
+        }));
+        console.log('Using dynamic popular items from database');
+    } else {
+        // Fallback to predefined popular items when no dynamic data available
+        popularItems = [
+            {
+                id: 'popular-1',
+                name: 'String Hoppers',
+                description: 'A Sri Lankan delicacy, perfect for breakfast or dinner.',
+                price: '350.00',
+                image_url: 'images/popular/1.png'
+            },
+            {
+                id: 'popular-2', 
+                name: 'Kottu Roti',
+                description: 'A flavorful Sri Lankan street food favorite.',
+                price: '750.00',
+                image_url: 'images/popular/2.png'
+            },
+            {
+                id: 'popular-3',
+                name: 'Fish Ambulthiyal', 
+                description: 'A tangy and spicy fish curry, unique to Sri Lanka.',
+                price: '950.00',
+                image_url: 'images/popular/3.png'
+            }
+        ];
+        console.log('Using fallback static popular items');
+    }
 
     foodCards.innerHTML = popularItems.map(item => `
         <div class="food-card">
             <img src="${item.image_url}" alt="${item.name}" 
-                 onerror="console.log('Popular image failed: ${item.image_url}'); this.src='images/2.png';">
+                 onerror="console.log('Popular image failed: ${item.image_url}'); this.src='images/popular/2.png';">
             <div class="food-card-content">
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
@@ -181,7 +199,7 @@ function updatePopularFoods(items) {
         </div>
     `).join('');
     
-    console.log('Popular foods section updated successfully');
+    console.log('Popular foods section updated successfully with', popularItems.length, 'items');
 }
 
 // Load customer reviews dynamically with carousel functionality
