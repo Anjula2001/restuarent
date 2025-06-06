@@ -114,7 +114,8 @@
             padding: 15px 0;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 15px;
         }
 
         .order-item:last-child, .reservation-item:last-child {
@@ -122,24 +123,73 @@
             padding-bottom: 0;
         }
 
-        .item-details h4 {
-            margin: 0 0 5px 0;
-            color: #333;
-            font-size: 1.1rem;
+        .order-item > div {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
         }
 
-        .item-details p {
-            margin: 0;
+        .order-item h4, .reservation-item .item-details h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .order-item p, .reservation-item .item-details p {
+            margin: 0 0 4px 0;
             color: #666;
             font-size: 0.9rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        .order-item p:last-child {
+            margin-bottom: 0;
+        }
+
+        .order-items {
+            font-weight: 500;
+            color: #555 !important;
+            margin-bottom: 6px !important;
+        }
+
+        .order-meta {
+            font-size: 0.85rem !important;
+            color: #888 !important;
+            font-weight: 400;
+        }
+
+        /* Responsive adjustments for order items */
+        @media (max-width: 768px) {
+            .order-item, .reservation-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .item-status {
+                align-self: flex-start;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .item-status {
-            padding: 6px 12px;
+            padding: 8px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
             text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
+            align-self: flex-start;
         }
 
         .status-pending { background: #fff3cd; color: #856404; }
@@ -572,16 +622,29 @@
                 return;
             }
 
-            ordersContent.innerHTML = orders.map(order => `
-                <div class="order-item">
-                    <div class="item-details">
-                        <h4>Order #${order.id}</h4>
-                        <p>${order.items || 'Order details'}</p>
-                        <p>${new Date(order.created_at).toLocaleDateString()} - $${parseFloat(order.total_amount).toFixed(2)}</p>
+            ordersContent.innerHTML = orders.map(order => {
+                // Parse and format order items if it's a JSON string
+                let orderItemsText = order.items || 'Order details';
+                try {
+                    if (typeof orderItemsText === 'string' && orderItemsText.startsWith('[')) {
+                        const items = JSON.parse(orderItemsText);
+                        orderItemsText = items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                    }
+                } catch (e) {
+                    // If parsing fails, use the original text
+                }
+                
+                return `
+                    <div class="order-item">
+                        <div>
+                            <h4>Order #${order.id}</h4>
+                            <p class="order-items">${orderItemsText}</p>
+                            <p class="order-meta">${new Date(order.created_at).toLocaleDateString()} • $${parseFloat(order.total_amount).toFixed(2)}</p>
+                        </div>
+                        <span class="item-status status-${order.status}">${order.status}</span>
                     </div>
-                    <span class="item-status status-${order.status}">${order.status}</span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function loadUserReservations() {

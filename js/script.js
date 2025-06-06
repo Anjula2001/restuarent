@@ -1246,6 +1246,129 @@ function clearCartConfirm() {
     }
 }
 
+// Setup reservation form handling
+function setupReservationForm() {
+    const reservationForm = document.getElementById('reservationForm');
+    if (!reservationForm) {
+        console.log('Reservation form not found on this page');
+        return;
+    }
+
+    console.log('Setting up reservation form...');
+    
+    reservationForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        
+        // Disable button to prevent double submission
+        submitButton.disabled = true;
+        submitButton.innerHTML = '⏳ Processing...';
+        
+        // Collect form data
+        const formData = new FormData(this);
+        const reservationData = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+            guests: formData.get('guests'),
+            occasion: formData.get('occasion') || '',
+            special_requests: formData.get('special_requests') || ''
+        };
+        
+        // Basic validation
+        if (!reservationData.name || !reservationData.email || !reservationData.phone || 
+            !reservationData.date || !reservationData.time || !reservationData.guests) {
+            showNotification('Please fill in all required fields.', 'error');
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+            return;
+        }
+        
+        // Validate date is not in the past
+        const selectedDate = new Date(reservationData.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+            showNotification('Please select a future date for your reservation.', 'error');
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+            return;
+        }
+        
+        try {
+            console.log('Submitting reservation:', reservationData);
+            
+            const response = await fetch('api/reservations.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reservationData)
+            });
+            
+            const result = await response.json();
+            console.log('Reservation response:', result);
+            
+            if (result.success) {
+                showNotification(
+                    `🎉 Reservation confirmed! Your table for ${reservationData.guests} guests on ${reservationData.date} at ${reservationData.time} has been reserved. Confirmation details sent to ${reservationData.email}.`,
+                    'success'
+                );
+                
+                // Reset form after successful submission
+                this.reset();
+                
+                // Optional: Redirect to confirmation page or show more details
+                setTimeout(() => {
+                    if (confirm('Would you like to view your reservation details?')) {
+                        // You could redirect to a reservations page here
+                        console.log('Reservation ID:', result.reservation_id);
+                    }
+                }, 2000);
+                
+            } else {
+                showNotification(
+                    result.message || 'Failed to make reservation. Please try again or call us directly.',
+                    'error'
+                );
+            }
+            
+        } catch (error) {
+            console.error('Reservation submission error:', error);
+            showNotification(
+                'Network error occurred. Please check your connection and try again, or call us directly at (555) 123-4567.',
+                'error'
+            );
+        } finally {
+            // Re-enable submit button
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        }
+    });
+}
+
+// Setup contact form handling (placeholder for future implementation)
+function setupContactForm() {
+    const contactForm = document.getElementById('contactForm');
+    if (!contactForm) {
+        console.log('Contact form not found on this page');
+        return;
+    }
+    
+    console.log('Setting up contact form...');
+    
+    // TODO: Implement contact form submission when contact form is added to contact.html
+    contactForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        showNotification('Contact form functionality coming soon!', 'info');
+    });
+}
+
 // Export functions to global scope for HTML onclick access
 window.placeOrder = placeOrder;
 window.clearCartConfirm = clearCartConfirm;
@@ -1253,3 +1376,5 @@ window.updateOrderQuantity = updateOrderQuantity;
 window.removeFromOrderPage = removeFromOrderPage;
 window.toggleDeliveryAddress = toggleDeliveryAddress;
 window.loadOrderPage = loadOrderPage;
+window.setupReservationForm = setupReservationForm;
+window.setupContactForm = setupContactForm;
