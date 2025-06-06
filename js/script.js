@@ -108,15 +108,36 @@ const API_BASE = 'api';
 
 // Load menu items dynamically
 async function loadMenuItems() {
+    console.log('🍽️ loadMenuItems() called - Starting popular foods load');
     try {
+        // Add cache busting parameter to ensure fresh data
+        const url = `${API_BASE}/menu.php?popular=true&limit=3&_t=${Date.now()}`;
+        console.log('🌐 Making API call to:', url);
+        
         // Load popular items from the new API endpoint
-        const response = await fetch(`${API_BASE}/menu.php?popular=true&limit=3`);
+        const response = await fetch(url);
+        console.log('📡 API Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const popularItems = await response.json();
+        console.log('📊 API Response data:', popularItems);
+        console.log('📊 Data type:', Array.isArray(popularItems) ? 'Array' : typeof popularItems);
+        console.log('📊 Items count:', popularItems?.length || 0);
+        
+        if (Array.isArray(popularItems) && popularItems.length > 0) {
+            console.log('✅ API data valid, calling updatePopularFoods with data');
+        } else {
+            console.log('⚠️ API data empty or invalid, calling updatePopularFoods with empty array');
+        }
         
         // Update popular foods section with real data from database
         updatePopularFoods(popularItems);
     } catch (error) {
-        console.error('Error loading popular menu items:', error);
+        console.error('❌ Error loading popular menu items:', error);
+        console.log('🔄 Falling back to static items');
         // Fallback to static items if API fails
         updatePopularFoods([]);
     }
@@ -124,24 +145,27 @@ async function loadMenuItems() {
 
 // Update popular foods section
 function updatePopularFoods(items) {
+    console.log('🔄 updatePopularFoods() called with:', items);
+    console.log('🌍 Current pathname:', window.location.pathname);
+    
     // Don't interfere with menu page - check if we're on menu.html
     if (window.location.pathname.includes('menu.html')) {
-        console.log('On menu page - skipping popular foods update to avoid conflicts');
+        console.log('📄 On menu page - skipping popular foods update to avoid conflicts');
         return;
     }
     
     const foodCards = document.querySelector('.food-cards');
     if (!foodCards) {
-        console.log('No food cards container found');
+        console.log('❌ No food cards container found');
         return;
     }
-
-    console.log('Updating popular foods with items:', items);
+    console.log('✅ Found food-cards container');
 
     let popularItems = [];
 
     // Use dynamic items from database if available
-    if (items && items.length > 0) {
+    if (items && Array.isArray(items) && items.length > 0) {
+        console.log('🎯 Processing dynamic items from database:', items.length, 'items');
         popularItems = items.map(item => ({
             id: item.id,
             name: item.name,
@@ -149,33 +173,36 @@ function updatePopularFoods(items) {
             price: parseFloat(item.price).toFixed(2),
             image_url: item.image_url || 'images/popular/2.png' // Fallback image
         }));
-        console.log('Using dynamic popular items from database');
+        console.log('✅ Using dynamic popular items from database');
+        console.log('🍽️ Dynamic items processed:', popularItems);
     } else {
+        console.log('⚠️ No valid dynamic items, using fallback static items');
+        console.log('📊 Items data check - items:', items, 'isArray:', Array.isArray(items), 'length:', items?.length);
         // Fallback to predefined popular items when no dynamic data available
         popularItems = [
             {
                 id: 'popular-1',
-                name: 'String Hoppers',
+                name: 'String Hoppers (FALLBACK)',
                 description: 'A Sri Lankan delicacy, perfect for breakfast or dinner.',
                 price: '350.00',
                 image_url: 'images/popular/1.png'
             },
             {
-                id: 'popular-2', 
-                name: 'Kottu Roti',
+                id: 'popular-2',
+                name: 'Kottu Roti (FALLBACK)',
                 description: 'A flavorful Sri Lankan street food favorite.',
                 price: '750.00',
                 image_url: 'images/popular/2.png'
             },
             {
                 id: 'popular-3',
-                name: 'Fish Ambulthiyal', 
+                name: 'Fish Ambulthiyal (FALLBACK)',
                 description: 'A tangy and spicy fish curry, unique to Sri Lanka.',
                 price: '950.00',
                 image_url: 'images/popular/3.png'
             }
         ];
-        console.log('Using fallback static popular items');
+        console.log('🔄 Using fallback static popular items');
     }
 
     foodCards.innerHTML = popularItems.map(item => `
@@ -196,10 +223,25 @@ function updatePopularFoods(items) {
                     </button>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>    `).join('');
     
-    console.log('Popular foods section updated successfully with', popularItems.length, 'items');
+    console.log('🎨 Popular foods section updated successfully with', popularItems.length, 'items');
+    console.log('🎯 Final items displayed:', popularItems.map(item => item.name));
+    
+    // Additional verification
+    setTimeout(() => {
+        const updatedCards = document.querySelectorAll('.food-cards .food-card');
+        console.log('🔍 Verification: Found', updatedCards.length, 'cards in DOM');
+        if (updatedCards.length > 0) {
+            const firstCardName = updatedCards[0].querySelector('h3')?.textContent;
+            console.log('🏆 First card name:', firstCardName);
+            if (firstCardName && !firstCardName.includes('FALLBACK')) {
+                console.log('✅ SUCCESS: API items are displayed!');
+            } else {
+                console.log('⚠️ WARNING: Fallback items are displayed');
+            }
+        }
+    }, 100);
 }
 
 // Load customer reviews dynamically with carousel functionality

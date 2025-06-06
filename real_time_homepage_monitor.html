@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Homepage Monitor</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        .monitor { position: fixed; top: 10px; right: 10px; width: 400px; max-height: 80vh; 
+                  background: black; color: lime; padding: 15px; overflow-y: auto; 
+                  border: 2px solid lime; z-index: 9999; }
+        .log-entry { margin: 2px 0; font-size: 12px; }
+        .error { color: red; }
+        .success { color: lime; }
+        .warning { color: yellow; }
+        .info { color: cyan; }
+        iframe { width: 100%; height: 70vh; border: 2px solid #333; }
+    </style>
+</head>
+<body>
+    <h1>Real-time Homepage Popular Foods Monitor</h1>
+    <p>This page monitors the actual homepage to see what happens with popular foods loading.</p>
+    
+    <div class="monitor" id="monitor">
+        <div><strong>HOMEPAGE MONITOR - LIVE</strong></div>
+        <div id="log"></div>
+    </div>
+    
+    <iframe src="http://localhost:8888/restuarent/index.html" id="homepage-frame"></iframe>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        addLog('Monitor started', 'info');
+        
+        // Monitor the iframe
+        const iframe = document.getElementById('homepage-frame');
+        
+        iframe.onload = function() {
+            addLog('Homepage iframe loaded', 'success');
+            
+            try {
+                const iframeWindow = iframe.contentWindow;
+                const iframeDocument = iframe.contentDocument;
+                
+                if (!iframeDocument) {
+                    addLog('Cannot access iframe document (CORS)', 'error');
+                    return;
+                }
+                
+                addLog('Accessing iframe document...', 'info');
+                
+                // Check if popular foods section exists
+                const popularSection = iframeDocument.querySelector('.popular-foods');
+                if (popularSection) {
+                    addLog('Found popular-foods section', 'success');
+                    
+                    const foodCards = popularSection.querySelector('.food-cards');
+                    if (foodCards) {
+                        addLog('Found food-cards container', 'success');
+                        
+                        // Monitor changes to the food cards
+                        const observer = new MutationObserver(function(mutations) {
+                            mutations.forEach(function(mutation) {
+                                if (mutation.type === 'childList') {
+                                    const cards = foodCards.querySelectorAll('.food-card');
+                                    if (cards.length > 0) {
+                                        const firstCardName = cards[0].querySelector('h3')?.textContent || 'Unknown';
+                                        addLog(`Food cards updated: ${cards.length} cards, first: ${firstCardName}`, 'success');
+                                        
+                                        // Check if it's API data or fallback
+                                        if (firstCardName.includes('Special Fusion') || 
+                                            firstCardName.includes('Sweet and Sour') || 
+                                            firstCardName.includes('Seafood')) {
+                                            addLog('✅ SUCCESS: API data is being displayed!', 'success');
+                                        } else if (firstCardName.includes('String Hoppers') || 
+                                                  firstCardName.includes('Kottu Roti') || 
+                                                  firstCardName.includes('Fish Ambulthiyal')) {
+                                            addLog('⚠️ WARNING: Fallback data is being displayed', 'warning');
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                        
+                        observer.observe(foodCards, { childList: true, subtree: true });
+                        addLog('Set up mutation observer for food cards', 'info');
+                        
+                        // Check initial state
+                        setTimeout(() => {
+                            const initialCards = foodCards.querySelectorAll('.food-card');
+                            if (initialCards.length > 0) {
+                                const firstCardName = initialCards[0].querySelector('h3')?.textContent || 'Unknown';
+                                addLog(`Initial state: ${initialCards.length} cards, first: ${firstCardName}`, 'info');
+                            } else {
+                                addLog('Initial state: No cards found', 'warning');
+                            }
+                        }, 2000);
+                        
+                    } else {
+                        addLog('food-cards container not found', 'error');
+                    }
+                } else {
+                    addLog('popular-foods section not found', 'error');
+                }
+                
+                // Monitor console errors
+                iframeWindow.addEventListener('error', function(e) {
+                    addLog(`JavaScript Error: ${e.message}`, 'error');
+                });
+                
+            } catch (error) {
+                addLog(`Error accessing iframe: ${error.message}`, 'error');
+            }
+        };
+        
+        // Also try to make direct API calls to compare
+        setTimeout(async () => {
+            try {
+                addLog('Making direct API call for comparison...', 'info');
+                const response = await fetch('http://localhost:8888/restuarent/api/menu.php?popular=true&limit=3');
+                const data = await response.json();
+                addLog(`Direct API call successful: ${data.length} items`, 'success');
+                addLog(`First item: ${data[0]?.name || 'None'}`, 'info');
+            } catch (error) {
+                addLog(`Direct API call failed: ${error.message}`, 'error');
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
