@@ -101,6 +101,9 @@ document.addEventListener("DOMContentLoaded", function() {
             this.style.boxShadow = 'none';
         });
     });
+    
+    // Initialize form validation on page load
+    setupFormValidation();
 });
 
 // Grand Restaurant Frontend JavaScript - Backend Integration
@@ -746,220 +749,304 @@ async function checkout() {
     }
 }
 
-// Notification system
-function showNotification(message) {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
-        z-index: 1000;
-        animation: slideIn 0.3s ease-out;
-    `;
+// Enhanced form validation with visual feedback
+function validateOrderForm() {
+    const form = document.getElementById('customer-form');
+    const formData = new FormData(form);
+    let isValid = true;
+    const errors = {};
     
-    document.body.appendChild(notification);
+    // Clear previous validation states
+    document.querySelectorAll('.form-group').forEach(group => {
+        group.classList.remove('error', 'success');
+        const errorMsg = group.querySelector('.error-message');
+        if (errorMsg) errorMsg.style.display = 'none';
+    });
     
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// Contact form submission (review submission)
-function setupContactForm() {
-    const contactForm = document.querySelector('#contactForm');
-    if (!contactForm) return;
-
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(contactForm);
-        const reviewData = {
-            customer_name: formData.get('name'),
-            customer_email: formData.get('email'),
-            rating: parseInt(formData.get('rating')) || 5,
-            review_text: formData.get('message')
-        };
-
-        try {
-            const response = await fetch(`${API_BASE}/reviews.php`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reviewData)
-            });
-
-            const result = await response.json();
+    // Validate name
+    const name = formData.get('name');
+    if (!name || name.trim().length < 2) {
+        errors.name = 'Please enter a valid full name (at least 2 characters)';
+        isValid = false;
+    }
+    
+    // Validate email
+    const email = formData.get('email');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+        errors.email = 'Please enter a valid email address';
+        isValid = false;
+    }
+    
+    // Validate phone
+    const phone = formData.get('phone');
+    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+    if (!phone || !phoneRegex.test(phone)) {
+        errors.phone = 'Please enter a valid phone number (at least 10 digits)';
+        isValid = false;
+    }
+    
+    // Validate order type
+    const orderType = formData.get('order_type');
+    if (!orderType) {
+        errors.order_type = 'Please select an order type';
+        isValid = false;
+    }
+    
+    // Validate delivery address if delivery is selected
+    if (orderType === 'delivery') {
+        const address = formData.get('delivery_address');
+        if (!address || address.trim().length < 10) {
+            errors.delivery_address = 'Please provide a complete delivery address (at least 10 characters)';
+            isValid = false;
+        }
+    }
+    
+    // Display validation results
+    Object.keys(errors).forEach(fieldName => {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+            const formGroup = field.closest('.form-group');
+            formGroup.classList.add('error');
             
-            if (response.ok) {
-                showNotification('Thank you for your review! It will be published after approval.');
-                contactForm.reset();
-            } else {
-                alert(result.error || 'Failed to submit review');
+            let errorMsg = formGroup.querySelector('.error-message');
+            if (!errorMsg) {
+                errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                formGroup.appendChild(errorMsg);
             }
-        } catch (error) {
-            alert('Error submitting review. Please try again.');
+            errorMsg.textContent = errors[fieldName];
+            errorMsg.style.display = 'block';
         }
     });
-}
-
-// Reservation form functionality
-function setupReservationForm() {
-    console.log('Setting up reservation form...');
-    const reservationForm = document.querySelector('#reservationForm, .reservation-form');
-    console.log('Found reservation form:', reservationForm);
-    if (!reservationForm) {
-        console.log('No reservation form found');
-        return;
-    }    reservationForm.addEventListener('submit', async (e) => {
-        console.log('Form submit event triggered!');
-        e.preventDefault();
-        
-        // Prevent multiple submissions
-        const submitButton = reservationForm.querySelector('button[type="submit"]');
-        if (submitButton.disabled) {
-            console.log('Form submission already in progress, ignoring...');
-            return;
-        }
-        
-        // Disable submit button and change text
-        submitButton.disabled = true;
-        const originalText = submitButton.textContent;
-        submitButton.textContent = 'Submitting...';
-        
-        const formData = new FormData(reservationForm);
-        const reservationData = {
-            name: formData.get('name'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            date: formData.get('date'),
-            time: formData.get('time'),
-            guests: parseInt(formData.get('guests')),
-            special_requests: formData.get('special_requests') || ''
-        };
-
-        console.log('Reservation data:', reservationData);
-
-        // Validate required fields
-        const requiredFields = ['name', 'email', 'phone', 'date', 'time', 'guests'];
-        for (const field of requiredFields) {
-            if (!reservationData[field]) {
-                alert(`Please fill in the ${field.replace('_', ' ')} field`);
-                // Re-enable button on validation error
-                submitButton.disabled = false;
-                submitButton.textContent = originalText;
-                return;
-            }
-        }
-
-        try {
-            console.log('Sending request to:', `${API_BASE}/reservations.php`);
-            const response = await fetch(`${API_BASE}/reservations.php`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(reservationData)
-            });
-
-            console.log('Response status:', response.status);
-            const result = await response.json();
-            console.log('Response data:', result);
-            
-            if (response.ok) {
-                showNotification('Reservation request submitted successfully! We will confirm shortly.');
-                reservationForm.reset();
-            } else {
-                alert(result.error || 'Failed to submit reservation');
-            }
-        } catch (error) {
-            console.error('Reservation submission error:', error);
-            alert('Error submitting reservation. Please try again.');
-        } finally {
-            // Re-enable submit button
-            submitButton.disabled = false;
-            submitButton.textContent = originalText;
-        }
-    });
-
-    // Load available time slots when date changes
-    const dateInput = reservationForm.querySelector('input[name="date"]');
-    const timeInput = reservationForm.querySelector('input[name="time"]');
     
-    if (dateInput && timeInput) {
-        dateInput.addEventListener('change', async (e) => {
-            const selectedDate = e.target.value;
-            if (!selectedDate) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/reservations.php?available_slots=1&date=${selectedDate}`);
-                const availableSlots = await response.json();
-                
-                // For now, just log available slots - we can enhance this later
-                console.log('Available time slots for', selectedDate, ':', availableSlots);
-            } catch (error) {
-                console.error('Error loading available slots:', error);
+    // Mark valid fields as success
+    if (isValid) {
+        document.querySelectorAll('.form-group').forEach(group => {
+            const input = group.querySelector('input, select, textarea');
+            if (input && input.value.trim()) {
+                group.classList.add('success');
             }
         });
     }
+    
+    return isValid;
 }
 
-// Order Page Functionality
-function loadOrderPage() {
-    if (window.location.pathname.includes('order.html')) {
-        displayOrderItems();
-        calculateOrderTotals();
+// Real-time form validation
+function setupFormValidation() {
+    const form = document.getElementById('customer-form');
+    if (!form) return;
+    
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', () => validateField(input));
+        input.addEventListener('input', () => {
+            // Clear error state on input
+            const formGroup = input.closest('.form-group');
+            if (formGroup.classList.contains('error')) {
+                formGroup.classList.remove('error');
+                const errorMsg = formGroup.querySelector('.error-message');
+                if (errorMsg) errorMsg.style.display = 'none';
+            }
+        });
+    });
+}
+
+function validateField(field) {
+    const formGroup = field.closest('.form-group');
+    const fieldName = field.name;
+    const value = field.value.trim();
+    
+    let isValid = true;
+    let errorMessage = '';
+    
+    switch (fieldName) {
+        case 'name':
+            if (!value || value.length < 2) {
+                isValid = false;
+                errorMessage = 'Please enter a valid full name';
+            }
+            break;
+        case 'email':
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!value || !emailRegex.test(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid email address';
+            }
+            break;
+        case 'phone':
+            const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+            if (!value || !phoneRegex.test(value)) {
+                isValid = false;
+                errorMessage = 'Please enter a valid phone number';
+            }
+            break;
+        case 'order_type':
+            if (!value) {
+                isValid = false;
+                errorMessage = 'Please select an order type';
+            }
+            break;
+        case 'delivery_address':
+            if (field.closest('#delivery-address-group').style.display !== 'none') {
+                if (!value || value.length < 10) {
+                    isValid = false;
+                    errorMessage = 'Please provide a complete delivery address';
+                }
+            }
+            break;
+    }
+    
+    formGroup.classList.remove('error', 'success');
+    const errorMsg = formGroup.querySelector('.error-message');
+    if (errorMsg) errorMsg.style.display = 'none';
+    
+    if (!isValid) {
+        formGroup.classList.add('error');
+        let errorElement = formGroup.querySelector('.error-message');
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            formGroup.appendChild(errorElement);
+        }
+        errorElement.textContent = errorMessage;
+        errorElement.style.display = 'block';
+    } else if (value) {
+        formGroup.classList.add('success');
     }
 }
 
-// Display cart items on order page
-function displayOrderItems() {
-    const orderContainer = document.getElementById('order-items-container');
-    const emptyMessage = document.getElementById('empty-cart-message');
-    const summaryContainer = document.getElementById('order-summary-container');
+// Enhanced notification system
+function showNotification(message, type = 'error', duration = 5000) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => {
+        notification.remove();
+    });
     
-    if (!orderContainer) return;
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Trigger show animation
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Auto-hide after duration
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, duration);
+}
+
+// Loading overlay functions
+function showLoadingOverlay(container) {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = '<div class="spinner"></div>';
+    container.style.position = 'relative';
+    container.appendChild(overlay);
+}
+
+function hideLoadingOverlay(container) {
+    const overlay = container.querySelector('.loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// Enhanced toggle delivery address with animation
+function toggleDeliveryAddress() {
+    const orderType = document.getElementById('order-type').value;
+    const addressGroup = document.getElementById('delivery-address-group');
+    const addressField = document.getElementById('delivery-address');
+    
+    if (orderType === 'delivery') {
+        addressGroup.style.display = 'block';
+        addressField.required = true;
+        // Animate in
+        addressGroup.style.opacity = '0';
+        addressGroup.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            addressGroup.style.transition = 'all 0.3s ease';
+            addressGroup.style.opacity = '1';
+            addressGroup.style.transform = 'translateY(0)';
+        }, 10);
+    } else {
+        addressField.required = false;
+        // Animate out
+        addressGroup.style.transition = 'all 0.3s ease';
+        addressGroup.style.opacity = '0';
+        addressGroup.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            addressGroup.style.display = 'none';
+        }, 300);
+    }
+    
+    // Recalculate totals
+    calculateOrderTotals();
+}
+
+// Load and display order page content
+function loadOrderPage() {
+    const orderContentWrapper = document.getElementById('order-content-wrapper');
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+    
+    if (!orderContentWrapper || !emptyCartMessage) return;
     
     if (cart.length === 0) {
-        emptyMessage.style.display = 'block';
-        summaryContainer.style.display = 'none';
-        orderContainer.innerHTML = '';
-        return;
+        // Show empty cart message
+        emptyCartMessage.style.display = 'block';
+        orderContentWrapper.style.display = 'none';
+    } else {
+        // Show order content
+        emptyCartMessage.style.display = 'none';
+        orderContentWrapper.style.display = 'grid';
+        
+        // Load cart items into order page
+        displayOrderItems();
+        calculateOrderTotals();
+        
+        // Setup form validation for order page
+        setupFormValidation();
     }
+}
+
+// Display cart items in the order page
+function displayOrderItems() {
+    const orderItemsContainer = document.getElementById('order-items-container');
+    if (!orderItemsContainer) return;
     
-    emptyMessage.style.display = 'none';
-    summaryContainer.style.display = 'block';
-    
-    orderContainer.innerHTML = cart.map(item => `
-        <div class="order-item">
-            <img src="images/popular/3.png" alt="${item.name}">
+    orderItemsContainer.innerHTML = cart.map(item => `
+        <div class="order-item" data-item-id="${item.id}">
+            <img src="images/popular/3.png" alt="${item.name}" class="order-item-image">
             <div class="order-item-details">
-                <div class="order-item-name">${item.name}</div>
+                <h4 class="order-item-name">${item.name}</h4>
                 <div class="order-item-price">Rs. ${item.price} each</div>
                 <div class="order-item-quantity">Quantity: ${item.quantity}</div>
+                <div class="order-item-subtotal">Subtotal: Rs. ${(item.price * item.quantity).toFixed(2)}</div>
             </div>
             <div class="order-item-controls">
                 <div class="quantity-controls-order">
-                    <button class="quantity-btn-order" onclick="updateOrderQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                    <button class="quantity-btn-order" onclick="updateOrderQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
                     <span class="quantity-display">${item.quantity}</span>
                     <button class="quantity-btn-order" onclick="updateOrderQuantity(${item.id}, ${item.quantity + 1})">+</button>
                 </div>
                 <button class="remove-order-item" onclick="removeFromOrderPage(${item.id})">Remove</button>
-                <div class="order-item-total">Rs. ${(item.price * item.quantity).toFixed(2)}</div>
             </div>
         </div>
     `).join('');
 }
 
-// Update quantity from order page
+// Update item quantity on order page
 function updateOrderQuantity(itemId, newQuantity) {
     if (newQuantity <= 0) {
         removeFromOrderPage(itemId);
@@ -970,130 +1057,120 @@ function updateOrderQuantity(itemId, newQuantity) {
     if (item) {
         item.quantity = newQuantity;
         saveCartToStorage();
+        updateCartUI();
+        
+        // Update order page display
         displayOrderItems();
         calculateOrderTotals();
-        updateCartUI();
+        
+        showNotification(`Quantity updated to ${newQuantity}`, 'success', 2000);
     }
 }
 
 // Remove item from order page
 function removeFromOrderPage(itemId) {
-    cart = cart.filter(item => item.id !== itemId);
-    saveCartToStorage();
-    displayOrderItems();
-    calculateOrderTotals();
-    updateCartUI();
-    showNotification('Item removed from cart');
+    const item = cart.find(item => item.id === itemId);
+    if (item && confirm(`Remove ${item.name} from your order?`)) {
+        cart = cart.filter(item => item.id !== itemId);
+        saveCartToStorage();
+        updateCartUI();
+        
+        // Refresh order page
+        loadOrderPage();
+        
+        showNotification(`${item.name} removed from cart`, 'success', 2000);
+    }
 }
 
-// Calculate order totals
+// Calculate and display order totals
 function calculateOrderTotals() {
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const totalItemsElement = document.getElementById('total-items');
+    const subtotalElement = document.getElementById('subtotal');
+    const deliveryFeeElement = document.getElementById('delivery-fee');
+    const taxAmountElement = document.getElementById('tax-amount');
+    const finalTotalElement = document.getElementById('final-total');
+    
+    if (!totalItemsElement || !subtotalElement) return;
+    
+    // Calculate totals
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const orderType = document.getElementById('order-type')?.value;
-    const deliveryFee = orderType === 'delivery' ? 50 : 0; // Rs. 50 delivery fee
-    const taxRate = 0.05; // 5% tax
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Delivery fee based on order type
+    const orderTypeSelect = document.getElementById('order-type');
+    const orderType = orderTypeSelect ? orderTypeSelect.value : '';
+    const deliveryFee = orderType === 'delivery' ? 50.00 : 0.00;
+    
+    // Tax calculation (5%)
+    const taxRate = 0.05;
     const taxAmount = subtotal * taxRate;
+    
+    // Final total
     const finalTotal = subtotal + deliveryFee + taxAmount;
     
-    // Update display elements
-    const elements = {
-        'total-items': totalItems,
-        'subtotal': subtotal.toFixed(2),
-        'delivery-fee': deliveryFee.toFixed(2),
-        'tax-amount': taxAmount.toFixed(2),
-        'final-total': finalTotal.toFixed(2)
-    };
+    // Update display
+    totalItemsElement.textContent = totalItems;
+    subtotalElement.textContent = subtotal.toFixed(2);
     
-    Object.entries(elements).forEach(([id, value]) => {
-        const element = document.getElementById(id);
-        if (element) element.textContent = value;
-    });
-}
-
-// Toggle delivery address field
-function toggleDeliveryAddress() {
-    const orderType = document.getElementById('order-type').value;
-    const deliveryGroup = document.getElementById('delivery-address-group');
-    const deliveryAddress = document.getElementById('delivery-address');
-    
-    if (orderType === 'delivery') {
-        deliveryGroup.style.display = 'block';
-        deliveryAddress.required = true;
-    } else {
-        deliveryGroup.style.display = 'none';
-        deliveryAddress.required = false;
+    if (deliveryFeeElement) {
+        deliveryFeeElement.textContent = deliveryFee.toFixed(2);
     }
     
-    calculateOrderTotals(); // Recalculate totals when order type changes
-}
-
-// Clear cart with confirmation
-function clearCartConfirm() {
-    if (confirm('Are you sure you want to clear your entire cart? This action cannot be undone.')) {
-        clearCart();
-        displayOrderItems();
-        calculateOrderTotals();
+    if (taxAmountElement) {
+        taxAmountElement.textContent = taxAmount.toFixed(2);
+    }
+    
+    if (finalTotalElement) {
+        finalTotalElement.textContent = finalTotal.toFixed(2);
     }
 }
 
-// Enhanced checkout function for order page
+// Enhanced placeOrder function with validation and loading states
 async function placeOrder() {
-    if (cart.length === 0) {
-        showNotification('Your cart is empty!');
+    // Check if cart has items
+    if (!cart || cart.length === 0) {
+        showNotification('Your cart is empty! Please add some items before placing an order.', 'warning');
         return;
     }
-    
+
+    // Validate form first
+    if (!validateOrderForm()) {
+        showNotification('Please fix the errors in your form before placing the order.', 'error');
+        return;
+    }
+
     const form = document.getElementById('customer-form');
     const formData = new FormData(form);
-    
-    // Validate required fields
-    const requiredFields = ['name', 'email', 'phone', 'order_type'];
-    for (let field of requiredFields) {
-        if (!formData.get(field)) {
-            showNotification(`Please fill in ${field.replace('_', ' ')}`);
-            return;
-        }
-    }
-    
-    // Validate delivery address if delivery is selected
-    if (formData.get('order_type') === 'delivery' && !formData.get('delivery_address')) {
-        showNotification('Please provide delivery address');
-        return;
-    }
-    
-    // Prepare order data
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const deliveryFee = formData.get('order_type') === 'delivery' ? 50 : 0;
-    const taxAmount = subtotal * 0.05;
-    const finalTotal = subtotal + deliveryFee + taxAmount;
-    
-    const orderData = {
-        customer_name: formData.get('name'),
-        customer_email: formData.get('email'),
-        customer_phone: formData.get('phone'),
-        delivery_address: formData.get('delivery_address') || '',
-        order_type: formData.get('order_type'),
-        special_instructions: formData.get('special_instructions') || '',
-        subtotal: subtotal,
-        delivery_fee: deliveryFee,
-        tax_amount: taxAmount,
-        total_amount: finalTotal,
-        items: cart.map(item => ({
-            menu_item_id: item.id,
-            item_name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.price * item.quantity
-        }))
-    };
-    
-    // Disable place order button
-    const placeOrderBtn = document.querySelector('.place-order-button');
-    placeOrderBtn.disabled = true;
-    placeOrderBtn.textContent = 'Placing Order...';
+    const submitButton = document.querySelector('.place-order-button');
+    const originalText = submitButton.textContent;
     
     try {
+        // Disable button and show loading state
+        submitButton.disabled = true;
+        submitButton.textContent = '🔄 Placing Order...';
+        
+        // Show loading overlay
+        const orderSummary = document.getElementById('order-summary-container');
+        showLoadingOverlay(orderSummary);
+
+        // Prepare order data
+        const orderData = {
+            customer_name: formData.get('name').trim(),
+            customer_email: formData.get('email').trim(),
+            customer_phone: formData.get('phone').trim(),
+            order_type: formData.get('order_type'),
+            delivery_address: formData.get('delivery_address') || '',
+            special_instructions: formData.get('special_instructions') || '',
+            items: cart.map(item => ({
+                menu_item_id: item.id,
+                quantity: item.quantity,
+                price: item.price
+            }))
+        };
+
+        console.log('Placing order:', orderData);
+
+        // Send order to server
         const response = await fetch(`${API_BASE}/orders.php`, {
             method: 'POST',
             headers: {
@@ -1104,138 +1181,75 @@ async function placeOrder() {
 
         const result = await response.json();
         
-        if (response.ok) {
-            // Order successful
-            showNotification('Order placed successfully! You will receive a confirmation email shortly.');
+        if (response.ok && result.success) {
+            // Success - show confirmation
+            showNotification(
+                `🎉 Order placed successfully! Order ID: #${result.order_id}. You will receive a confirmation email shortly.`, 
+                'success', 
+                8000
+            );
             
-            // Clear cart and redirect
-            clearCart();
+            // Clear cart and reset form
+            cart = [];
+            saveCartToStorage();
+            updateCartUI();
+              // Reset form
+            form.reset();
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error', 'success');
+                const errorMsg = group.querySelector('.error-message');
+                if (errorMsg) errorMsg.style.display = 'none';
+            });
             
-            // Show order confirmation
-            showOrderConfirmation(result.order_id, finalTotal);
-            
+            // Refresh page after short delay to show clean state
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         } else {
-            throw new Error(result.error || 'Failed to place order');
+            // Error - show error message
+            showNotification(
+                result.error || 'Failed to place order. Please try again.', 
+                'error', 
+                5000
+            );
         }
+        
     } catch (error) {
-        console.error('Order error:', error);
-        showNotification('Error placing order. Please try again.');
+        console.error('Order placement error:', error);
+        showNotification(
+            'An error occurred while placing your order. Please check your connection and try again.', 
+            'error', 
+            5000
+        );
     } finally {
-        // Re-enable button
-        placeOrderBtn.disabled = false;
-        placeOrderBtn.textContent = 'Place Your Order';
+        // Reset button state
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+        
+        // Hide loading overlay
+        const orderSummary = document.getElementById('order-summary-container');
+        hideLoadingOverlay(orderSummary);
     }
 }
 
-// Show order confirmation
-function showOrderConfirmation(orderId, total) {
-    const confirmationHTML = `
-        <div class="order-confirmation">
-            <h3>🎉 Order Confirmed!</h3>
-            <p><strong>Order ID:</strong> #${orderId}</p>
-            <p><strong>Total Amount:</strong> Rs. ${total.toFixed(2)}</p>
-            <p>Thank you for your order! We'll prepare it with care.</p>
-            <div class="confirmation-actions">
-                <button onclick="window.location.href='menu.html'" class="continue-shopping-btn">Continue Shopping</button>
-                <button onclick="window.location.href='index.html'" class="go-home-btn">Go to Home</button>
-            </div>
-        </div>
-    `;
-    
-    const orderSection = document.querySelector('.order-review-section');
-    orderSection.innerHTML = confirmationHTML;
-}
-
-// Initialize order page when DOM loads
-document.addEventListener("DOMContentLoaded", function() {
-    // ...existing code...
-    
-    // Load order page if we're on it
-    loadOrderPage();
-    
-    // Listen for order type changes
-    const orderTypeSelect = document.getElementById('order-type');
-    if (orderTypeSelect) {
-        orderTypeSelect.addEventListener('change', calculateOrderTotals);
+// Enhanced clear cart confirmation
+function clearCartConfirm() {
+    if (cart.length === 0) {
+        showNotification('Your cart is already empty!', 'warning');
+        return;
     }
-});
-
-// Menu page specific functionality
-async function loadFullMenu() {
-    const loadingMessage = document.getElementById('loading-message');
-    const menuSections = document.getElementById('menu-sections');
     
-    if (!menuSections) return;
-    
-    try {
-        // Show loading message
-        if (loadingMessage) {
-            loadingMessage.style.display = 'block';
-        }
-        
-        const response = await fetch(`${API_BASE}/menu.php`);
-        const menuItems = await response.json();
-        
-        // Group items by category
-        const categories = {};
-        menuItems.forEach(item => {
-            const category = item.category || 'Other';
-            if (!categories[category]) {
-                categories[category] = [];
-            }
-            categories[category].push(item);
-        });
-        
-        // Hide loading message
-        if (loadingMessage) {
-            loadingMessage.style.display = 'none';
-        }
-        
-        // Create sections for each category
-        menuSections.innerHTML = Object.entries(categories).map(([category, items]) => `
-            <section class="food-category" id="${category.toLowerCase().replace(/\s+/g, '-')}">
-                <h2>${category.toUpperCase()}</h2>
-                <div class="food-cards">
-                    ${items.map(item => `
-                        <div class="food-card">
-                            <img src="${item.image_url || 'images/popular/3.png'}" alt="${item.name}">
-                            <div class="food-card-content">
-                                <h3>${item.name}</h3>
-                                <p>${item.description || ''}</p>
-                                <p class="food-price">Rs. ${item.price}</p>
-                                <div class="food-card-actions">
-                                    <div class="quantity-selector">
-                                        <label>Qty:</label>
-                                        <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">
-                                    </div>
-                                    <button onclick="addToCartWithQuantity(${item.id}, '${item.name}', ${item.price})" class="add-to-cart-btn">
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </section>
-        `).join('');
-        
-    } catch (error) {
-        console.error('Error loading menu:', error);
-        if (loadingMessage) {
-            loadingMessage.innerHTML = '<h3>Error loading menu. Please try again later.</h3>';
-        }
+    if (confirm('Are you sure you want to clear your cart? This action cannot be undone.')) {
+        clearCart();
+        loadOrderPage(); // Refresh the page to show empty state
+        showNotification('Cart cleared successfully!', 'success');
     }
 }
 
-// Make carousel functions globally accessible
-window.previousReviews = previousReviews;
-window.nextReviews = nextReviews;
-window.goToReviewSlide = goToReviewSlide;
-
-// Export functions for global access
+// Export functions to global scope for HTML onclick access
+window.placeOrder = placeOrder;
+window.clearCartConfirm = clearCartConfirm;
 window.updateOrderQuantity = updateOrderQuantity;
 window.removeFromOrderPage = removeFromOrderPage;
 window.toggleDeliveryAddress = toggleDeliveryAddress;
-window.clearCartConfirm = clearCartConfirm;
-window.placeOrder = placeOrder;
-window.addToCartWithQuantity = addToCartWithQuantity;
+window.loadOrderPage = loadOrderPage;

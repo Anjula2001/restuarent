@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Order Flow Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .test-header {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .test-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .test-content {
+            padding: 30px;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .step h3 {
+            color: #8B5A2B;
+            margin-top: 0;
+            font-size: 1.4em;
+        }
+        .step-button {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .step-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.3);
+        }
+        .step-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .success { 
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724; 
+            border-left: 4px solid #28a745;
+        }
+        .error { 
+            background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+            color: #721c24; 
+            border-left: 4px solid #dc3545;
+        }
+        .info { 
+            background: linear-gradient(135deg, #d1ecf1, #b8daff);
+            color: #0c5460; 
+            border-left: 4px solid #17a2b8;
+        }
+        .cart-display {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+        }
+        .menu-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .item-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+        .item-price {
+            font-weight: bold;
+            color: #8B5A2B;
+            font-size: 1.2em;
+        }
+        .add-to-cart-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .order-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🍽️ Complete Order Flow Test</h1>
+            <p>Test the entire order process from menu selection to order placement</p>
+        </div>
+        
+        <div class="test-content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- Step 1: Initialize System -->
+            <div class="step">
+                <h3>Step 1: Initialize System</h3>
+                <p>Initialize the cart system and load necessary functions.</p>
+                <button class="step-button" onclick="initializeSystem()">Initialize System</button>
+                <div id="step1-status" class="status"></div>
+            </div>
+
+            <!-- Step 2: Add Menu Items -->
+            <div class="step">
+                <h3>Step 2: Add Items to Cart</h3>
+                <p>Add some delicious items to your cart for testing.</p>
+                
+                <div class="menu-item">
+                    <img src="https://via.placeholder.com/60x60/8B5A2B/white?text=🍕" alt="Pizza">
+                    <div class="item-info">
+                        <h4>Margherita Pizza</h4>
+                        <p>Fresh tomato, mozzarella, and basil</p>
+                    </div>
+                    <div class="item-price">$18.99</div>
+                    <button class="add-to-cart-btn" onclick="addTestItem('pizza', 'Margherita Pizza', 18.99)">Add to Cart</button>
+                </div>
+                
+                <div class="menu-item">
+                    <img src="https://via.placeholder.com/60x60/8B5A2B/white?text=🍔" alt="Burger">
+                    <div class="item-info">
+                        <h4>Classic Burger</h4>
+                        <p>Beef patty with lettuce, tomato, and cheese</p>
+                    </div>
+                    <div class="item-price">$14.99</div>
+                    <button class="add-to-cart-btn" onclick="addTestItem('burger', 'Classic Burger', 14.99)">Add to Cart</button>
+                </div>
+                
+                <div class="menu-item">
+                    <img src="https://via.placeholder.com/60x60/8B5A2B/white?text=🥗" alt="Salad">
+                    <div class="item-info">
+                        <h4>Caesar Salad</h4>
+                        <p>Crisp romaine lettuce with caesar dressing</p>
+                    </div>
+                    <div class="item-price">$12.99</div>
+                    <button class="add-to-cart-btn" onclick="addTestItem('salad', 'Caesar Salad', 12.99)">Add to Cart</button>
+                </div>
+                
+                <div id="step2-status" class="status"></div>
+                <div id="cart-display" class="cart-display" style="display: none;"></div>
+            </div>
+
+            <!-- Step 3: Load Order Page -->
+            <div class="step">
+                <h3>Step 3: Load Order Page</h3>
+                <p>Load the order page and display cart items.</p>
+                <button class="step-button" onclick="testLoadOrderPage()">Load Order Page</button>
+                <div id="step3-status" class="status"></div>
+            </div>
+
+            <!-- Step 4: Fill Order Form -->
+            <div class="step">
+                <h3>Step 4: Fill Order Information</h3>
+                <p>Fill in customer details for the order.</p>
+                
+                <div class="order-form">
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" name="customerName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerEmail">Email Address *</label>
+                        <input type="email" id="customerEmail" name="customerEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <input type="tel" id="customerPhone" name="customerPhone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orderType">Order Type *</label>
+                        <select id="orderType" name="orderType" required>
+                            <option value="">Select order type</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="pickup">Pickup</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerAddress">Delivery Address</label>
+                        <textarea id="customerAddress" name="customerAddress" rows="3" placeholder="Required for delivery orders"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialInstructions">Special Instructions</label>
+                        <textarea id="specialInstructions" name="specialInstructions" rows="2" placeholder="Any special requests or notes"></textarea>
+                    </div>
+                </div>
+                
+                <button class="step-button" onclick="fillTestData()">Fill Test Data</button>
+                <button class="step-button" onclick="validateForm()">Validate Form</button>
+                <div id="step4-status" class="status"></div>
+            </div>
+
+            <!-- Step 5: Place Order -->
+            <div class="step">
+                <h3>Step 5: Place Order</h3>
+                <p>Submit the complete order to the server.</p>
+                <button class="step-button" onclick="testPlaceOrder()" id="placeOrderBtn">Place Order</button>
+                <div id="step5-status" class="status"></div>
+            </div>
+
+            <!-- Hidden elements needed for order processing -->
+            <div id="order-items-container" style="display: none;"></div>
+            <div id="order-summary" style="display: none;"></div>
+            <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 18px; margin-bottom: 15px;">Processing your order...</div>
+                    <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #8B5A2B; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                </div>
+            </div>
+            
+            <!-- Form for order processing -->
+            <form id="orderForm" style="display: none;">
+                <input type="text" name="customerName">
+                <input type="email" name="customerEmail">
+                <input type="tel" name="customerPhone">
+                <select name="orderType">
+                    <option value="delivery">Delivery</option>
+                    <option value="pickup">Pickup</option>
+                </select>
+                <textarea name="customerAddress"></textarea>
+                <textarea name="specialInstructions"></textarea>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        let currentStep = 0;
+        const totalSteps = 5;
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateStatus(stepNumber, message, type = 'info') {
+            const statusDiv = document.getElementById(`step${stepNumber}-status`);
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            
+            if (type === 'success' && stepNumber > currentStep) {
+                currentStep = stepNumber;
+                updateProgress();
+            }
+        }
+
+        function initializeSystem() {
+            try {
+                // Check if required functions exist
+                const requiredFunctions = [
+                    'initializeCart',
+                    'addToCart', 
+                    'loadOrderPage',
+                    'validateOrderForm',
+                    'placeOrder'
+                ];
+                
+                const missingFunctions = [];
+                
+                for (const func of requiredFunctions) {
+                    if (typeof window[func] !== 'function') {
+                        missingFunctions.push(func);
+                    }
+                }
+                
+                if (missingFunctions.length > 0) {
+                    updateStatus(1, `✗ Missing functions: ${missingFunctions.join(', ')}`, 'error');
+                    return;
+                }
+                
+                // Initialize cart
+                initializeCart();
+                
+                updateStatus(1, '✓ System initialized successfully. All required functions available.', 'success');
+                
+            } catch (error) {
+                updateStatus(1, `✗ Initialization error: ${error.message}`, 'error');
+            }
+        }
+
+        function addTestItem(category, name, price) {
+            try {
+                const item = {
+                    id: `test-${category}-${Date.now()}`,
+                    name: name,
+                    price: price,
+                    category: category,
+                    image: `https://via.placeholder.com/150x150/8B5A2B/white?text=${category.charAt(0).toUpperCase()}`
+                };
+
+                addToCart(item);
+                
+                // Update cart display
+                displayCartContents();
+                
+                updateStatus(2, `✓ ${name} added to cart successfully!`, 'success');
+                
+            } catch (error) {
+                updateStatus(2, `✗ Error adding item: ${error.message}`, 'error');
+            }
+        }
+
+        function displayCartContents() {
+            const cartDisplay = document.getElementById('cart-display');
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            if (cart.length === 0) {
+                cartDisplay.style.display = 'none';
+                return;
+            }
+            
+            let html = '<h4>Current Cart:</h4>';
+            let total = 0;
+            
+            cart.forEach(item => {
+                html += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">
+                        <span>${item.name} (x${item.quantity})</span>
+                        <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                `;
+                total += item.price * item.quantity;
+            });
+            
+            html += `
+                <div style="display: flex; justify-content: space-between; padding: 10px; font-weight: bold; border-top: 2px solid #8B5A2B;">
+                    <span>Total:</span>
+                    <span>$${total.toFixed(2)}</span>
+                </div>
+            `;
+            
+            cartDisplay.innerHTML = html;
+            cartDisplay.style.display = 'block';
+        }
+
+        function testLoadOrderPage() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                if (cart.length === 0) {
+                    updateStatus(3, '✗ Please add items to cart first', 'error');
+                    return;
+                }
+                
+                loadOrderPage();
+                updateStatus(3, '✓ Order page loaded successfully', 'success');
+                
+            } catch (error) {
+                updateStatus(3, `✗ Error loading order page: ${error.message}`, 'error');
+            }
+        }
+
+        function fillTestData() {
+            try {
+                document.getElementById('customerName').value = 'John Doe';
+                document.getElementById('customerEmail').value = 'john.doe@example.com';
+                document.getElementById('customerPhone').value = '+1-555-123-4567';
+                document.getElementById('orderType').value = 'delivery';
+                document.getElementById('customerAddress').value = '123 Main Street, City, State 12345';
+                document.getElementById('specialInstructions').value = 'Please ring the doorbell twice';
+                
+                updateStatus(4, '✓ Test data filled successfully', 'success');
+                
+            } catch (error) {
+                updateStatus(4, `✗ Error filling test data: ${error.message}`, 'error');
+            }
+        }
+
+        function validateForm() {
+            try {
+                // Copy form data to the hidden form that the validation function expects
+                const orderForm = document.getElementById('orderForm');
+                orderForm.customerName.value = document.getElementById('customerName').value;
+                orderForm.customerEmail.value = document.getElementById('customerEmail').value;
+                orderForm.customerPhone.value = document.getElementById('customerPhone').value;
+                orderForm.orderType.value = document.getElementById('orderType').value;
+                orderForm.customerAddress.value = document.getElementById('customerAddress').value;
+                orderForm.specialInstructions.value = document.getElementById('specialInstructions').value;
+                
+                const isValid = validateOrderForm();
+                
+                if (isValid) {
+                    updateStatus(4, '✓ Form validation passed', 'success');
+                } else {
+                    updateStatus(4, '✗ Form validation failed. Please check required fields.', 'error');
+                }
+                
+            } catch (error) {
+                updateStatus(4, `✗ Validation error: ${error.message}`, 'error');
+            }
+        }
+
+        function testPlaceOrder() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                if (cart.length === 0) {
+                    updateStatus(5, '✗ Cart is empty. Please add items first.', 'error');
+                    return;
+                }
+                
+                // Validate form first
+                const orderForm = document.getElementById('orderForm');
+                orderForm.customerName.value = document.getElementById('customerName').value;
+                orderForm.customerEmail.value = document.getElementById('customerEmail').value;
+                orderForm.customerPhone.value = document.getElementById('customerPhone').value;
+                orderForm.orderType.value = document.getElementById('orderType').value;
+                orderForm.customerAddress.value = document.getElementById('customerAddress').value;
+                orderForm.specialInstructions.value = document.getElementById('specialInstructions').value;
+                
+                if (!validateOrderForm()) {
+                    updateStatus(5, '✗ Please fill in all required fields first', 'error');
+                    return;
+                }
+                
+                updateStatus(5, '⏳ Placing order...', 'info');
+                
+                // Disable button during processing
+                const btn = document.getElementById('placeOrderBtn');
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
+                
+                // Call the actual placeOrder function
+                placeOrder().then(() => {
+                    updateStatus(5, '✓ Order placed successfully!', 'success');
+                }).catch(error => {
+                    updateStatus(5, `✗ Order failed: ${error.message}`, 'error');
+                }).finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Place Order';
+                });
+                
+            } catch (error) {
+                updateStatus(5, `✗ Error placing order: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Order flow test page loaded');
+            updateProgress();
+        });
+    </script>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>
