@@ -110,10 +110,34 @@
 
         .add-to-cart-btn:active {
             transform: scale(0.98);
-        }.customer-reviews {
+        }        /* Customer Reviews Section Enhancements */
+        .customer-reviews {
             padding: 50px 20px;
             text-align: center;
-            background-color: #f0f0f0;
+            background: linear-gradient(135deg, #f0f0f0 0%, #f8f9fa 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .customer-reviews::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23e9ecef" opacity="0.3"/></svg>') repeat;
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .customer-reviews h2 {
+            position: relative;
+            z-index: 1;
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         /* Reviews Carousel Container */
@@ -123,12 +147,11 @@
             margin: 0 auto;
             overflow: hidden;
             border-radius: 15px;
-        }
-
-        .reviews-carousel {
+        }        .reviews-carousel {
             display: flex;
-            transition: transform 0.5s ease-in-out;
+            transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
             gap: 20px;
+            will-change: transform;
         }
 
         .review-slide {
@@ -148,6 +171,19 @@
             flex: 1;
             position: relative;
             overflow: hidden;
+            opacity: 0;
+            animation: slideInReview 0.6s ease-out forwards;
+        }
+
+        @keyframes slideInReview {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .review-card::before {
@@ -239,15 +275,97 @@
             justify-content: center;
             gap: 10px;
             margin-top: 30px;
-        }
-
-        .indicator {
+        }        .indicator {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             background: rgba(139, 90, 43, 0.3);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            position: relative;
+        }
+
+        .indicator.active {
+            background: rgba(139, 90, 43, 1);
+            transform: scale(1.3);
+        }
+
+        .indicator:hover {
+            background: rgba(139, 90, 43, 0.7);
+            transform: scale(1.1);
+        }
+
+        /* Enhanced carousel navigation animations */
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(139, 90, 43, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            z-index: 10;
+            opacity: 0.8;
+        }
+
+        .carousel-nav:hover {
+            background: rgba(139, 90, 43, 1);
+            transform: translateY(-50%) scale(1.1);
+            opacity: 1;
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.3);
+        }
+
+        .carousel-nav.prev {
+            left: -25px;
+        }
+
+        .carousel-nav.next {
+            right: -25px;
+        }
+
+        .carousel-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        /* Reviews carousel container enhancements */
+        .reviews-carousel-container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 15px;
+            padding: 20px 0;
+        }
+
+        .reviews-carousel-container:hover .carousel-nav {
+            opacity: 1;
+        }
+
+        /* Loading state improvements */
+        .review-loading {
+            text-align: center;
+            padding: 80px 40px;
+            color: #666;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .indicator.active {
@@ -336,6 +454,104 @@
                 flex-direction: column;
                 gap: 15px;
                 padding: 0 10px;
+            }
+        }
+
+        /* Mobile Responsive Design for Reviews Carousel */
+        @media (max-width: 768px) {
+            .customer-reviews h2 {
+                font-size: 2em;
+                margin-bottom: 30px;
+            }
+
+            .reviews-carousel-container {
+                padding: 10px 0;
+                margin: 0 10px;
+            }
+
+            .review-card {
+                padding: 20px;
+                margin: 0 5px;
+                font-size: 0.9em;
+            }
+
+            .review-text {
+                font-size: 1em;
+                line-height: 1.5;
+                margin-bottom: 15px;
+            }
+
+            .reviewer-name {
+                font-size: 1em;
+            }
+
+            .reviewer-rating {
+                font-size: 1.1em;
+            }
+
+            .carousel-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            .carousel-nav.prev {
+                left: -20px;
+            }
+
+            .carousel-nav.next {
+                right: -20px;
+            }
+
+            .indicator {
+                width: 10px;
+                height: 10px;
+            }
+
+            .carousel-indicators {
+                margin-top: 20px;
+                gap: 8px;
+            }
+
+            /* Show only 1 review per slide on mobile */
+            .review-slide {
+                justify-content: center;
+            }
+
+            .review-card {
+                min-width: 90%;
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .customer-reviews {
+                padding: 30px 10px;
+            }
+
+            .reviews-carousel-container {
+                margin: 0;
+            }
+
+            .review-card {
+                padding: 15px;
+                margin: 0;
+                min-width: 95%;
+                max-width: 95%;
+            }
+
+            .carousel-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+            }
+
+            .carousel-nav.prev {
+                left: -15px;
+            }
+
+            .carousel-nav.next {
+                right: -15px;
             }
         }
 

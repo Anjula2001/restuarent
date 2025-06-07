@@ -251,6 +251,16 @@ function updatePopularFoods(items) {
 let allCustomerReviews = [];
 let currentReviewSlide = 0;
 let reviewsPerSlide = 3;
+let autoRotateInterval;
+let isTransitioning = false;
+
+// Function to get reviews per slide based on screen size
+function getReviewsPerSlide() {
+    const width = window.innerWidth;
+    if (width <= 480) return 1;  // Mobile: 1 review
+    if (width <= 768) return 2;  // Tablet: 2 reviews
+    return 3;                    // Desktop: 3 reviews
+}
 
 async function loadReviews() {
     console.log('Loading customer reviews...');
@@ -263,10 +273,30 @@ async function loadReviews() {
         console.log('Reviews loaded:', reviews);
         
         allCustomerReviews = reviews;
+        
+        // Set initial reviews per slide
+        reviewsPerSlide = getReviewsPerSlide();
+        
         initializeReviewsCarousel();
+        
+        // Listen for window resize to adjust layout
+        window.addEventListener('resize', handleResize);
     } catch (error) {
         console.error('Error loading reviews:', error);
         showReviewsError();
+    }
+}
+
+// Handle window resize for responsive behavior
+function handleResize() {
+    const newReviewsPerSlide = getReviewsPerSlide();
+    if (newReviewsPerSlide !== reviewsPerSlide) {
+        reviewsPerSlide = newReviewsPerSlide;
+        currentReviewSlide = 0; // Reset to first slide
+        updateReviewsCarousel();
+        setupCarouselIndicators();
+        stopAutoRotation();
+        startAutoRotation();
     }
 }
 
@@ -280,24 +310,60 @@ function initializeReviewsCarousel() {
     setupCarouselIndicators();
     setupCarouselEventListeners();
     
-    // Auto-rotate carousel every 5 seconds
-    setInterval(() => {
-        if (allCustomerReviews.length > reviewsPerSlide) {
-            nextReviews();
-        }
-    }, 5000);
+    // Start auto-rotation with smooth transitions
+    startAutoRotation();
+}
+
+function startAutoRotation() {
+    // Clear any existing interval
+    if (autoRotateInterval) {
+        clearInterval(autoRotateInterval);
+    }
+    
+    // Only auto-rotate if there are multiple slides
+    if (allCustomerReviews.length > reviewsPerSlide) {
+        autoRotateInterval = setInterval(() => {
+            if (!isTransitioning) {
+                nextReviews();
+            }
+        }, 4000); // 4 second intervals for smoother experience
+    }
+}
+
+function stopAutoRotation() {
+    if (autoRotateInterval) {
+        clearInterval(autoRotateInterval);
+        autoRotateInterval = null;
+    }
 }
 
 function setupCarouselEventListeners() {
     const prevBtn = document.getElementById('prevReview');
     const nextBtn = document.getElementById('nextReview');
+    const container = document.querySelector('.reviews-carousel-container');
     
     if (prevBtn) {
-        prevBtn.addEventListener('click', previousReviews);
+        prevBtn.addEventListener('click', () => {
+            stopAutoRotation();
+            previousReviews();
+            // Restart auto-rotation after user interaction
+            setTimeout(startAutoRotation, 6000);
+        });
     }
     
     if (nextBtn) {
-        nextBtn.addEventListener('click', nextReviews);
+        nextBtn.addEventListener('click', () => {
+            stopAutoRotation();
+            nextReviews();
+            // Restart auto-rotation after user interaction
+            setTimeout(startAutoRotation, 6000);
+        });
+    }
+    
+    // Pause auto-rotation on hover (desktop only)
+    if (container && window.innerWidth > 768) {
+        container.addEventListener('mouseenter', stopAutoRotation);
+        container.addEventListener('mouseleave', startAutoRotation);
     }
 }
 
@@ -378,35 +444,60 @@ function updateNavigationButtons(totalSlides) {
 }
 
 function previousReviews() {
+    if (isTransitioning) return;
+    
     if (currentReviewSlide > 0) {
+        isTransitioning = true;
         currentReviewSlide--;
         animateCarousel();
         updateIndicators();
         updateNavigationButtons(Math.ceil(allCustomerReviews.length / reviewsPerSlide));
+        
+        // Reset transition flag after animation
+        setTimeout(() => {
+            isTransitioning = false;
+        }, 500);
     }
 }
 
 function nextReviews() {
+    if (isTransitioning) return;
+    
     const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+    isTransitioning = true;
+    
     if (currentReviewSlide < totalSlides - 1) {
         currentReviewSlide++;
-        animateCarousel();
-        updateIndicators();
-        updateNavigationButtons(totalSlides);
     } else {
-        // Loop back to first slide
+        // Loop back to first slide smoothly
         currentReviewSlide = 0;
-        animateCarousel();
-        updateIndicators();
-        updateNavigationButtons(totalSlides);
     }
+    
+    animateCarousel();
+    updateIndicators();
+    updateNavigationButtons(totalSlides);
+    
+    // Reset transition flag after animation
+    setTimeout(() => {
+        isTransitioning = false;
+    }, 500);
 }
 
 function goToReviewSlide(slideIndex) {
+    if (isTransitioning) return;
+    
+    isTransitioning = true;
     currentReviewSlide = slideIndex;
     animateCarousel();
     updateIndicators();
     updateNavigationButtons(Math.ceil(allCustomerReviews.length / reviewsPerSlide));
+    
+    // Restart auto-rotation when user manually navigates
+    stopAutoRotation();
+    setTimeout(() => {
+        isTransitioning = false;
+        startAutoRotation();
+    }, 500);
 }
 
 function animateCarousel() {
@@ -430,17 +521,23 @@ function showNoReviews() {
     
     carousel.innerHTML = `
         <div class="review-slide">
-            <div class="review-loading">
-                No reviews available at the moment. 
-                <a href="contact.html" style="color: #8B5A2B;">Be the first to leave a review!</a>
+            <div class="review-card" style="text-align: center; padding: 60px 40px;">
+                <div style="font-size: 3em; color: #8B5A2B; margin-bottom: 20px;">📝</div>
+                <h3 style="color: #333; margin-bottom: 15px;">No Reviews Yet</h3>
+                <p style="color: #666; margin-bottom: 25px;">Be the first to share your dining experience!</p>
+                <a href="reviews.html" style="color: #8B5A2B; text-decoration: none; font-weight: bold;">Write a Review →</a>
             </div>
         </div>
     `;
     
     // Hide navigation
-    document.getElementById('prevReview').style.display = 'none';
-    document.getElementById('nextReview').style.display = 'none';
-    document.getElementById('carouselIndicators').style.display = 'none';
+    const prevBtn = document.getElementById('prevReview');
+    const nextBtn = document.getElementById('nextReview');
+    const indicators = document.getElementById('carouselIndicators');
+    
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (indicators) indicators.style.display = 'none';
 }
 
 function showReviewsError() {
@@ -449,16 +546,25 @@ function showReviewsError() {
     
     carousel.innerHTML = `
         <div class="review-slide">
-            <div class="review-loading">
-                Unable to load reviews at the moment. Please try again later.
+            <div class="review-card" style="text-align: center; padding: 60px 40px;">
+                <div style="font-size: 3em; color: #dc3545; margin-bottom: 20px;">⚠️</div>
+                <h3 style="color: #333; margin-bottom: 15px;">Unable to Load Reviews</h3>
+                <p style="color: #666; margin-bottom: 25px;">Please check your connection and try again.</p>
+                <button onclick="loadReviews()" style="background: #8B5A2B; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    🔄 Retry
+                </button>
             </div>
         </div>
     `;
     
     // Hide navigation
-    document.getElementById('prevReview').style.display = 'none';
-    document.getElementById('nextReview').style.display = 'none';
-    document.getElementById('carouselIndicators').style.display = 'none';
+    const prevBtn = document.getElementById('prevReview');
+    const nextBtn = document.getElementById('nextReview');
+    const indicators = document.getElementById('carouselIndicators');
+    
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (indicators) indicators.style.display = 'none';
 }
 
 // Legacy function for backward compatibility
