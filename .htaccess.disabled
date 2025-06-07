@@ -1,0 +1,44 @@
+# Grand Restaurant Apache Configuration
+RewriteEngine On
+
+# API URL Rewriting
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/$1.php [QSA,L]
+
+# Security Headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# CORS Headers for API
+<FilesMatch "\.php$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</FilesMatch>
+
+# Cache Control for Images
+<FilesMatch "\.(jpg|jpeg|png|gif|ico|svg)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+</FilesMatch>
+
+# Cache Control for CSS and JS
+<FilesMatch "\.(css|js)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 week"
+</FilesMatch>
+
+# Prevent access to sensitive files
+<FilesMatch "\.(sql|md|sh)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Error pages (optional)
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html

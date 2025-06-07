@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form Validation</title>
+    <script>
+        function testFormValidation() {
+            // Test different validation scenarios
+            console.log('Testing form validation scenarios...');
+            
+            // Test with empty fields
+            console.log('\n=== Test 1: Empty fields ===');
+            testScenario('', '', '');
+            
+            // Test with only name
+            console.log('\n=== Test 2: Only name filled ===');
+            testScenario('John Doe', '', '');
+            
+            // Test with name and rating
+            console.log('\n=== Test 3: Name and rating filled ===');
+            testScenario('John Doe', '5', '');
+            
+            // Test with all fields but short review
+            console.log('\n=== Test 4: All fields but short review ===');
+            testScenario('John Doe', '5', 'Great!');
+            
+            // Test with all valid fields
+            console.log('\n=== Test 5: All fields valid ===');
+            testScenario('John Doe', '5', 'This is a great restaurant with excellent food and service!');
+        }
+        
+        function testScenario(name, rating, reviewText) {
+            console.log(`Testing: name="${name}", rating="${rating}", reviewText="${reviewText}"`);
+            
+            // Simulate validation logic
+            if (!name) {
+                console.log('❌ Validation failed: Name is empty');
+                return;
+            }
+            console.log('✅ Name validation passed');
+
+            if (!rating) {
+                console.log('❌ Validation failed: No rating selected');
+                return;
+            }
+            console.log('✅ Rating validation passed');
+
+            if (!reviewText) {
+                console.log('❌ Validation failed: Review text is empty');
+                return;
+            }
+            console.log('✅ Review text validation passed');
+
+            if (reviewText.length < 10) {
+                console.log('❌ Validation failed: Review text too short');
+                return;
+            }
+            console.log('✅ All validations passed, would proceed with submission');
+        }
+        
+        // Run tests when page loads
+        window.onload = testFormValidation;
+    </script>
+</head>
+<body>
+    <h1>Form Validation Test</h1>
+    <p>Check the browser console for test results.</p>
+    <button onclick="testFormValidation()">Run Tests Again</button>
+</body>
+</html>

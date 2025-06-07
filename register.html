@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d4af37 0%, #f4f4f4 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: #d4af37;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .auth-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .auth-form {
+            text-align: left;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-divider {
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e1e1;
+        }
+
+        .auth-divider span {
+            background: white;
+            padding: 0 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auth-link a {
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .auth-link a:hover {
+            color: #b8941f;
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .optional-fields {
+            border-top: 2px solid #e1e1e1;
+            padding-top: 25px;
+            margin-top: 25px;
+        }
+
+        .optional-fields h3 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .auth-card {
+                margin: 10px;
+                padding: 30px 20px;
+            }
+
+            .auth-header h1 {
+                font-size: 2rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Join Us</h1>
+                <p>Create your account to start ordering</p>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <form class="auth-form" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name *</label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name *</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required>
+                    <div class="password-requirements">
+                        Password must be at least 6 characters long
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+
+                <div class="optional-fields">
+                    <h3>Additional Information (Optional)</h3>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" placeholder="Enter your delivery address..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn" id="registerBtn">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Creating your account...</p>
+            </div>
+
+            <div class="auth-divider">
+                <span>or</span>
+            </div>
+
+            <div class="auth-link">
+                <p>Already have an account? <a href="login.html">Sign in here</a></p>
+            </div>
+
+            <div class="auth-link">
+                <p><a href="index.html">← Back to Restaurant</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            const registerBtn = document.getElementById('registerBtn');
+            const loading = document.getElementById('loading');
+            const alertContainer = document.getElementById('alertContainer');
+            const passwordField = document.getElementById('password');
+            const confirmPasswordField = document.getElementById('confirm_password');
+
+            // Check if user is already logged in
+            checkUserSession();
+
+            // Real-time password confirmation validation
+            confirmPasswordField.addEventListener('input', function() {
+                if (this.value && passwordField.value && this.value !== passwordField.value) {
+                    this.setCustomValidity('Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            passwordField.addEventListener('input', function() {
+                if (confirmPasswordField.value && this.value !== confirmPasswordField.value) {
+                    confirmPasswordField.setCustomValidity('Passwords do not match');
+                } else {
+                    confirmPasswordField.setCustomValidity('');
+                }
+            });
+
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(registerForm);
+                const firstName = formData.get('first_name');
+                const lastName = formData.get('last_name');
+                const email = formData.get('email');
+                const password = formData.get('password');
+                const confirmPassword = formData.get('confirm_password');
+                const phone = formData.get('phone');
+                const dateOfBirth = formData.get('date_of_birth');
+                const address = formData.get('address');
+
+                // Validation
+                if (!firstName || !lastName || !email || !password) {
+                    showAlert('Please fill in all required fields', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showAlert('Passwords do not match', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showAlert('Password must be at least 6 characters long', 'error');
+                    return;
+                }
+
+                setLoading(true);
+                
+                try {
+                    const response = await fetch('api/auth.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'register',
+                            first_name: firstName,
+                            last_name: lastName,
+                            email: email,
+                            password: password,
+                            phone: phone || '',
+                            date_of_birth: dateOfBirth || null,
+                            address: address || ''
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showAlert('Account created successfully! Redirecting to dashboard...', 'success');
+                        
+                        // Store user info in localStorage for frontend use
+                        if (result.user) {
+                            localStorage.setItem('user', JSON.stringify(result.user));
+                        }
+                        
+                        // Redirect to dashboard
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1500);
+                    } else {
+                        showAlert(result.message || 'Registration failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    showAlert('An error occurred. Please try again.', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    registerBtn.disabled = true;
+                    registerForm.style.display = 'none';
+                    loading.style.display = 'block';
+                } else {
+                    registerBtn.disabled = false;
+                    registerForm.style.display = 'block';
+                    loading.style.display = 'none';
+                }
+            }
+
+            function showAlert(message, type) {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-${type}">
+                        ${message}
+                    </div>
+                `;
+
+                // Auto-hide success messages
+                if (type === 'success') {
+                    setTimeout(() => {
+                        alertContainer.innerHTML = '';
+                    }, 3000);
+                }
+            }
+
+            async function checkUserSession() {
+                try {
+                    const response = await fetch('api/auth.php?action=check_session');
+                    const result = await response.json();
+                    
+                    if (result.logged_in) {
+                        // User is already logged in, redirect to dashboard
+                        window.location.href = 'dashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Session check error:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

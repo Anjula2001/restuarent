@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Review Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #8B5A2B; color: white; padding: 15px 30px; border: none; border-radius: 4px; cursor: pointer; }
+        .message { padding: 15px; border-radius: 4px; margin-top: 20px; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .star-rating { margin: 20px 0; }
+        .stars { display: flex; gap: 5px; margin: 10px 0; }
+        .star { font-size: 2em; color: #ddd; cursor: pointer; }
+        .star.active { color: #ffd700; }
+    </style>
+</head>
+<body>
+    <h1>Test Review Form</h1>
+    <p>This is a simplified version to test the review submission functionality.</p>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="Enter your name">
+        </div>
+        
+        <div class="form-group">
+            <label>Rating</label>
+            <div class="star-rating">
+                <div class="stars" id="stars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <input type="hidden" id="rating" name="rating" value="">
+                <div id="ratingText">Please select a rating</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="review">Your Review</label>
+            <textarea id="review" placeholder="Write your review here" rows="4"></textarea>
+        </div>
+        
+        <button type="button" id="submitBtn">Submit Review</button>
+    </form>
+    
+    <div id="message" style="display: none;"></div>
+    
+    <script>
+        // Star rating functionality
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating');
+        const ratingText = document.getElementById('ratingText');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.dataset.rating;
+                ratingInput.value = rating;
+                
+                // Update star display
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+                
+                // Update text
+                const texts = {
+                    1: 'Poor - Not satisfied',
+                    2: 'Fair - Below expectations', 
+                    3: 'Good - Meets expectations',
+                    4: 'Very Good - Above expectations',
+                    5: 'Excellent - Outstanding!'
+                };
+                ratingText.textContent = texts[rating];
+            });
+        });
+        
+        // Form submission
+        document.getElementById('submitBtn').addEventListener('click', async function() {
+            console.log('Submit button clicked');
+            
+            const name = document.getElementById('name').value.trim();
+            const rating = document.getElementById('rating').value;
+            const reviewText = document.getElementById('review').value.trim();
+            
+            console.log('Form data:', { name, rating, reviewText });
+            
+            // Validation with specific error messages (same as in reviews.html)
+            if (!name) {
+                showMessage('Please enter your name.', 'error');
+                document.getElementById('name').focus();
+                return;
+            }
+            
+            if (!rating) {
+                showMessage('Please select a rating by clicking on the stars.', 'error');
+                return;
+            }
+            
+            if (!reviewText) {
+                showMessage('Please write your review.', 'error');
+                document.getElementById('review').focus();
+                return;
+            }
+            
+            if (reviewText.length < 10) {
+                showMessage('Please write at least 10 characters for your review.', 'error');
+                document.getElementById('review').focus();
+                return;
+            }
+            
+            // Prepare data
+            const reviewData = {
+                customer_name: name,
+                rating: parseInt(rating),
+                review_text: reviewText
+            };
+            
+            console.log('Submitting:', reviewData);
+            
+            try {
+                const response = await fetch('api/reviews.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reviewData)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Success result:', result);
+                
+                showMessage('Review submitted successfully! It will be published after approval.', 'success');
+                
+                // Reset form
+                document.getElementById('name').value = '';
+                document.getElementById('review').value = '';
+                document.getElementById('rating').value = '';
+                stars.forEach(s => s.classList.remove('active'));
+                ratingText.textContent = 'Please select a rating';
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('Error submitting review. Please try again.', 'error');
+            }
+        });
+        
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('message');
+            messageBox.textContent = message;
+            messageBox.className = 'message ' + type;
+            messageBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

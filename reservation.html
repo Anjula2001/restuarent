@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Restaurant</title>
+    <link rel="stylesheet" href="css/style.css">    <style>
+        /* Reservation Section Styles */
+        .reservation-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #faf5ef 0%, #f0e6d6 100%);
+            min-height: 80vh;
+        }
+
+        .reservation-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(139, 90, 43, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .reservation-header {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            text-align: center;
+            padding: 50px 40px;
+            position: relative;
+        }
+
+        .reservation-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="2" height="2"><circle cx="1" cy="1" r="0.3" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .reservation-header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reservation-header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reservation-header .decorative-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reservation-form-container {
+            padding: 50px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8B5A2B;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e8e1d4;
+            border-radius: 12px;
+            font-size: 16px;
+            background-color: #faf8f5;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8B5A2B;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%238B5A2B" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            appearance: none;
+        }
+
+        .reservation-form button {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reservation-form button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .reservation-form button:hover::before {
+            left: 100%;
+        }
+
+        .reservation-form button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(139, 90, 43, 0.3);
+        }
+
+        .reservation-form button:active {
+            transform: translateY(-1px);
+        }
+
+        .form-note {
+            background: #f8f5f1;
+            border-left: 4px solid #8B5A2B;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 12px 12px 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .form-note .icon {
+            color: #8B5A2B;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        /* Enhanced Date and Time Inputs */
+        .form-group input[type="date"],
+        .form-group input[type="time"] {
+            color: #8B5A2B;
+            font-weight: 500;
+        }
+
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator,
+        .form-group input[type="time"]::-webkit-calendar-picker-indicator {
+            color: #8B5A2B;
+            cursor: pointer;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .reservation-section {
+                padding: 40px 15px;
+            }
+            
+            .reservation-form-container {
+                padding: 30px 25px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .reservation-header h1 {
+                font-size: 2.2em;
+            }
+            
+            .reservation-header {
+                padding: 40px 25px;
+            }
+        }
+
+        /* Floating Label Effect */
+        .form-group.floating {
+            position: relative;
+        }
+
+        .form-group.floating input:focus + label,
+        .form-group.floating input:not(:placeholder-shown) + label {
+            transform: translateY(-25px) scale(0.8);
+            color: #8B5A2B;
+        }
+
+        /* Custom Radio Buttons for Special Occasions */
+        .occasion-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .occasion-option {
+            position: relative;
+        }
+
+        .occasion-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .occasion-option label {
+            display: block;
+            padding: 12px 15px;
+            background: #f8f5f1;
+            border: 2px solid #e8e1d4;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .occasion-option input[type="radio"]:checked + label {
+            background: #8B5A2B;
+            color: white;
+            border-color: #8B5A2B;        }
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section h2 {
+            margin-bottom: 10px;
+        }
+
+        .section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .location-contact {
+            margin-top: 20px;
+        }
+
+        .social-media {
+            margin-top: 20px;
+        }
+
+        .social-media a {
+            margin-right: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        /*the contact information section */
+        .contact-section {
+            padding: 50px 20px;
+            text-align: center;
+            background-color: #f0f0f0; 
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contact-item svg {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 10px;
+        }
+
+        .contact-item h3 {
+            margin: 0;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .contact-item p {
+            margin: 0;
+            font-size: 1em;
+            text-decoration: none;
+        }
+
+        .contact-item a {
+            color: inherit;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->        <header>
+            <div class="logo">
+                <a href="index.html">
+                    <h1>GRAND</h1>
+                    <p>RESTAURANT</p>
+                </a>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Food">
+                </div>
+                <div class="cart-icon" id="cart-toggle">
+                    <span>🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>                <!-- Authentication Buttons -->
+                <div class="auth-buttons" id="authButtons">
+                    <div id="guestLinks" style="display: inline;">
+                        <a href="login.html" class="auth-btn login">LOGIN</a>
+                        <a href="register.html" class="auth-btn register">REGISTER</a>
+                    </div>
+                    <div id="userLinks" style="display: none;">
+                        <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
+                        <a href="profile.html" class="auth-btn profile">PROFILE</a>
+                        <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
+                    </div>
+                </div>
+            </div>
+        </header>        <!-- Navigation Menu -->
+        <nav>            <ul class="main-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="menu.html">MENU</a></li>
+                <li><a href="reservation.html">RESERVATION</a></li>
+                <li><a href="order.html">ORDER ONLINE</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li><a href="reviews.html">REVIEWS</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Savor the Flavor,</h2>
+            <h3>One Grain at a Time!</h3>
+        </section>        <!-- Reservation Section -->
+        <section class="reservation-section">
+            <div class="reservation-container">
+                <div class="reservation-header">
+                    <div class="decorative-icon">🍽️</div>
+                    <h1>Reserve Your Culinary Experience</h1>
+                    <p class="subtitle">at Grand Restaurant</p>
+                </div>
+                
+                <div class="reservation-form-container">
+                    <form id="reservationForm" class="reservation-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date">📅 Reservation Date</label>
+                                <input type="date" id="date" name="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="time">🕐 Preferred Time</label>
+                                <input type="time" id="time" name="time" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="guests">👥 Number of Guests</label>
+                                <select id="guests" name="guests" required>
+                                    <option value="">Select number of guests</option>
+                                    <option value="1">1 Guest</option>
+                                    <option value="2">2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                    <option value="5">5 Guests</option>
+                                    <option value="6">6 Guests</option>
+                                    <option value="7">7 Guests</option>
+                                    <option value="8">8 Guests</option>
+                                    <option value="9">9 Guests</option>
+                                    <option value="10">10 Guests</option>
+                                    <option value="11">11 Guests</option>
+                                    <option value="12">12 Guests</option>
+                                    <option value="more">More than 12 (We'll contact you)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="occasion">🎉 Special Occasion</label>
+                                <select id="occasion" name="occasion">
+                                    <option value="">Select occasion (Optional)</option>
+                                    <option value="birthday">🎂 Birthday Celebration</option>
+                                    <option value="anniversary">💕 Anniversary</option>
+                                    <option value="business">💼 Business Meeting</option>
+                                    <option value="romantic">🌹 Romantic Dinner</option>
+                                    <option value="family">👨‍👩‍👧‍👦 Family Gathering</option>
+                                    <option value="celebration">🎊 Celebration</option>
+                                    <option value="other">✨ Other Special Event</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">👤 Full Name</label>
+                                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">📱 Phone Number</label>
+                                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row single">
+                            <div class="form-group">
+                                <label for="email">📧 Email Address</label>
+                                <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row single">
+                            <div class="form-group">
+                                <label for="requests">📝 Special Requests or Dietary Requirements</label>
+                                <textarea id="requests" name="special_requests" placeholder="Please let us know about any dietary restrictions, allergies, seating preferences, or special arrangements..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-note">
+                            <span class="icon">ℹ️</span>
+                            <strong>Please note:</strong> Reservations are confirmed subject to availability. You will receive a confirmation email within 2 hours. For same-day reservations, please call us directly at <strong>(555) 123-4567</strong>.
+                        </div>
+
+                        <button type="submit">
+                            🎯 Reserve Your Table
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-container">
+                <div class="footer-section">
+                    <p>&copy; 2024 Grand Restaurant. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>    </div>
+
+    <script src="js/script.js"></script>    <script>        // Reservation page initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing reservation page...');
+            checkUserAuthentication();
+            populateUserDataIfLoggedIn();
+            initializeReservationForm();
+            
+            // Note: Form submission is handled by js/script.js setupReservationForm()
+            // Do not add another event listener here to avoid duplicates
+        });
+
+        // Enhanced reservation form initialization
+        function initializeReservationForm() {
+            // Set minimum date to today
+            const dateInput = document.getElementById('date');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            
+            // Set default time slots availability
+            const timeInput = document.getElementById('time');
+            timeInput.addEventListener('change', validateTimeSlot);
+            
+            // Add real-time validation
+            addFormValidation();
+            
+            // Set default values for better UX
+            setDefaultFormValues();
+        }
+
+        function validateTimeSlot() {
+            const timeInput = document.getElementById('time');
+            const selectedTime = timeInput.value;
+            
+            if (selectedTime) {
+                const hour = parseInt(selectedTime.split(':')[0]);
+                
+                // Restaurant hours: 11:00 AM to 10:00 PM
+                if (hour < 11 || hour > 22) {
+                    showReservationNotification('Please select a time between 11:00 AM and 10:00 PM', 'warning');
+                    timeInput.value = '';
+                }
+            }
+        }
+
+        function addFormValidation() {
+            const form = document.getElementById('reservationForm');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', clearFieldError);
+            });
+        }
+
+        function validateField(event) {
+            const field = event.target;
+            const value = field.value.trim();
+            
+            // Remove existing error states
+            field.style.borderColor = '';
+            
+            switch(field.type) {
+                case 'email':
+                    if (value && !isValidEmail(value)) {
+                        showFieldError(field, 'Please enter a valid email address');
+                    }
+                    break;
+                case 'tel':
+                    if (value && !isValidPhone(value)) {
+                        showFieldError(field, 'Please enter a valid phone number');
+                    }
+                    break;
+                case 'date':
+                    if (value && new Date(value) < new Date().setHours(0,0,0,0)) {
+                        showFieldError(field, 'Please select a future date');
+                    }
+                    break;
+            }
+        }
+
+        function clearFieldError(event) {
+            const field = event.target;
+            field.style.borderColor = '';
+            const errorMsg = field.parentNode.querySelector('.field-error');
+            if (errorMsg) errorMsg.remove();
+        }
+
+        function showFieldError(field, message) {
+            field.style.borderColor = '#dc3545';
+            
+            // Remove existing error message
+            const existingError = field.parentNode.querySelector('.field-error');
+            if (existingError) existingError.remove();
+            
+            // Add new error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error';
+            errorDiv.style.cssText = 'color: #dc3545; font-size: 12px; margin-top: 5px;';
+            errorDiv.textContent = message;
+            field.parentNode.appendChild(errorDiv);
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function isValidPhone(phone) {
+            return /^[\+]?[0-9\s\-\(\)]{10,}$/.test(phone);
+        }
+
+        function setDefaultFormValues() {
+            // Set default time to 7:00 PM if no time is selected
+            const timeInput = document.getElementById('time');
+            if (!timeInput.value) {
+                timeInput.value = '19:00';
+            }
+        }
+
+        function showReservationNotification(message, type = 'info') {
+            // Create or get notification container
+            let container = document.getElementById('reservation-notification');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'reservation-notification';
+                container.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    max-width: 350px;
+                `;
+                document.body.appendChild(container);
+            }
+            
+            // Create notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                background: ${type === 'warning' ? '#fff3cd' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+                color: ${type === 'warning' ? '#856404' : type === 'error' ? '#721c24' : '#0c5460'};
+                border: 1px solid ${type === 'warning' ? '#faeeba' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // Add animation styles
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            container.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // User Authentication Management
+        async function checkUserAuthentication() {
+            try {
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+
+                const guestLinks = document.getElementById('guestLinks');
+                const userLinks = document.getElementById('userLinks');
+
+                if (result.logged_in) {
+                    guestLinks.style.display = 'none';
+                    userLinks.style.display = 'inline';
+                } else {
+                    guestLinks.style.display = 'inline';
+                    userLinks.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Authentication check error:', error);
+                // Default to guest state on error
+                document.getElementById('guestLinks').style.display = 'inline';
+                document.getElementById('userLinks').style.display = 'none';
+            }
+        }
+
+        // Auto-populate user data if logged in
+        async function populateUserDataIfLoggedIn() {
+            try {
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+
+                if (result.logged_in) {
+                    // Get user profile data
+                    const profileResponse = await fetch('api/auth.php?action=profile');
+                    const profileResult = await profileResponse.json();                    if (profileResult.success) {
+                        const user = profileResult.user;
+                        // Auto-fill form with user data
+                        const nameField = document.querySelector('input[name="name"]');
+                        const emailField = document.querySelector('input[name="email"]');
+                        const phoneField = document.querySelector('input[name="phone"]');
+
+                        if (nameField) nameField.value = `${user.first_name} ${user.last_name}`;
+                        if (emailField) emailField.value = user.email;
+                        if (phoneField && user.phone) phoneField.value = user.phone;
+                    }
+                }
+            } catch (error) {
+                console.error('Error populating user data:', error);
+            }
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetch('api/auth.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'logout'
+                        })
+                    });
+
+                    // Clear localStorage
+                    localStorage.removeItem('user');
+                    
+                    // Refresh authentication state
+                    checkUserAuthentication();
+                    
+                    alert('Logged out successfully!');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
