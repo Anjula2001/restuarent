@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Functionality Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #8B5A2B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #A0522D;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Order Page Functionality Test</h1>
+        
+        <div class="test-section">
+            <h3>Test 1: Cart Initialization</h3>
+            <button class="test-button" onclick="testCartInitialization()">Test Cart Init</button>
+            <div id="test1-status" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Add Items to Cart</h3>
+            <button class="test-button" onclick="testAddToCart()">Add Test Items</button>
+            <div id="test2-status" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Load Order Page</h3>
+            <button class="test-button" onclick="testLoadOrderPage()">Load Order Page</button>
+            <div id="test3-status" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Form Validation</h3>
+            <button class="test-button" onclick="testFormValidation()">Test Validation</button>
+            <div id="test4-status" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 5: Place Order (Simulation)</h3>
+            <button class="test-button" onclick="testPlaceOrder()">Test Place Order</button>
+            <div id="test5-status" class="status"></div>
+        </div>
+
+        <!-- Order Page Elements for Testing -->
+        <div id="order-items-container" style="display: none;"></div>
+        <div id="order-summary" style="display: none;"></div>
+        <div id="loadingOverlay" style="display: none;"></div>
+        
+        <!-- Test Form -->
+        <form id="orderForm" style="display: none;">
+            <input type="text" id="customerName" required>
+            <input type="email" id="customerEmail" required>
+            <input type="tel" id="customerPhone" required>
+            <textarea id="customerAddress" required></textarea>
+        </form>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function updateStatus(testId, message, type = 'info') {
+            const statusDiv = document.getElementById(`test${testId}-status`);
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function testCartInitialization() {
+            try {
+                if (typeof initializeCart === 'function') {
+                    initializeCart();
+                    updateStatus(1, '✓ Cart initialization function exists and executed', 'success');
+                } else {
+                    updateStatus(1, '✗ initializeCart function not found', 'error');
+                }
+            } catch (error) {
+                updateStatus(1, `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testAddToCart() {
+            try {
+                // Test adding items to cart
+                const testItem = {
+                    id: 'test-item-1',
+                    name: 'Test Pizza',
+                    price: 15.99,
+                    category: 'pizza',
+                    image: 'images/pizza1.jpg'
+                };
+
+                if (typeof addToCart === 'function') {
+                    addToCart(testItem);
+                    
+                    // Check if item was added
+                    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    if (cart.length > 0) {
+                        updateStatus(2, `✓ Item added to cart. Cart has ${cart.length} item(s)`, 'success');
+                    } else {
+                        updateStatus(2, '✗ Item not added to cart', 'error');
+                    }
+                } else {
+                    updateStatus(2, '✗ addToCart function not found', 'error');
+                }
+            } catch (error) {
+                updateStatus(2, `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testLoadOrderPage() {
+            try {
+                if (typeof loadOrderPage === 'function') {
+                    loadOrderPage();
+                    updateStatus(3, '✓ loadOrderPage function exists and executed', 'success');
+                } else {
+                    updateStatus(3, '✗ loadOrderPage function not found', 'error');
+                }
+            } catch (error) {
+                updateStatus(3, `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testFormValidation() {
+            try {
+                if (typeof validateOrderForm === 'function') {
+                    // Test with empty form
+                    const isValid = validateOrderForm();
+                    updateStatus(4, `✓ validateOrderForm function exists. Validation result: ${isValid}`, 'success');
+                } else {
+                    updateStatus(4, '✗ validateOrderForm function not found', 'error');
+                }
+            } catch (error) {
+                updateStatus(4, `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testPlaceOrder() {
+            try {
+                if (typeof placeOrder === 'function') {
+                    updateStatus(5, '✓ placeOrder function exists. Ready for testing.', 'success');
+                    // Note: We don't actually call placeOrder as it would make API calls
+                } else {
+                    updateStatus(5, '✗ placeOrder function not found', 'error');
+                }
+            } catch (error) {
+                updateStatus(5, `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded. Ready for testing order functionality.');
+        });
+    </script>
+</body>
+</html>

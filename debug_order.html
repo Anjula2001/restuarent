@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Order System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Order System Debug</h1>
+        
+        <div class="debug-section">
+            <h2>Debug Information</h2>
+            <div id="debug-info"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Test Cart Operations</h2>
+            <button onclick="testAddToCart()">Add Test Item to Cart</button>
+            <button onclick="testViewCart()">View Cart Contents</button>
+            <button onclick="testLoadOrderPage()">Load Order Page</button>
+            <button onclick="testPlaceOrder()">Test Place Order</button>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Cart Display</h2>
+            <div id="cart-display"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h2>Order Form</h2>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="customer-name">Name:</label>
+                    <input type="text" id="customer-name" name="customer-name" value="Test Customer" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">Phone:</label>
+                    <input type="tel" id="customer-phone" name="customer-phone" value="1234567890" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-email">Email:</label>
+                    <input type="email" id="customer-email" name="customer-email" value="test@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="delivery-address">Address:</label>
+                    <textarea id="delivery-address" name="delivery-address" required>123 Test Street</textarea>
+                </div>
+                <button type="button" id="place-order-btn" onclick="placeOrder()">Place Order</button>
+            </form>
+        </div>
+        
+        <div id="notification-container"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function testAddToCart() {
+            const testItem = {
+                id: 1,
+                name: "Test Pizza",
+                price: 15.99,
+                image: "images/pizza1.jpg"
+            };
+            
+            addToCart(testItem);
+            updateDebugInfo('Added test item to cart');
+        }
+        
+        function testViewCart() {
+            const cart = getCart();
+            document.getElementById('cart-display').innerHTML = 
+                '<pre>' + JSON.stringify(cart, null, 2) + '</pre>';
+            updateDebugInfo();
+        }
+        
+        function testLoadOrderPage() {
+            try {
+                loadOrderPage();
+                updateDebugInfo('Order page loaded successfully');
+            } catch (error) {
+                updateDebugInfo('Error loading order page: ' + error.message);
+            }
+        }
+        
+        async function testPlaceOrder() {
+            updateDebugInfo('Testing place order function...');
+            
+            // First add a test item if cart is empty
+            const cart = getCart();
+            if (cart.length === 0) {
+                testAddToCart();
+            }
+            
+            try {
+                await placeOrder();
+            } catch (error) {
+                updateDebugInfo('Error in place order: ' + error.message);
+            }
+        }
+        
+        function updateDebugInfo(message = '') {
+            const cart = getCart();
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML = `
+                <p><strong>Debug Message:</strong> ${message}</p>
+                <p><strong>Cart Items:</strong> ${cart.length}</p>
+                <p><strong>Cart Total:</strong> $${calculateCartTotal().toFixed(2)}</p>
+                <p><strong>Functions Available:</strong></p>
+                <ul>
+                    <li>addToCart: ${typeof addToCart}</li>
+                    <li>getCart: ${typeof getCart}</li>
+                    <li>loadOrderPage: ${typeof loadOrderPage}</li>
+                    <li>placeOrder: ${typeof placeOrder}</li>
+                    <li>validateOrderForm: ${typeof validateOrderForm}</li>
+                </ul>
+            `;
+        }
+        
+        // Initialize debug page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCart();
+            updateDebugInfo('Debug page loaded');
+        });
+    </script>
+</body>
+</html>

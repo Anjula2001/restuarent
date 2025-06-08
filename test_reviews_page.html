@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Page Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-header {
+            background: linear-gradient(135deg, #8B5A2B, #A0522D);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.success { background: #4CAF50; color: white; }
+        .status.error { background: #f44336; color: white; }
+        .status.warning { background: #ff9800; color: white; }
+        .test-btn {
+            padding: 10px 20px;
+            background: #8B5A2B;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .test-btn:hover {
+            background: #A0522D;
+        }
+        .reviews-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .review-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>📝 Reviews Page Debug Test</h1>
+        <p>Testing all reviews display functionality</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 API Tests</h2>
+        <button class="test-btn" onclick="testReviewsAPI()">Test Reviews API</button>
+        <button class="test-btn" onclick="testStatisticsAPI()">Test Statistics API</button>
+        <button class="test-btn" onclick="testReviewsPageLoad()">Test Reviews Page Load</button>
+        <div id="apiResults" style="margin-top: 15px;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Reviews Data Preview</h2>
+        <div id="reviewsStats" style="margin-bottom: 15px;"></div>
+        <div class="reviews-preview" id="reviewsPreview">
+            <p>Click "Load All Reviews" to see preview...</p>
+        </div>
+        <button class="test-btn" onclick="loadAllReviews()">Load All Reviews</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Reviews Page Direct Test</h2>
+        <p>Test the actual reviews page functionality:</p>
+        <iframe src="http://localhost:8888/restuarent/reviews.html" 
+                width="100%" 
+                height="600" 
+                style="border: 2px solid #8B5A2B; border-radius: 5px;">
+        </iframe>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8888/restuarent/api';
+
+        async function testReviewsAPI() {
+            const resultsDiv = document.getElementById('apiResults');
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php`);
+                const reviews = await response.json();
+                
+                if (reviews && reviews.length > 0) {
+                    resultsDiv.innerHTML = `
+                        <div style="color: #4CAF50; font-weight: bold;">
+                            ✅ Reviews API Working: ${reviews.length} reviews loaded
+                        </div>
+                    `;
+                    return reviews;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div style="color: #f44336; font-weight: bold;">
+                            ❌ Reviews API: No reviews found
+                        </div>
+                    `;
+                    return null;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div style="color: #f44336; font-weight: bold;">
+                        ❌ Reviews API Error: ${error.message}
+                    </div>
+                `;
+                return null;
+            }
+        }
+
+        async function testStatisticsAPI() {
+            const resultsDiv = document.getElementById('apiResults');
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php?statistics=1`);
+                const stats = await response.json();
+                
+                if (stats && stats.total_reviews) {
+                    resultsDiv.innerHTML += `
+                        <div style="color: #4CAF50; font-weight: bold; margin-top: 10px;">
+                            ✅ Statistics API Working: ${stats.total_reviews} total, ${stats.average_rating}/5 avg rating
+                        </div>
+                    `;
+                    
+                    document.getElementById('reviewsStats').innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #8B5A2B;">${stats.total_reviews}</div>
+                                <div style="color: #666;">Total Reviews</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #8B5A2B;">${stats.average_rating}/5</div>
+                                <div style="color: #666;">Average Rating</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #8B5A2B;">${stats.pending_reviews}</div>
+                                <div style="color: #666;">Pending Reviews</div>
+                            </div>
+                        </div>
+                    `;
+                    return stats;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div style="color: #f44336; font-weight: bold; margin-top: 10px;">
+                            ❌ Statistics API: Invalid response
+                        </div>
+                    `;
+                    return null;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div style="color: #f44336; font-weight: bold; margin-top: 10px;">
+                        ❌ Statistics API Error: ${error.message}
+                    </div>
+                `;
+                return null;
+            }
+        }
+
+        async function testReviewsPageLoad() {
+            const resultsDiv = document.getElementById('apiResults');
+            try {
+                const response = await fetch('http://localhost:8888/restuarent/reviews.html');
+                if (response.ok) {
+                    resultsDiv.innerHTML += `
+                        <div style="color: #4CAF50; font-weight: bold; margin-top: 10px;">
+                            ✅ Reviews Page: Loading successfully (HTTP ${response.status})
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div style="color: #f44336; font-weight: bold; margin-top: 10px;">
+                            ❌ Reviews Page: HTTP ${response.status}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div style="color: #f44336; font-weight: bold; margin-top: 10px;">
+                        ❌ Reviews Page Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function loadAllReviews() {
+            const previewDiv = document.getElementById('reviewsPreview');
+            previewDiv.innerHTML = '<p>Loading reviews...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php`);
+                const reviews = await response.json();
+                
+                if (reviews && reviews.length > 0) {
+                    const reviewsHTML = reviews.map((review, index) => `
+                        <div class="review-item">
+                            <strong>${review.customer_name}</strong> 
+                            <span style="color: #ff9800;">${'★'.repeat(review.rating)}</span>
+                            <div style="margin-top: 5px; color: #666; font-size: 14px;">
+                                ${review.review_text}
+                            </div>
+                            <div style="margin-top: 5px; color: #888; font-size: 12px;">
+                                ${new Date(review.created_at).toLocaleDateString()}
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    previewDiv.innerHTML = reviewsHTML;
+                } else {
+                    previewDiv.innerHTML = '<p>No reviews found.</p>';
+                }
+            } catch (error) {
+                previewDiv.innerHTML = `<p style="color: #f44336;">Error loading reviews: ${error.message}</p>`;
+            }
+        }
+
+        // Auto-run basic tests on page load
+        window.onload = () => {
+            testReviewsAPI();
+            setTimeout(() => testStatisticsAPI(), 1000);
+        };
+    </script>
+</body>
+</html>

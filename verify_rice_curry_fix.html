@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rice & Curry Fix Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 2px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 15px; border-radius: 6px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { background: #007bff; color: white; border: none; padding: 12px 24px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        button.success { background: #28a745; }
+        button.success:hover { background: #218838; }
+        .food-card { border: 1px solid #ccc; margin: 10px; padding: 15px; border-radius: 5px; display: inline-block; width: 200px; vertical-align: top; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Rice & Curry Fix Verification</h1>
+    
+    <div class="test-section">
+        <h2>📊 Test Status</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-tests">0</div>
+                <div>Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="passed-tests">0</div>
+                <div>Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failed-tests">0</div>
+                <div>Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="rice-curry-count">?</div>
+                <div>Rice & Curry Items</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Test Controls</h2>
+        <button onclick="runAllTests()">🚀 Run All Tests</button>
+        <button onclick="testCacheBusting()">🔄 Test Cache Busting</button>
+        <button onclick="testConsistency()">⚖️ Test Consistency</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🍛 Current Rice & Curry Items</h2>
+        <div id="rice-curry-display"></div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let totalTests = 0;
+        let passedTests = 0;
+        let failedTests = 0;
+
+        function addResult(message, type, details = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({ timestamp, message, type, details });
+            updateResults();
+            updateStats();
+        }
+
+        function updateResults() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = testResults.slice(-20).reverse().map(result => {
+                let html = `<div class="result ${result.type}">[${result.timestamp}] ${result.message}`;
+                if (result.details) {
+                    html += `<br><small>${result.details}</small>`;
+                }
+                html += '</div>';
+                return html;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('total-tests').textContent = totalTests;
+            document.getElementById('passed-tests').textContent = passedTests;
+            document.getElementById('failed-tests').textContent = failedTests;
+        }
+
+        function clearResults() {
+            testResults = [];
+            totalTests = passedTests = failedTests = 0;
+            updateResults();
+            updateStats();
+        }
+
+        // Test the fixed API with cache busting
+        async function testCacheBusting() {
+            totalTests++;
+            addResult('Testing cache-busting API calls...', 'info');
+
+            try {
+                // Test 1: Regular fetch
+                const timestamp1 = new Date().getTime();
+                const response1 = await fetch(`api/menu.php?_t=${timestamp1}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const data1 = await response1.json();
+
+                // Wait a moment
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Test 2: Another fetch with different timestamp
+                const timestamp2 = new Date().getTime();
+                const response2 = await fetch(`api/menu.php?_t=${timestamp2}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const data2 = await response2.json();
+
+                // Filter Rice & Curry items
+                const riceCurryMatches = ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'];
+                
+                const items1 = data1.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    return riceCurryMatches.some(match => {
+                        return itemCategory === match || itemCategory.includes(match);
+                    });
+                });
+
+                const items2 = data2.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    return riceCurryMatches.some(match => {
+                        return itemCategory === match || itemCategory.includes(match);
+                    });
+                });
+
+                if (items1.length === items2.length && items1.length === 5) {
+                    passedTests++;
+                    addResult(`✅ Cache busting test PASSED: Consistently found ${items1.length} items`, 'success');
+                } else {
+                    failedTests++;
+                    addResult(`❌ Cache busting test FAILED: Found ${items1.length} vs ${items2.length} items`, 'error');
+                }
+
+                document.getElementById('rice-curry-count').textContent = items1.length;
+
+            } catch (error) {
+                failedTests++;
+                addResult(`❌ Cache busting test ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test consistency across multiple calls
+        async function testConsistency() {
+            totalTests++;
+            addResult('Testing consistency across 5 rapid API calls...', 'info');
+
+            try {
+                const results = [];
+                const riceCurryMatches = ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'];
+
+                for (let i = 0; i < 5; i++) {
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`api/menu.php?_t=${timestamp}`, {
+                        cache: 'no-cache',
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    const riceCurryItems = data.filter(item => {
+                        const itemCategory = item.category.toLowerCase().trim();
+                        return riceCurryMatches.some(match => {
+                            return itemCategory === match || itemCategory.includes(match);
+                        });
+                    });
+
+                    results.push(riceCurryItems.length);
+                    await new Promise(resolve => setTimeout(resolve, 50)); // Small delay
+                }
+
+                const allSame = results.every(count => count === results[0]);
+                const expectedCount = 5;
+                const actualCount = results[0];
+
+                if (allSame && actualCount === expectedCount) {
+                    passedTests++;
+                    addResult(`✅ Consistency test PASSED: All 5 calls returned ${actualCount} items`, 'success');
+                } else if (allSame) {
+                    failedTests++;
+                    addResult(`⚠️ Consistency test PARTIAL: Consistent but expected ${expectedCount}, got ${actualCount}`, 'warning');
+                } else {
+                    failedTests++;
+                    addResult(`❌ Consistency test FAILED: Results varied: ${results.join(', ')}`, 'error');
+                }
+
+            } catch (error) {
+                failedTests++;
+                addResult(`❌ Consistency test ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test the exact loadMenuByCategories function
+        async function testMenuFunction() {
+            totalTests++;
+            addResult('Testing menu loading function...', 'info');
+
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`api/menu.php?_t=${timestamp}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const allItems = await response.json();
+
+                // Use exact logic from menu.html
+                const categories = [
+                    { 
+                        id: 'rice-curry', 
+                        name: 'Rice & Curry', 
+                        matches: ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'] 
+                    }
+                ];
+
+                const category = categories[0];
+                const categoryItems = allItems.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    return category.matches.some(match => {
+                        return itemCategory === match || itemCategory.includes(match);
+                    });
+                });
+
+                const displayDiv = document.getElementById('rice-curry-display');
+                if (categoryItems.length > 0) {
+                    displayDiv.innerHTML = `
+                        <h3>Found ${categoryItems.length} Rice & Curry Items:</h3>
+                        ${categoryItems.map(item => `
+                            <div class="food-card">
+                                <h4>${item.name}</h4>
+                                <p><strong>Category:</strong> "${item.category}"</p>
+                                <p><strong>Price:</strong> Rs. ${item.price}</p>
+                                <p><small>ID: ${item.id}</small></p>
+                            </div>
+                        `).join('')}
+                    `;
+                } else {
+                    displayDiv.innerHTML = '<div style="color: red; padding: 20px; text-align: center;">❌ No Rice & Curry items found!</div>';
+                }
+
+                if (categoryItems.length === 5) {
+                    passedTests++;
+                    addResult(`✅ Menu function test PASSED: Found ${categoryItems.length} items`, 'success');
+                } else {
+                    failedTests++;
+                    addResult(`❌ Menu function test FAILED: Expected 5 items, found ${categoryItems.length}`, 'error');
+                }
+
+            } catch (error) {
+                failedTests++;
+                addResult(`❌ Menu function test ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        async function runAllTests() {
+            clearResults();
+            addResult('🚀 Starting comprehensive fix verification...', 'info');
+            
+            await testCacheBusting();
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            await testConsistency();
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            await testMenuFunction();
+            
+            const passRate = totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0;
+            
+            if (passedTests === totalTests) {
+                addResult(`🎉 ALL TESTS PASSED! (${passRate}%) - Rice & Curry fix is working correctly!`, 'success');
+            } else {
+                addResult(`⚠️ ${passedTests}/${totalTests} tests passed (${passRate}%) - Some issues remain`, 'warning');
+            }
+        }
+
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                addResult('🔧 Auto-running verification tests...', 'info');
+                runAllTests();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

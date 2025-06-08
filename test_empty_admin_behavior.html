@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Panel Empty Menu Behavior</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { margin: 5px; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        #testLog { max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 4px; }
+        .json-display { background: #f8f9fa; padding: 10px; border-radius: 4px; white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Admin Panel Empty Menu Behavior Test</h1>
+    <p>This test simulates what happens in the admin panel when all menu items are deleted.</p>
+
+    <div class="test-section">
+        <h2>Current Menu Status</h2>
+        <div id="currentStatus" class="status info">Loading...</div>
+        <button class="btn-primary" onclick="checkCurrentMenu()">🔍 Check Current Menu</button>
+        <div id="currentMenuData" class="json-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Delete All Items Test</h2>
+        <p><strong>Warning:</strong> This will delete ALL menu items to test empty state behavior.</p>
+        <button class="btn-danger" onclick="deleteAllItems()">🗑️ Delete ALL Menu Items</button>
+        <button class="btn-success" onclick="restoreSampleData()">🔄 Restore Sample Data</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Admin Panel Menu Loading Simulation</h2>
+        <button class="btn-primary" onclick="simulateAdminMenuLoad()">🎭 Simulate Admin Menu Load</button>
+        <div id="adminLoadResult" class="status info">Ready to test...</div>
+        <div id="adminMenuResponse" class="json-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <button class="btn-primary" onclick="clearLog()">🧹 Clear Log</button>
+        <div id="testLog"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'api';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('testLog');
+            logDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        async function checkCurrentMenu() {
+            log('Checking current menu status...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('currentStatus');
+                const dataDiv = document.getElementById('currentMenuData');
+                
+                if (Array.isArray(data)) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = `✅ Menu loaded successfully - ${data.length} items found`;
+                    dataDiv.textContent = JSON.stringify(data, null, 2);
+                    log(`Current menu has ${data.length} items`, 'success');
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Invalid response format';
+                    dataDiv.textContent = JSON.stringify(data, null, 2);
+                    log('Invalid response format received', 'error');
+                }
+            } catch (error) {
+                log(`Error checking menu: ${error.message}`, 'error');
+                document.getElementById('currentStatus').className = 'status error';
+                document.getElementById('currentStatus').textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        async function deleteAllItems() {
+            if (!confirm('⚠️ This will DELETE ALL menu items from the database!\n\nAre you absolutely sure?\n\nThis is for testing empty state behavior.')) {
+                return;
+            }
+
+            log('Starting deletion of all menu items...', 'warning');
+            
+            try {
+                // First get all items
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                const items = await response.json();
+                
+                if (!Array.isArray(items)) {
+                    throw new Error('Failed to load menu items');
+                }
+
+                log(`Found ${items.length} items to delete`, 'info');
+
+                // Delete each item (hard delete)
+                let deletedCount = 0;
+                for (const item of items) {
+                    try {
+                        const deleteResponse = await fetch(`${API_BASE}/menu.php?id=${item.id}&hard=true`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (deleteResponse.ok) {
+                            deletedCount++;
+                            log(`Deleted: ${item.name} (ID: ${item.id})`, 'info');
+                        } else {
+                            log(`Failed to delete: ${item.name} (ID: ${item.id})`, 'error');
+                        }
+                    } catch (error) {
+                        log(`Error deleting ${item.name}: ${error.message}`, 'error');
+                    }
+                }
+
+                log(`✅ Deletion completed. ${deletedCount}/${items.length} items deleted.`, deletedCount === items.length ? 'success' : 'warning');
+                
+                // Check menu status after deletion
+                setTimeout(checkCurrentMenu, 1000);
+                
+            } catch (error) {
+                log(`Error during bulk deletion: ${error.message}`, 'error');
+            }
+        }
+
+        async function restoreSampleData() {
+            log('Restoring sample data...', 'info');
+            
+            try {
+                // This will trigger the database initialization which includes sample data
+                const response = await fetch(`${API_BASE}/menu.php`);
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    log(`✅ Sample data restored - ${data.length} items now available`, 'success');
+                } else {
+                    log('⚠️ Sample data may not have been restored properly', 'warning');
+                }
+                
+                setTimeout(checkCurrentMenu, 1000);
+                
+            } catch (error) {
+                log(`Error restoring sample data: ${error.message}`, 'error');
+            }
+        }
+
+        async function simulateAdminMenuLoad() {
+            log('🎭 Simulating admin panel menu loading...', 'info');
+            
+            const resultDiv = document.getElementById('adminLoadResult');
+            const responseDiv = document.getElementById('adminMenuResponse');
+            
+            try {
+                // Simulate the exact same call the admin panel makes
+                const response = await fetch(`${API_BASE}/menu.php?admin=true`);
+                
+                log(`Response status: ${response.status}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get raw response text first (like the admin panel does)
+                const responseText = await response.text();
+                log(`Raw response length: ${responseText.length} characters`, 'info');
+                log(`Response starts with: "${responseText.substring(0, 50)}..."`, 'info');
+                
+                // Try to parse as JSON
+                let menuItems;
+                try {
+                    menuItems = JSON.parse(responseText);
+                    log('✅ JSON parsing successful', 'success');
+                } catch (jsonError) {
+                    log(`❌ JSON parsing failed: ${jsonError.message}`, 'error');
+                    resultDiv.className = 'status error';
+                    resultDiv.textContent = `❌ JSON Parse Error: ${jsonError.message}`;
+                    responseDiv.textContent = responseText.substring(0, 500) + '...';
+                    return;
+                }
+                
+                // Check if it's an array
+                if (!Array.isArray(menuItems)) {
+                    log('❌ Response is not an array', 'error');
+                    resultDiv.className = 'status error';
+                    resultDiv.textContent = '❌ Invalid response format - expected array';
+                    responseDiv.textContent = JSON.stringify(menuItems, null, 2);
+                    return;
+                }
+                
+                // Success - show results
+                log(`✅ Admin menu load simulation successful - ${menuItems.length} items`, 'success');
+                
+                if (menuItems.length === 0) {
+                    resultDiv.className = 'status warning';
+                    resultDiv.textContent = '⚠️ Menu is empty - This is the scenario we\'re testing!';
+                    log('📋 Empty menu detected - this should show "No menu items found" message in admin panel', 'info');
+                } else {
+                    resultDiv.className = 'status success';
+                    resultDiv.textContent = `✅ Menu loaded successfully - ${menuItems.length} items`;
+                }
+                
+                responseDiv.textContent = JSON.stringify(menuItems, null, 2);
+                
+            } catch (error) {
+                log(`❌ Admin menu load simulation failed: ${error.message}`, 'error');
+                resultDiv.className = 'status error';
+                resultDiv.textContent = `❌ Simulation failed: ${error.message}`;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🌟 Admin Panel Empty Menu Behavior Test initialized', 'success');
+            checkCurrentMenu();
+        });
+    </script>
+</body>
+</html>

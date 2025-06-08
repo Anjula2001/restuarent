@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Final System Integration Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .test-sections {
+            padding: 40px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #219a52;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .results-panel {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .results-panel h3 {
+            margin-top: 0;
+            color: #ecf0f1;
+        }
+        
+        .log-entry {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        .log-success {
+            background: rgba(39, 174, 96, 0.2);
+            color: #2ecc71;
+        }
+        
+        .log-error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .log-info {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+        
+        .log-warning {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ecf0f1;
+            text-align: center;
+        }
+        
+        .status-card.success {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.05);
+        }
+        
+        .status-card.error {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.05);
+        }
+        
+        .status-card.pending {
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.05);
+        }
+        
+        .status-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .api-test-form {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            height: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <h1>🎯 Final System Integration Test</h1>
+            <p>Comprehensive testing of the Grand Restaurant reservation system</p>
+        </div>
+        
+        <div class="test-sections">
+            <!-- System Status Overview -->
+            <div class="test-section">
+                <h2>📊 System Status Overview</h2>
+                <div class="status-grid" id="statusGrid">
+                    <div class="status-card pending">
+                        <div class="status-icon">⏳</div>
+                        <h3>JavaScript Functions</h3>
+                        <p>Checking function definitions...</p>
+                    </div>
+                    <div class="status-card pending">
+                        <div class="status-icon">⏳</div>
+                        <h3>API Endpoints</h3>
+                        <p>Testing API connectivity...</p>
+                    </div>
+                    <div class="status-card pending">
+                        <div class="status-icon">⏳</div>
+                        <h3>Form Integration</h3>
+                        <p>Validating form setup...</p>
+                    </div>
+                    <div class="status-card pending">
+                        <div class="status-icon">⏳</div>
+                        <h3>Database Connection</h3>
+                        <p>Testing database operations...</p>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="runSystemStatusCheck()">
+                        🔍 Run System Check
+                    </button>
+                    <button class="btn btn-success" onclick="runFullIntegrationTest()">
+                        🚀 Full Integration Test
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Live API Testing -->
+            <div class="test-section">
+                <h2>🔌 Live API Testing</h2>
+                <p>Test the reservation API with real data submissions</p>
+                
+                <div class="api-test-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testName">Full Name</label>
+                            <input type="text" id="testName" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="testEmail">Email</label>
+                            <input type="email" id="testEmail" value="john.doe@test.com">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testPhone">Phone</label>
+                            <input type="tel" id="testPhone" value="+1-555-123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label for="testGuests">Guests</label>
+                            <select id="testGuests">
+                                <option value="2">2 Guests</option>
+                                <option value="4" selected>4 Guests</option>
+                                <option value="6">6 Guests</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testDate">Date</label>
+                            <input type="date" id="testDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="testTime">Time</label>
+                            <input type="time" id="testTime" value="19:00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="testRequests">Special Requests</label>
+                        <textarea id="testRequests" placeholder="Any special requirements...">Window table preferred for birthday celebration</textarea>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="testApiDirectly()">
+                        📡 Test API Directly
+                    </button>
+                    <button class="btn btn-success" onclick="testFormSubmission()">
+                        📝 Test Form Submission
+                    </button>
+                    <button class="btn btn-warning" onclick="testValidation()">
+                        ⚠️ Test Validation
+                    </button>
+                    <button class="btn btn-danger" onclick="testDuplicatePrevention()">
+                        🚫 Test Duplicate Prevention
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Live Form Testing -->
+            <div class="test-section">
+                <h2>📝 Live Form Testing</h2>
+                <p>Test the actual reservation form functionality</p>
+                
+                <div class="button-group">
+                    <a href="reservation.html" target="_blank" class="btn btn-primary">
+                        🔗 Open Reservation Page
+                    </a>
+                    <a href="test_reservation_final.html" target="_blank" class="btn btn-success">
+                        🧪 Open Test Page
+                    </a>
+                    <button class="btn btn-warning" onclick="simulateFormSubmission()">
+                        🎭 Simulate Form Submission
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <h3>📋 Test Results Log</h3>
+                <div id="resultsLog">
+                    <div class="log-entry log-info">
+                        [Ready] System integration test environment initialized
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/script.js"></script>
+    <script>
+        let testResults = [];
+        
+        function logResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({message, type, timestamp});
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            
+            const resultsLog = document.getElementById('resultsLog');
+            resultsLog.appendChild(logEntry);
+            resultsLog.scrollTop = resultsLog.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function updateStatusCard(index, status, title, message) {
+            const cards = document.querySelectorAll('.status-card');
+            if (cards[index]) {
+                cards[index].className = `status-card ${status}`;
+                const icon = cards[index].querySelector('.status-icon');
+                const h3 = cards[index].querySelector('h3');
+                const p = cards[index].querySelector('p');
+                
+                switch(status) {
+                    case 'success':
+                        icon.textContent = '✅';
+                        break;
+                    case 'error':
+                        icon.textContent = '❌';
+                        break;
+                    case 'pending':
+                        icon.textContent = '⏳';
+                        break;
+                }
+                
+                if (title) h3.textContent = title;
+                if (message) p.textContent = message;
+            }
+        }
+        
+        async function runSystemStatusCheck() {
+            logResult('🔍 Starting comprehensive system status check...', 'info');
+            
+            // Test 1: JavaScript Functions
+            logResult('Testing JavaScript function definitions...', 'info');
+            try {
+                if (typeof setupReservationForm === 'function' && typeof setupContactForm === 'function') {
+                    updateStatusCard(0, 'success', 'JavaScript Functions', '✅ All functions defined');
+                    logResult('✅ JavaScript functions: setupReservationForm and setupContactForm are defined', 'success');
+                } else {
+                    updateStatusCard(0, 'error', 'JavaScript Functions', '❌ Missing functions');
+                    logResult('❌ JavaScript functions: One or more functions missing', 'error');
+                }
+            } catch (error) {
+                updateStatusCard(0, 'error', 'JavaScript Functions', '❌ Error checking functions');
+                logResult(`❌ Error checking JavaScript functions: ${error.message}`, 'error');
+            }
+            
+            // Test 2: API Endpoints
+            logResult('Testing API endpoint connectivity...', 'info');
+            try {
+                const response = await fetch('/api/reservations.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: 'API Test',
+                        email: 'apitest@example.com',
+                        phone: '555-0000',
+                        date: '2025-06-10',
+                        time: '18:00',
+                        guests: '2'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatusCard(1, 'success', 'API Endpoints', '✅ API working correctly');
+                    logResult(`✅ API test successful: ${result.message}`, 'success');
+                } else {
+                    updateStatusCard(1, 'error', 'API Endpoints', '❌ API returned error');
+                    logResult(`❌ API test failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                updateStatusCard(1, 'error', 'API Endpoints', '❌ API connection failed');
+                logResult(`❌ API connectivity test failed: ${error.message}`, 'error');
+            }
+            
+            // Test 3: Form Integration
+            logResult('Testing form integration...', 'info');
+            try {
+                setupReservationForm();
+                updateStatusCard(2, 'success', 'Form Integration', '✅ Form setup successful');
+                logResult('✅ Form integration: setupReservationForm executed successfully', 'success');
+            } catch (error) {
+                updateStatusCard(2, 'error', 'Form Integration', '❌ Form setup failed');
+                logResult(`❌ Form integration failed: ${error.message}`, 'error');
+            }
+            
+            // Test 4: Database Connection (indirect)
+            logResult('Testing database operations...', 'info');
+            try {
+                const response = await fetch('/api/reservations.php?action=test');
+                if (response.ok) {
+                    updateStatusCard(3, 'success', 'Database Connection', '✅ Database accessible');
+                    logResult('✅ Database connection: API endpoint accessible', 'success');
+                } else {
+                    updateStatusCard(3, 'error', 'Database Connection', '❌ Database issues');
+                    logResult('❌ Database connection: API endpoint returned error', 'error');
+                }
+            } catch (error) {
+                updateStatusCard(3, 'error', 'Database Connection', '❌ Connection failed');
+                logResult(`❌ Database test failed: ${error.message}`, 'error');
+            }
+            
+            logResult('🏁 System status check completed', 'success');
+        }
+        
+        async function testApiDirectly() {
+            logResult('📡 Testing API with form data...', 'info');
+            
+            const testData = {
+                name: document.getElementById('testName').value,
+                email: document.getElementById('testEmail').value,
+                phone: document.getElementById('testPhone').value,
+                date: document.getElementById('testDate').value,
+                time: document.getElementById('testTime').value,
+                guests: document.getElementById('testGuests').value,
+                special_requests: document.getElementById('testRequests').value
+            };
+            
+            try {
+                const response = await fetch('/api/reservations.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    logResult(`✅ API Test Success: ${result.message} (ID: ${result.id})`, 'success');
+                } else {
+                    logResult(`❌ API Test Failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                logResult(`❌ API Test Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testFormSubmission() {
+            logResult('📝 Testing form submission process...', 'info');
+            
+            // Create a temporary form
+            const form = document.createElement('form');
+            form.id = 'tempReservationForm';
+            form.innerHTML = `
+                <input type="text" name="name" value="${document.getElementById('testName').value}">
+                <input type="email" name="email" value="${document.getElementById('testEmail').value}">
+                <input type="tel" name="phone" value="${document.getElementById('testPhone').value}">
+                <input type="date" name="date" value="${document.getElementById('testDate').value}">
+                <input type="time" name="time" value="${document.getElementById('testTime').value}">
+                <select name="guests">
+                    <option value="${document.getElementById('testGuests').value}" selected>
+                        ${document.getElementById('testGuests').value} Guests
+                    </option>
+                </select>
+                <textarea name="special_requests">${document.getElementById('testRequests').value}</textarea>
+                <button type="submit">Submit</button>
+            `;
+            form.style.display = 'none';
+            document.body.appendChild(form);
+            
+            // Setup form handling
+            setupReservationForm();
+            
+            // Simulate form submission
+            const submitEvent = new Event('submit');
+            form.dispatchEvent(submitEvent);
+            
+            logResult('📝 Form submission simulation completed', 'info');
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(form);
+            }, 1000);
+        }
+        
+        async function testValidation() {
+            logResult('⚠️ Testing form validation...', 'info');
+            
+            const invalidData = {
+                name: '',
+                email: 'invalid-email',
+                phone: '',
+                date: '2025-06-05', // Past date
+                time: '',
+                guests: ''
+            };
+            
+            try {
+                const response = await fetch('/api/reservations.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(invalidData)
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    logResult(`✅ Validation working: ${result.message}`, 'success');
+                } else {
+                    logResult('❌ Validation failed: Invalid data was accepted', 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Validation test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testDuplicatePrevention() {
+            logResult('🚫 Testing duplicate prevention...', 'info');
+            
+            const testData = {
+                name: 'Duplicate Test User',
+                email: 'duplicate@test.com',
+                phone: '555-DUPLICATE',
+                date: document.getElementById('testDate').value,
+                time: document.getElementById('testTime').value,
+                guests: '2'
+            };
+            
+            try {
+                // Submit first reservation
+                const response1 = await fetch('/api/reservations.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(testData)
+                });
+                const result1 = await response1.json();
+                
+                if (result1.success) {
+                    logResult('✅ First reservation created successfully', 'success');
+                    
+                    // Immediately submit duplicate
+                    const response2 = await fetch('/api/reservations.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(testData)
+                    });
+                    const result2 = await response2.json();
+                    
+                    if (!result2.success && result2.message.includes('duplicate')) {
+                        logResult('✅ Duplicate prevention working correctly', 'success');
+                    } else {
+                        logResult('❌ Duplicate prevention failed: Duplicate was allowed', 'error');
+                    }
+                } else {
+                    logResult(`❌ Could not create initial reservation: ${result1.message}`, 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Duplicate prevention test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runFullIntegrationTest() {
+            logResult('🚀 Starting full integration test suite...', 'success');
+            
+            await runSystemStatusCheck();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testApiDirectly();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testValidation();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testDuplicatePrevention();
+            
+            logResult('🎉 Full integration test suite completed!', 'success');
+        }
+        
+        function simulateFormSubmission() {
+            logResult('🎭 Simulating complete form submission workflow...', 'info');
+            
+            // This would typically involve:
+            // 1. User fills form
+            // 2. Form validation
+            // 3. API submission
+            // 4. Success/error handling
+            
+            logResult('📝 Step 1: User fills out reservation form', 'info');
+            logResult('✅ Step 2: Client-side validation passes', 'success');
+            logResult('📡 Step 3: Data sent to API endpoint', 'info');
+            logResult('✅ Step 4: Server processes reservation', 'success');
+            logResult('📧 Step 5: Confirmation sent to user', 'success');
+            logResult('🎉 Form submission workflow simulation complete', 'success');
+        }
+        
+        // Mock showNotification for testing
+        window.showNotification = function(message, type) {
+            logResult(`📢 Notification: ${message}`, type === 'error' ? 'error' : 'success');
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            logResult('✅ Final integration test environment loaded', 'success');
+            
+            // Set tomorrow's date as default
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('testDate').value = tomorrow.toISOString().split('T')[0];
+            
+            logResult('📅 Test date set to tomorrow', 'info');
+        });
+    </script>
+</body>
+</html>

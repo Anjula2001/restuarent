@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Pagination Final Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-header {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-results {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .test-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .pagination-test {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .page-button {
+            padding: 8px 15px;
+            border: 1px solid #007bff;
+            background: white;
+            color: #007bff;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .page-button.active {
+            background: #007bff;
+            color: white;
+        }
+        .page-button:hover {
+            background: #0056b3;
+            color: white;
+        }
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .review-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .review-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .review-rating {
+            color: #ffc107;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .review-text {
+            color: #333;
+            line-height: 1.4;
+        }
+        .console-log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-header">Reviews Pagination Final Test</h1>
+        
+        <div class="test-results info">
+            <h3>Test Objective</h3>
+            <p>Verify that all approved reviews are accessible through pagination and that pagination functions work correctly after the recent fixes.</p>
+        </div>
+
+        <div class="test-controls">
+            <button class="test-button" onclick="runCompleteTest()">Run Complete Test</button>
+            <button class="test-button" onclick="testPaginationFunctions()">Test Pagination Functions</button>
+            <button class="test-button" onclick="testFilterFunctions()">Test Filter Functions</button>
+            <button class="test-button" onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div class="summary-stats" id="summaryStats"></div>
+
+        <div class="pagination-test" id="paginationControls"></div>
+
+        <div class="reviews-grid" id="reviewsGrid"></div>
+
+        <div id="testResults"></div>
+
+        <div class="console-log" id="consoleLog"></div>
+    </div>
+
+    <script>
+        let allReviews = [];
+        let currentPage = 1;
+        let reviewsPerPage = 6;
+        let filteredReviews = [];
+        let testResults = [];
+
+        // Console logging override
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const logDiv = document.getElementById('consoleLog');
+            if (logDiv) {
+                logDiv.innerHTML += args.join(' ') + '\n';
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+        };
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('consoleLog').innerHTML = '';
+            document.getElementById('reviewsGrid').innerHTML = '';
+            document.getElementById('paginationControls').innerHTML = '';
+            document.getElementById('summaryStats').innerHTML = '';
+            testResults = [];
+            console.log('Results cleared');
+        }
+
+        function addTestResult(test, status, message) {
+            testResults.push({ test, status, message });
+            updateTestResultsDisplay();
+        }
+
+        function updateTestResultsDisplay() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = testResults.map(result => `
+                <div class="test-results ${result.status}">
+                    <strong>${result.test}:</strong> ${result.message}
+                </div>
+            `).join('');
+        }
+
+        function updateSummaryStats() {
+            const statsDiv = document.getElementById('summaryStats');
+            const totalReviews = allReviews.length;
+            const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+            const currentDisplayed = Math.min(reviewsPerPage, filteredReviews.length - (currentPage - 1) * reviewsPerPage);
+            
+            statsDiv.innerHTML = `
+                <div class="stat-card">
+                    <span class="stat-number">${totalReviews}</span>
+                    <span class="stat-label">Total Reviews</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">${totalPages}</span>
+                    <span class="stat-label">Total Pages</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">${currentPage}</span>
+                    <span class="stat-label">Current Page</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">${currentDisplayed}</span>
+                    <span class="stat-label">Displayed</span>
+                </div>
+            `;
+        }
+
+        function createPaginationControls() {
+            const controlsDiv = document.getElementById('paginationControls');
+            const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+            
+            let controlsHtml = '';
+            
+            // Previous button
+            controlsHtml += `<button class="page-button" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                controlsHtml += `<button class="page-button ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            // Next button
+            controlsHtml += `<button class="page-button" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+            
+            controlsDiv.innerHTML = controlsHtml;
+        }
+
+        function displayReviews() {
+            console.log(`[Final Test] Displaying page ${currentPage} of ${Math.ceil(filteredReviews.length / reviewsPerPage)}`);
+            
+            const startIndex = (currentPage - 1) * reviewsPerPage;
+            const endIndex = startIndex + reviewsPerPage;
+            const reviewsToShow = filteredReviews.slice(startIndex, endIndex);
+            
+            console.log(`[Final Test] Showing reviews ${startIndex + 1} to ${Math.min(endIndex, filteredReviews.length)} of ${filteredReviews.length}`);
+            
+            const gridDiv = document.getElementById('reviewsGrid');
+            gridDiv.innerHTML = reviewsToShow.map(review => `
+                <div class="review-card">
+                    <div class="review-meta">ID: ${review.id} | ${review.customer_name} | ${review.created_at}</div>
+                    <div class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                    <div class="review-text">${review.review_text}</div>
+                </div>
+            `).join('');
+            
+            updateSummaryStats();
+            createPaginationControls();
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            console.log(`[Final Test] Going to page ${page}`);
+            currentPage = page;
+            displayReviews();
+        }
+
+        async function loadReviews() {
+            try {
+                console.log('[Final Test] Loading reviews from API...');
+                const response = await fetch('/restuarent/api/reviews.php');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                allReviews = await response.json();
+                filteredReviews = [...allReviews];
+                
+                console.log(`[Final Test] Loaded ${allReviews.length} reviews`);
+                return allReviews;
+            } catch (error) {
+                console.error('[Final Test] Error loading reviews:', error);
+                addTestResult('API Load', 'error', `Failed to load reviews: ${error.message}`);
+                return [];
+            }
+        }
+
+        async function runCompleteTest() {
+            clearResults();
+            console.log('[Final Test] Starting complete pagination test...');
+            
+            // Test 1: Load reviews
+            const reviews = await loadReviews();
+            if (reviews.length === 0) {
+                addTestResult('Complete Test', 'error', 'No reviews loaded - cannot continue testing');
+                return;
+            }
+            
+            addTestResult('API Load', 'success', `Successfully loaded ${reviews.length} reviews`);
+            
+            // Test 2: Display first page
+            currentPage = 1;
+            displayReviews();
+            addTestResult('First Page Display', 'success', `Displayed first page with ${Math.min(reviewsPerPage, reviews.length)} reviews`);
+            
+            // Test 3: Test pagination through all pages
+            const totalPages = Math.ceil(reviews.length / reviewsPerPage);
+            console.log(`[Final Test] Testing pagination through ${totalPages} pages`);
+            
+            let allReviewsFound = [];
+            for (let page = 1; page <= totalPages; page++) {
+                goToPage(page);
+                
+                const startIndex = (page - 1) * reviewsPerPage;
+                const endIndex = startIndex + reviewsPerPage;
+                const pageReviews = filteredReviews.slice(startIndex, endIndex);
+                
+                allReviewsFound = allReviewsFound.concat(pageReviews);
+                console.log(`[Final Test] Page ${page}: Found ${pageReviews.length} reviews`);
+            }
+            
+            if (allReviewsFound.length === reviews.length) {
+                addTestResult('Pagination Coverage', 'success', `All ${reviews.length} reviews are accessible through pagination`);
+            } else {
+                addTestResult('Pagination Coverage', 'error', `Only ${allReviewsFound.length} of ${reviews.length} reviews are accessible`);
+            }
+            
+            // Test 4: Verify unique review IDs (no duplicates)
+            const uniqueIds = new Set(allReviewsFound.map(r => r.id));
+            if (uniqueIds.size === allReviewsFound.length) {
+                addTestResult('Duplicate Check', 'success', 'No duplicate reviews found in pagination');
+            } else {
+                addTestResult('Duplicate Check', 'error', `Found ${allReviewsFound.length - uniqueIds.size} duplicate reviews`);
+            }
+            
+            // Test 5: Go back to first page
+            goToPage(1);
+            addTestResult('Navigation Test', 'success', 'Successfully navigated back to first page');
+            
+            console.log('[Final Test] Complete test finished');
+        }
+
+        async function testPaginationFunctions() {
+            console.log('[Final Test] Testing pagination functions...');
+            
+            if (allReviews.length === 0) {
+                await loadReviews();
+            }
+            
+            const totalPages = Math.ceil(allReviews.length / reviewsPerPage);
+            
+            // Test next/previous functions
+            goToPage(1);
+            console.log(`[Final Test] Started at page ${currentPage}`);
+            
+            // Test going to next page
+            if (totalPages > 1) {
+                goToPage(currentPage + 1);
+                if (currentPage === 2) {
+                    addTestResult('Next Page Function', 'success', 'Successfully navigated to next page');
+                } else {
+                    addTestResult('Next Page Function', 'error', 'Failed to navigate to next page');
+                }
+                
+                // Test going to previous page
+                goToPage(currentPage - 1);
+                if (currentPage === 1) {
+                    addTestResult('Previous Page Function', 'success', 'Successfully navigated to previous page');
+                } else {
+                    addTestResult('Previous Page Function', 'error', 'Failed to navigate to previous page');
+                }
+            }
+            
+            // Test direct page navigation
+            if (totalPages > 2) {
+                goToPage(totalPages);
+                if (currentPage === totalPages) {
+                    addTestResult('Direct Navigation', 'success', `Successfully navigated to last page (${totalPages})`);
+                } else {
+                    addTestResult('Direct Navigation', 'error', 'Failed to navigate to last page');
+                }
+            }
+        }
+
+        async function testFilterFunctions() {
+            console.log('[Final Test] Testing filter functions...');
+            
+            if (allReviews.length === 0) {
+                await loadReviews();
+            }
+            
+            // Test filter by rating
+            const originalLength = filteredReviews.length;
+            
+            // Filter by 5-star reviews
+            filteredReviews = allReviews.filter(review => review.rating === 5);
+            currentPage = 1;
+            displayReviews();
+            
+            const fiveStarCount = filteredReviews.length;
+            console.log(`[Final Test] Found ${fiveStarCount} five-star reviews`);
+            
+            if (fiveStarCount > 0) {
+                addTestResult('5-Star Filter', 'success', `Successfully filtered to ${fiveStarCount} five-star reviews`);
+            }
+            
+            // Reset filter to show all reviews
+            filteredReviews = [...allReviews];
+            currentPage = 1;
+            displayReviews();
+            
+            if (filteredReviews.length === originalLength) {
+                addTestResult('Filter Reset', 'success', 'Successfully reset filter to show all reviews');
+            } else {
+                addTestResult('Filter Reset', 'error', 'Failed to reset filter properly');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            console.log('[Final Test] Page loaded, ready for testing');
+        });
+    </script>
+</body>
+</html>

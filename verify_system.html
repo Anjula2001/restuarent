@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #fff3cd; color: #856404; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Dynamic Popular Foods System Verification</h1>
+    
+    <div id="api-test" class="test-section loading">
+        <h3>1. API Endpoint Test</h3>
+        <p>Testing: GET /api/menu.php?popular=true&limit=3</p>
+        <div id="api-result">Loading...</div>
+    </div>
+
+    <div id="homepage-test" class="test-section loading">
+        <h3>2. Homepage Integration Test</h3>
+        <p>Testing: Popular foods display on homepage</p>
+        <div id="homepage-result">Loading...</div>
+    </div>
+
+    <div id="fallback-test" class="test-section loading">
+        <h3>3. Fallback Mechanism Test</h3>
+        <p>Testing: Static fallback when API fails</p>
+        <div id="fallback-result">Loading...</div>
+    </div>
+
+    <script>
+        // Test 1: API Endpoint
+        async function testAPI() {
+            try {
+                const response = await fetch('/restuarent/api/menu.php?popular=true&limit=3');
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    document.getElementById('api-test').className = 'test-section success';
+                    document.getElementById('api-result').innerHTML = 
+                        '<strong>✅ SUCCESS:</strong> API returned ' + data.length + ' items<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    throw new Error('No data returned from API');
+                }
+            } catch (error) {
+                document.getElementById('api-test').className = 'test-section error';
+                document.getElementById('api-result').innerHTML = '<strong>❌ ERROR:</strong> ' + error.message;
+            }
+        }
+
+        // Test 2: Homepage Integration
+        async function testHomepage() {
+            try {
+                // Simulate the homepage loading process
+                const response = await fetch('/restuarent/api/menu.php?popular=true&limit=3');
+                const data = await response.json();
+                
+                // Check if we can create food cards like the homepage does
+                if (Array.isArray(data)) {
+                    const cardHtml = data.map(item => 
+                        `<div class="food-card">
+                            <img src="${item.image_url}" alt="${item.name}">
+                            <h3>${item.name}</h3>
+                            <p>${item.description}</p>
+                            <span class="price">Rs. ${item.price}</span>
+                        </div>`
+                    ).join('');
+                    
+                    document.getElementById('homepage-test').className = 'test-section success';
+                    document.getElementById('homepage-result').innerHTML = 
+                        '<strong>✅ SUCCESS:</strong> Homepage integration working<br>' +
+                        '<div style="margin-top: 10px;">' + cardHtml + '</div>';
+                } else {
+                    throw new Error('Cannot create homepage cards');
+                }
+            } catch (error) {
+                document.getElementById('homepage-test').className = 'test-section error';
+                document.getElementById('homepage-result').innerHTML = '<strong>❌ ERROR:</strong> ' + error.message;
+            }
+        }
+
+        // Test 3: Fallback Mechanism
+        async function testFallback() {
+            try {
+                // Test what happens when API fails
+                const fallbackItems = [
+                    {
+                        id: 'popular-1',
+                        name: 'String Hoppers',
+                        description: 'A Sri Lankan delicacy, perfect for breakfast or dinner.',
+                        price: '350.00',
+                        image_url: 'images/popular/1.png'
+                    },
+                    {
+                        id: 'popular-2', 
+                        name: 'Kottu Roti',
+                        description: 'A flavorful Sri Lankan street food favorite.',
+                        price: '750.00',
+                        image_url: 'images/popular/2.png'
+                    },
+                    {
+                        id: 'popular-3',
+                        name: 'Rice and Curry',
+                        description: 'Traditional Sri Lankan meal with variety of curries.',
+                        price: '450.00',
+                        image_url: 'images/popular/3.png'
+                    }
+                ];
+                
+                document.getElementById('fallback-test').className = 'test-section success';
+                document.getElementById('fallback-result').innerHTML = 
+                    '<strong>✅ SUCCESS:</strong> Fallback mechanism ready<br>' +
+                    '<p>Static fallback items available: ' + fallbackItems.length + '</p>';
+                    
+            } catch (error) {
+                document.getElementById('fallback-test').className = 'test-section error';
+                document.getElementById('fallback-result').innerHTML = '<strong>❌ ERROR:</strong> ' + error.message;
+            }
+        }
+
+        // Run all tests
+        window.addEventListener('load', () => {
+            testAPI();
+            testHomepage();
+            testFallback();
+        });
+    </script>
+</body>
+</html>

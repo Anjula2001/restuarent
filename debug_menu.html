@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Menu - Grand Restaurant</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .category-items { background: #f9f9f9; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .item { background: white; margin: 5px 0; padding: 8px; border-radius: 3px; border-left: 3px solid #007bff; }
+        .reload-btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .reload-btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Menu Debug Page</h1>
+    <button class="reload-btn" onclick="loadAndDisplayMenu()">🔄 Load Menu</button>
+    
+    <div class="debug-section">
+        <h2>Raw API Data</h2>
+        <div id="raw-data"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Categorized Items</h2>
+        <div id="categorized-data"></div>
+    </div>
+
+    <script>
+        async function loadAndDisplayMenu() {
+            try {
+                // Load all menu items
+                const response = await fetch('api/menu.php');
+                const allItems = await response.json();
+                
+                // Display raw data
+                document.getElementById('raw-data').innerHTML = `
+                    <p><strong>Total items loaded:</strong> ${allItems.length}</p>
+                    <div style="max-height: 200px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 3px;">
+                        ${allItems.map(item => `
+                            <div style="margin: 5px 0; padding: 5px; background: white; border-radius: 2px;">
+                                <strong>ID:</strong> ${item.id} | 
+                                <strong>Name:</strong> ${item.name} | 
+                                <strong>Category:</strong> "${item.category}" | 
+                                <strong>Price:</strong> Rs. ${item.price}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                // Categories with comprehensive matching
+                const categories = [
+                    { 
+                        id: 'rice-curry', 
+                        name: 'Rice & Curry', 
+                        matches: ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'] 
+                    },
+                    { 
+                        id: 'chinese', 
+                        name: 'Chinese', 
+                        matches: ['chinese'] 
+                    },
+                    { 
+                        id: 'seafood', 
+                        name: 'Seafood', 
+                        matches: ['seafood'] 
+                    },
+                    { 
+                        id: 'kottu', 
+                        name: 'Kottu', 
+                        matches: ['kottu'] 
+                    },
+                    { 
+                        id: 'juices', 
+                        name: 'Juices', 
+                        matches: ['juices', 'juice'] 
+                    },
+                    { 
+                        id: 'desserts', 
+                        name: 'Desserts', 
+                        matches: ['desserts', 'dessert'] 
+                    },
+                    { 
+                        id: 'others', 
+                        name: 'Other Specialties', 
+                        matches: ['pasta', 'salad', 'other'] 
+                    }
+                ];
+
+                let categorizedHtml = '';
+
+                categories.forEach(category => {
+                    const categoryItems = allItems.filter(item => {
+                        const itemCategory = item.category.toLowerCase().trim();
+                        
+                        // Check all possible matches for this category
+                        return category.matches.some(match => {
+                            return itemCategory === match || itemCategory.includes(match);
+                        });
+                    });
+
+                    categorizedHtml += `
+                        <div class="category-items">
+                            <h3>${category.name} (${categoryItems.length} items)</h3>
+                            ${categoryItems.length > 0 ? 
+                                categoryItems.map(item => `
+                                    <div class="item">
+                                        <strong>${item.name}</strong> - Rs. ${item.price} 
+                                        <small>(Category: "${item.category}")</small>
+                                    </div>
+                                `).join('') : 
+                                '<p style="color: #666; font-style: italic;">No items found for this category</p>'
+                            }
+                        </div>
+                    `;
+                });
+
+                // Show uncategorized items
+                const categorizedItemIds = new Set();
+                categories.forEach(category => {
+                    allItems.forEach(item => {
+                        const itemCategory = item.category.toLowerCase().trim();
+                        
+                        const isMatched = category.matches.some(match => {
+                            return itemCategory === match || itemCategory.includes(match);
+                        });
+                        
+                        if (isMatched) {
+                            categorizedItemIds.add(item.id);
+                        }
+                    });
+                });
+
+                const uncategorizedItems = allItems.filter(item => !categorizedItemIds.has(item.id));
+                
+                if (uncategorizedItems.length > 0) {
+                    categorizedHtml += `
+                        <div class="category-items" style="border: 2px solid #ff6b6b;">
+                            <h3 style="color: #ff6b6b;">Uncategorized Items (${uncategorizedItems.length})</h3>
+                            ${uncategorizedItems.map(item => `
+                                <div class="item" style="border-left-color: #ff6b6b;">
+                                    <strong>${item.name}</strong> - Rs. ${item.price} 
+                                    <small>(Category: "${item.category}")</small>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                document.getElementById('categorized-data').innerHTML = categorizedHtml;
+
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                document.getElementById('raw-data').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                document.getElementById('categorized-data').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Load menu on page load
+        document.addEventListener('DOMContentLoaded', loadAndDisplayMenu);
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Menu Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .debug-panel { background: white; margin: 15px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status { padding: 10px; margin: 5px 0; border-radius: 4px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px; border: 1px solid #e9ecef; }
+        .food-card { border: 1px solid #ddd; margin: 10px; padding: 15px; border-radius: 8px; display: inline-block; width: 280px; vertical-align: top; background: white; }
+        .food-card h4 { margin: 0 0 10px 0; color: #343a40; }
+        .food-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; }
+        button { background: #007bff; color: white; border: none; padding: 12px 24px; margin: 5px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .step { margin: 10px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Live Menu Loading Debug</h1>
+        
+        <div class="debug-panel">
+            <h2>🎯 Current Status</h2>
+            <div id="overall-status" class="status info">Ready to test...</div>
+            <button onclick="runFullDiagnosis()" class="btn-success">🚀 Run Full Diagnosis</button>
+            <button onclick="testMenuFunction()">🔄 Test Menu Function</button>
+            <button onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+
+        <div class="grid">
+            <div class="debug-panel">
+                <h2>📡 API Response Test</h2>
+                <div id="api-status"></div>
+                <div id="api-details"></div>
+            </div>
+            
+            <div class="debug-panel">
+                <h2>🎯 Category Filtering Test</h2>
+                <div id="filter-status"></div>
+                <div id="filter-details"></div>
+            </div>
+        </div>
+
+        <div class="debug-panel">
+            <h2>🍛 Rice & Curry Items Found</h2>
+            <div id="rice-curry-status"></div>
+            <div id="rice-curry-display"></div>
+        </div>
+
+        <div class="debug-panel">
+            <h2>📋 Debug Log</h2>
+            <div id="debug-log"></div>
+        </div>
+    </div>
+
+    <script>
+        let debugLog = [];
+        let allMenuItems = [];
+        let filteredItems = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push({ timestamp, message, type });
+            updateDebugLog();
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateDebugLog() {
+            const logDiv = document.getElementById('debug-log');
+            logDiv.innerHTML = debugLog.slice(-15).reverse().map(entry => 
+                `<div class="status ${entry.type}">[${entry.timestamp}] ${entry.message}</div>`
+            ).join('');
+        }
+
+        function clearAll() {
+            debugLog = [];
+            allMenuItems = [];
+            filteredItems = [];
+            
+            document.getElementById('overall-status').className = 'status info';
+            document.getElementById('overall-status').textContent = 'Cleared - Ready to test...';
+            
+            ['api-status', 'api-details', 'filter-status', 'filter-details', 
+             'rice-curry-status', 'rice-curry-display'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            
+            updateDebugLog();
+        }
+
+        async function testApiCall() {
+            log('Testing API call to menu.php...', 'info');
+            document.getElementById('api-status').innerHTML = '<div class="status info">Loading...</div>';
+
+            try {
+                const timestamp = new Date().getTime();
+                const url = `api/menu.php?_t=${timestamp}`;
+                log(`Making request to: ${url}`, 'info');
+
+                const response = await fetch(url, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                allMenuItems = await response.json();
+                log(`✅ API Success: Received ${allMenuItems.length} total items`, 'success');
+
+                // Count items by category
+                const categoryCounts = {};
+                allMenuItems.forEach(item => {
+                    const cat = item.category || 'Unknown';
+                    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+                });
+
+                document.getElementById('api-status').innerHTML = '<div class="status success">✅ API Call Successful</div>';
+                document.getElementById('api-details').innerHTML = `
+                    <div class="step">
+                        <strong>Total Items:</strong> ${allMenuItems.length}<br>
+                        <strong>Categories Found:</strong><br>
+                        ${Object.entries(categoryCounts).map(([cat, count]) => 
+                            `• ${cat}: ${count} items`
+                        ).join('<br>')}
+                    </div>
+                    <pre>${JSON.stringify(allMenuItems.filter(item => 
+                        item.category.toLowerCase().includes('rice') || 
+                        item.category.toLowerCase().includes('curry')
+                    ), null, 2)}</pre>
+                `;
+
+                return true;
+
+            } catch (error) {
+                log(`❌ API Error: ${error.message}`, 'error');
+                document.getElementById('api-status').innerHTML = '<div class="status error">❌ API Call Failed</div>';
+                document.getElementById('api-details').innerHTML = `<div class="step">Error: ${error.message}</div>`;
+                return false;
+            }
+        }
+
+        async function testCategoryFiltering() {
+            log('Testing category filtering logic...', 'info');
+            document.getElementById('filter-status').innerHTML = '<div class="status info">Processing...</div>';
+
+            if (allMenuItems.length === 0) {
+                log('⚠️ No menu items loaded - running API test first', 'warning');
+                const apiSuccess = await testApiCall();
+                if (!apiSuccess) return false;
+            }
+
+            try {
+                // Use exact matching logic from menu.html
+                const riceCurryMatches = ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'];
+                
+                log(`Testing with matches: [${riceCurryMatches.join(', ')}]`, 'info');
+
+                filteredItems = allMenuItems.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    
+                    const isMatch = riceCurryMatches.some(match => {
+                        const exactMatch = itemCategory === match;
+                        const partialMatch = itemCategory.includes(match);
+                        
+                        if (exactMatch || partialMatch) {
+                            log(`✅ MATCH: "${itemCategory}" matches "${match}" (exact: ${exactMatch}, partial: ${partialMatch})`, 'success');
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    if (!isMatch) {
+                        log(`❌ NO MATCH: "${itemCategory}" doesn't match any rice/curry patterns`, 'warning');
+                    }
+
+                    return isMatch;
+                });
+
+                log(`🎯 Filter Result: Found ${filteredItems.length} Rice & Curry items`, filteredItems.length > 0 ? 'success' : 'error');
+
+                document.getElementById('filter-status').innerHTML = `<div class="status ${filteredItems.length > 0 ? 'success' : 'error'}">
+                    ${filteredItems.length > 0 ? '✅' : '❌'} Found ${filteredItems.length} Rice & Curry items
+                </div>`;
+
+                document.getElementById('filter-details').innerHTML = `
+                    <div class="step">
+                        <strong>Matching Logic:</strong> ${riceCurryMatches.join(', ')}<br>
+                        <strong>Items Found:</strong> ${filteredItems.length}<br>
+                        ${filteredItems.map(item => 
+                            `• ${item.name} (Category: "${item.category}", ID: ${item.id})`
+                        ).join('<br>')}
+                    </div>
+                `;
+
+                return filteredItems.length > 0;
+
+            } catch (error) {
+                log(`❌ Filter Error: ${error.message}`, 'error');
+                document.getElementById('filter-status').innerHTML = '<div class="status error">❌ Filtering Failed</div>';
+                return false;
+            }
+        }
+
+        async function testMenuFunction() {
+            log('Testing complete menu loading function...', 'info');
+
+            try {
+                // Test the exact loadMenuByCategories function logic
+                const categories = [
+                    { 
+                        id: 'rice-curry', 
+                        name: 'Rice & Curry', 
+                        matches: ['rice & curry', 'rice&curry', 'ricecurry', 'rice', 'curry'] 
+                    }
+                ];
+
+                const timestamp = new Date().getTime();
+                const response = await fetch(`api/menu.php?_t=${timestamp}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                const allItems = await response.json();
+                log(`📦 Loaded ${allItems.length} total items from API`, 'info');
+
+                // Process rice-curry category
+                const category = categories[0];
+                const categoryItems = allItems.filter(item => {
+                    const itemCategory = item.category.toLowerCase().trim();
+                    
+                    return category.matches.some(match => {
+                        return itemCategory === match || itemCategory.includes(match);
+                    });
+                });
+
+                log(`🍛 Menu function found ${categoryItems.length} rice & curry items`, 'success');
+
+                // Display the items
+                const displayDiv = document.getElementById('rice-curry-display');
+                if (categoryItems.length > 0) {
+                    displayDiv.innerHTML = categoryItems.map(item => `
+                        <div class="food-card">
+                            <h4>${item.name}</h4>
+                            <img src="${item.image_url || 'images/popular/2.png'}" alt="${item.name}" 
+                                 onerror="this.src='images/popular/2.png'">
+                            <p><strong>Category:</strong> "${item.category}"</p>
+                            <p><strong>Price:</strong> Rs. ${item.price}</p>
+                            <p><strong>Description:</strong> ${item.description || 'No description'}</p>
+                            <p><small>ID: ${item.id}</small></p>
+                        </div>
+                    `).join('');
+
+                    document.getElementById('rice-curry-status').innerHTML = `<div class="status success">✅ Found ${categoryItems.length} Rice & Curry items</div>`;
+                } else {
+                    displayDiv.innerHTML = '<div class="status error">❌ No Rice & Curry items found!</div>';
+                    document.getElementById('rice-curry-status').innerHTML = '<div class="status error">❌ No items found</div>';
+                }
+
+                return categoryItems.length > 0;
+
+            } catch (error) {
+                log(`❌ Menu function error: ${error.message}`, 'error');
+                document.getElementById('rice-curry-status').innerHTML = '<div class="status error">❌ Error occurred</div>';
+                return false;
+            }
+        }
+
+        async function runFullDiagnosis() {
+            log('🚀 Starting full diagnosis...', 'info');
+            document.getElementById('overall-status').className = 'status info';
+            document.getElementById('overall-status').textContent = 'Running diagnosis...';
+
+            try {
+                const apiSuccess = await testApiCall();
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                const filterSuccess = await testCategoryFiltering();
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                const menuSuccess = await testMenuFunction();
+
+                const overallSuccess = apiSuccess && filterSuccess && menuSuccess;
+                
+                document.getElementById('overall-status').className = `status ${overallSuccess ? 'success' : 'error'}`;
+                document.getElementById('overall-status').textContent = overallSuccess ? 
+                    '✅ All tests passed - Menu should be working!' : 
+                    '❌ Issues found - Check the details above';
+
+                log(`🎯 Diagnosis complete: ${overallSuccess ? 'SUCCESS' : 'ISSUES FOUND'}`, overallSuccess ? 'success' : 'error');
+
+            } catch (error) {
+                log(`❌ Diagnosis failed: ${error.message}`, 'error');
+                document.getElementById('overall-status').className = 'status error';
+                document.getElementById('overall-status').textContent = '❌ Diagnosis failed';
+            }
+        }
+
+        // Auto-run diagnosis on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                log('🔧 Auto-starting diagnosis...', 'info');
+                runFullDiagnosis();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

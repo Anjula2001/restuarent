@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Image Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 20px 0; border: 1px solid #ccc; padding: 15px; }
+        img { max-width: 300px; height: 200px; object-fit: cover; display: block; margin: 10px 0; }
+        .success { border-color: green; }
+        .error { border-color: red; }
+    </style>
+</head>
+<body>
+    <h1>Simple Image Test for Rice & Curry</h1>
+    
+    <div class="test">
+        <h3>Test 1: Local Image</h3>
+        <img src="images/popular/1.png" alt="Local Image 1" onload="this.parentElement.className+=' success'" onerror="this.parentElement.className+=' error'">
+        <p>images/popular/1.png</p>
+    </div>
+    
+    <div class="test">
+        <h3>Test 2: Local Image</h3>
+        <img src="images/popular/2.png" alt="Local Image 2" onload="this.parentElement.className+=' success'" onerror="this.parentElement.className+=' error'">
+        <p>images/popular/2.png</p>
+    </div>
+    
+    <div class="test">
+        <h3>Test 3: External Image</h3>
+        <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="External Image" onload="this.parentElement.className+=' success'" onerror="this.parentElement.className+=' error'">
+        <p>Unsplash URL</p>
+    </div>
+    
+    <div class="test">
+        <h3>Test 4: Rice & Curry API Data</h3>
+        <div id="api-test">Loading...</div>
+    </div>
+    
+    <script>
+        // Test the API data
+        fetch('api/menu.php?category=Rice%20%26%20Curry')
+            .then(response => response.json())
+            .then(items => {
+                const container = document.getElementById('api-test');
+                container.innerHTML = items.map(item => `
+                    <div style="border: 1px solid #ddd; margin: 10px 0; padding: 10px;">
+                        <h4>${item.name}</h4>
+                        <img src="${item.image_url || 'images/popular/2.png'}" alt="${item.name}" 
+                             style="max-width: 200px; height: 150px; object-fit: cover;"
+                             onload="console.log('✅ Loaded: ${item.name}')"
+                             onerror="console.log('❌ Failed: ${item.name}'); this.src='images/popular/2.png'">
+                        <p>URL: ${item.image_url || 'EMPTY (using fallback)'}</p>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                document.getElementById('api-test').innerHTML = `Error: ${error.message}`;
+            });
+    </script>
+</body>
+</html>

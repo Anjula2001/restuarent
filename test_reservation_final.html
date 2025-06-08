@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Reservation Form Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-form {
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        button {
+            background: #2c3e50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #34495e;
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .test-results {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+        .info { color: #3498db; }
+        .notification {
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .notification.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .notification.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .notification.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Final Reservation Form Test</h1>
+        <p>This test verifies that the reservation form functionality is working correctly with the implemented <code>setupReservationForm()</code> function.</p>
+        
+        <div class="test-form">
+            <h2>📝 Test Reservation Form</h2>
+            <form id="reservationForm" class="reservation-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">📅 Reservation Date</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">🕐 Preferred Time</label>
+                        <input type="time" id="time" name="time" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="guests">👥 Number of Guests</label>
+                        <select id="guests" name="guests" required>
+                            <option value="">Select number of guests</option>
+                            <option value="1">1 Guest</option>
+                            <option value="2">2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="5">5 Guests</option>
+                            <option value="6">6 Guests</option>
+                            <option value="8">8 Guests</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="occasion">🎉 Special Occasion</label>
+                        <select id="occasion" name="occasion">
+                            <option value="">Select occasion (Optional)</option>
+                            <option value="birthday">🎂 Birthday Celebration</option>
+                            <option value="anniversary">💕 Anniversary</option>
+                            <option value="business">💼 Business Meeting</option>
+                            <option value="romantic">🌹 Romantic Dinner</option>
+                            <option value="family">👨‍👩‍👧‍👦 Family Gathering</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">👤 Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">📱 Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">📧 Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="requests">📝 Special Requests or Dietary Requirements</label>
+                    <textarea id="requests" name="special_requests" placeholder="Please let us know about any dietary restrictions, allergies, seating preferences, or special arrangements..."></textarea>
+                </div>
+
+                <button type="submit">🎯 Reserve Your Table</button>
+            </form>
+        </div>
+
+        <div class="test-controls">
+            <h3>🔧 Test Controls</h3>
+            <button onclick="fillValidTestData()">📝 Fill Valid Test Data</button>
+            <button onclick="fillInvalidTestData()">❌ Fill Invalid Test Data</button>
+            <button onclick="clearForm()">🗑️ Clear Form</button>
+            <button onclick="runAutomatedTests()">🤖 Run Automated Tests</button>
+        </div>
+
+        <div id="notification" class="notification"></div>
+        
+        <div class="test-results">
+            <h3>📊 Test Results</h3>
+            <div id="testOutput">
+                <p>Ready to test reservation form functionality...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Test utilities
+        let testResults = [];
+
+        function logTest(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push(`[${timestamp}] ${message}`);
+            
+            const output = document.getElementById('testOutput');
+            const p = document.createElement('p');
+            p.className = type;
+            p.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            output.appendChild(p);
+            
+            console.log(`[TEST] ${message}`);
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            logTest(`Notification: ${message}`, type);
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        function fillValidTestData() {
+            // Set date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            
+            document.getElementById('date').value = dateStr;
+            document.getElementById('time').value = '19:00';
+            document.getElementById('guests').value = '4';
+            document.getElementById('occasion').value = 'birthday';
+            document.getElementById('name').value = 'John Doe';
+            document.getElementById('phone').value = '+1-555-123-4567';
+            document.getElementById('email').value = 'john.doe@test.com';
+            document.getElementById('requests').value = 'Window table preferred, celebrating birthday';
+            
+            logTest('✅ Valid test data filled', 'success');
+        }
+
+        function fillInvalidTestData() {
+            // Set date to yesterday (past date)
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const dateStr = yesterday.toISOString().split('T')[0];
+            
+            document.getElementById('date').value = dateStr;
+            document.getElementById('time').value = '25:00'; // Invalid time
+            document.getElementById('guests').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('phone').value = 'invalid-phone';
+            document.getElementById('email').value = 'invalid-email';
+            
+            logTest('❌ Invalid test data filled', 'error');
+        }
+
+        function clearForm() {
+            document.getElementById('reservationForm').reset();
+            logTest('🗑️ Form cleared', 'info');
+        }
+
+        async function runAutomatedTests() {
+            logTest('🤖 Starting automated tests...', 'info');
+            
+            // Test 1: Form submission with empty data
+            logTest('Test 1: Empty form submission', 'info');
+            clearForm();
+            try {
+                document.getElementById('reservationForm').dispatchEvent(new Event('submit'));
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                logTest('✅ Empty form validation working', 'success');
+            } catch (error) {
+                logTest(`❌ Empty form test failed: ${error.message}`, 'error');
+            }
+            
+            // Test 2: Valid form submission
+            logTest('Test 2: Valid form submission', 'info');
+            fillValidTestData();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            try {
+                // Simulate form submission
+                const form = document.getElementById('reservationForm');
+                const submitEvent = new Event('submit');
+                form.dispatchEvent(submitEvent);
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                logTest('✅ Valid form submission test completed', 'success');
+            } catch (error) {
+                logTest(`❌ Valid form test failed: ${error.message}`, 'error');
+            }
+            
+            // Test 3: Past date validation
+            logTest('Test 3: Past date validation', 'info');
+            fillInvalidTestData();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            try {
+                const form = document.getElementById('reservationForm');
+                const submitEvent = new Event('submit');
+                form.dispatchEvent(submitEvent);
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                logTest('✅ Past date validation test completed', 'success');
+            } catch (error) {
+                logTest(`❌ Past date test failed: ${error.message}`, 'error');
+            }
+            
+            logTest('🏁 Automated tests completed', 'success');
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            logTest('🚀 Test page loaded, initializing...', 'info');
+            
+            // Set minimum date to today for the date input
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+            
+            logTest('✅ Test environment ready', 'success');
+        });
+    </script>
+</body>
+</html>

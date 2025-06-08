@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Page Debug - Focused Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #8B5A2B;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #A0522D;
+        }
+        .status-good { color: #4CAF50; font-weight: bold; }
+        .status-error { color: #f44336; font-weight: bold; }
+        .debug-output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #8B5A2B;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .console-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error-log { color: #e74c3c; }
+        .warning-log { color: #f39c12; }
+        .info-log { color: #3498db; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Reviews Page Focused Debug</h1>
+    
+    <div class="debug-section">
+        <h2>⚡ Quick API Test</h2>
+        <button class="test-btn" onclick="quickAPITest()">Test API</button>
+        <button class="test-btn" onclick="simulateExactReviewsPageLoad()">Simulate Exact Reviews Page</button>
+        <button class="test-btn" onclick="testFiltering()">Test Filtering</button>
+        <button class="test-btn" onclick="testPagination()">Test Pagination</button>
+        <div id="quickOutput" class="debug-output" style="display: none;"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>📊 Reviews Display Test</h2>
+        <div style="border: 2px solid #8B5A2B; padding: 15px; border-radius: 5px;">
+            <!-- Filters -->
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="filter-btn" data-rating="all" onclick="setFilter('all')" style="background: #8B5A2B; color: white; padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer;">All Reviews</button>
+                <button class="filter-btn" data-rating="5" onclick="setFilter('5')" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 8px 16px; border-radius: 20px; cursor: pointer;">5 Stars</button>
+                <button class="filter-btn" data-rating="4" onclick="setFilter('4')" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 8px 16px; border-radius: 20px; cursor: pointer;">4 Stars</button>
+                <button class="filter-btn" data-rating="3" onclick="setFilter('3')" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 8px 16px; border-radius: 20px; cursor: pointer;">3 Stars</button>
+                <button class="filter-btn" data-rating="2" onclick="setFilter('2')" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 8px 16px; border-radius: 20px; cursor: pointer;">2 Stars</button>
+                <button class="filter-btn" data-rating="1" onclick="setFilter('1')" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 8px 16px; border-radius: 20px; cursor: pointer;">1 Star</button>
+            </div>
+            
+            <!-- Loading -->
+            <div id="testLoading" style="text-align: center; padding: 20px; color: #666;">
+                Loading customer reviews...
+            </div>
+            
+            <!-- Reviews Grid -->
+            <div id="testReviewsGrid" style="display: none; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+                <!-- Reviews will be loaded here -->
+            </div>
+            
+            <!-- Pagination -->
+            <div id="testPagination" style="display: none; justify-content: center; gap: 10px; margin-top: 20px;">
+                <!-- Pagination will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔍 Console Monitor</h2>
+        <button class="test-btn" onclick="clearConsole()">Clear Console</button>
+        <div id="consoleOutput" class="console-output">
+            Console logs will appear here...
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'api';
+        let allReviews = [];
+        let currentPage = 1;
+        let reviewsPerPage = 9;
+        let currentFilter = 'all';
+        
+        // Override console methods to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsoleOutput(message, type = 'info') {
+            const output = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error-log' : type === 'warn' ? 'warning-log' : 'info-log';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsoleOutput(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsoleOutput(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsoleOutput(args.join(' '), 'warn');
+        };
+
+        async function quickAPITest() {
+            const output = document.getElementById('quickOutput');
+            output.style.display = 'block';
+            output.innerHTML = 'Testing API...\n';
+            
+            try {
+                console.log('=== API TEST START ===');
+                
+                // Test reviews API
+                const reviewsResponse = await fetch(`${API_BASE}/reviews.php`);
+                console.log('Reviews API Response Status:', reviewsResponse.status);
+                
+                const reviews = await reviewsResponse.json();
+                console.log('Reviews Count:', reviews.length);
+                console.log('First 3 Reviews:', reviews.slice(0, 3));
+                
+                // Test statistics API
+                const statsResponse = await fetch(`${API_BASE}/reviews.php?statistics=1`);
+                console.log('Statistics API Response Status:', statsResponse.status);
+                
+                const stats = await statsResponse.json();
+                console.log('Statistics:', stats);
+                
+                allReviews = reviews;
+                
+                output.innerHTML += `✅ API Test Successful\n`;
+                output.innerHTML += `Total Reviews: ${reviews.length}\n`;
+                output.innerHTML += `Average Rating: ${stats.average_rating}\n`;
+                output.innerHTML += `First Review: ${reviews[0]?.customer_name} - ${reviews[0]?.rating} stars\n`;
+                
+                console.log('=== API TEST END ===');
+                
+            } catch (error) {
+                console.error('API Test Error:', error);
+                output.innerHTML += `❌ API Test Failed: ${error.message}\n`;
+            }
+        }
+
+        async function simulateExactReviewsPageLoad() {
+            const output = document.getElementById('quickOutput');
+            output.style.display = 'block';
+            
+            if (!allReviews.length) {
+                await quickAPITest();
+            }
+            
+            try {
+                console.log('=== SIMULATING REVIEWS PAGE LOAD ===');
+                
+                // Hide loading
+                document.getElementById('testLoading').style.display = 'none';
+                
+                // Show grid
+                const grid = document.getElementById('testReviewsGrid');
+                grid.style.display = 'grid';
+                
+                // Use exact same logic as reviews.html
+                const filteredReviews = currentFilter === 'all' 
+                    ? allReviews 
+                    : allReviews.filter(review => review.rating == currentFilter);
+
+                console.log(`Filtered reviews for "${currentFilter}": ${filteredReviews.length}`);
+
+                // Paginate reviews
+                const startIndex = (currentPage - 1) * reviewsPerPage;
+                const endIndex = startIndex + reviewsPerPage;
+                const paginatedReviews = filteredReviews.slice(startIndex, endIndex);
+
+                console.log(`Page ${currentPage}: showing reviews ${startIndex + 1}-${Math.min(endIndex, filteredReviews.length)} of ${filteredReviews.length}`);
+
+                // Generate review cards (exact same HTML as reviews.html)
+                grid.innerHTML = paginatedReviews.map((review, index) => `
+                    <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; transition: transform 0.3s, box-shadow 0.3s; position: relative;">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #8B5A2B, #D2B48C); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5em; font-weight: bold; margin-right: 15px;">
+                                ${review.customer_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; color: #333; font-size: 1.2em;">${review.customer_name}</h3>
+                                <div style="color: #888; font-size: 0.9em; margin: 5px 0;">${formatDate(review.created_at)}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 2px; margin-bottom: 20px;">
+                            ${generateStarRating(review.rating)}
+                        </div>
+                        
+                        <div style="color: #555; line-height: 1.7; font-size: 1.05em; margin-bottom: 20px;">
+                            ${review.review_text}
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                            <button style="background: none; border: 1px solid #ddd; color: #666; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                                👍 Helpful
+                            </button>
+                            <span style="color: #888; font-size: 0.9em;">
+                                ${Math.floor(Math.random() * 10) + 1} people found this helpful
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Setup pagination
+                setupTestPagination(filteredReviews.length);
+                
+                output.innerHTML += `\n✅ Reviews Page Simulation Complete\n`;
+                output.innerHTML += `Showing ${paginatedReviews.length} reviews on page ${currentPage}\n`;
+                
+                console.log('=== SIMULATION COMPLETE ===');
+                
+            } catch (error) {
+                console.error('Simulation Error:', error);
+                output.innerHTML += `❌ Simulation Failed: ${error.message}\n`;
+            }
+        }
+
+        function setupTestPagination(totalReviews) {
+            const pagination = document.getElementById('testPagination');
+            const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `<button onclick="changePage(${currentPage - 1})" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 10px 15px; border-radius: 8px; cursor: pointer;" ${currentPage === 1 ? 'disabled' : ''}>← Previous</button>`;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHTML += `
+                    <button onclick="changePage(${i})" style="background: ${i === currentPage ? '#8B5A2B' : 'white'}; border: 2px solid #8B5A2B; color: ${i === currentPage ? 'white' : '#8B5A2B'}; padding: 10px 15px; border-radius: 8px; cursor: pointer;">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Next button
+            paginationHTML += `<button onclick="changePage(${currentPage + 1})" style="background: white; border: 2px solid #8B5A2B; color: #8B5A2B; padding: 10px 15px; border-radius: 8px; cursor: pointer;" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>`;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const filteredReviews = currentFilter === 'all' 
+                ? allReviews 
+                : allReviews.filter(review => review.rating == currentFilter);
+            const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+            
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                console.log(`Changing to page ${page}`);
+                simulateExactReviewsPageLoad();
+            }
+        }
+
+        function setFilter(rating) {
+            console.log(`Setting filter to: ${rating}`);
+            
+            // Update button styles
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                if (btn.dataset.rating === rating) {
+                    btn.style.background = '#8B5A2B';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.color = '#8B5A2B';
+                }
+            });
+            
+            currentFilter = rating;
+            currentPage = 1; // Reset to first page
+            simulateExactReviewsPageLoad();
+        }
+
+        async function testFiltering() {
+            const output = document.getElementById('quickOutput');
+            output.style.display = 'block';
+            
+            if (!allReviews.length) {
+                await quickAPITest();
+            }
+            
+            console.log('=== TESTING FILTERING ===');
+            
+            output.innerHTML += `\n📊 Filter Test Results:\n`;
+            
+            // Test each filter
+            const filters = ['all', '5', '4', '3', '2', '1'];
+            for (const filter of filters) {
+                const filteredReviews = filter === 'all' 
+                    ? allReviews 
+                    : allReviews.filter(review => review.rating == filter);
+                
+                output.innerHTML += `${filter} stars: ${filteredReviews.length} reviews\n`;
+                console.log(`Filter "${filter}": ${filteredReviews.length} reviews`);
+            }
+            
+            console.log('=== FILTERING TEST COMPLETE ===');
+        }
+
+        async function testPagination() {
+            const output = document.getElementById('quickOutput');
+            output.style.display = 'block';
+            
+            if (!allReviews.length) {
+                await quickAPITest();
+            }
+            
+            console.log('=== TESTING PAGINATION ===');
+            
+            const totalPages = Math.ceil(allReviews.length / reviewsPerPage);
+            
+            output.innerHTML += `\n📄 Pagination Test:\n`;
+            output.innerHTML += `Total reviews: ${allReviews.length}\n`;
+            output.innerHTML += `Reviews per page: ${reviewsPerPage}\n`;
+            output.innerHTML += `Total pages: ${totalPages}\n`;
+            
+            for (let page = 1; page <= Math.min(totalPages, 3); page++) {
+                const startIndex = (page - 1) * reviewsPerPage;
+                const endIndex = startIndex + reviewsPerPage;
+                const pageReviews = allReviews.slice(startIndex, endIndex);
+                
+                output.innerHTML += `Page ${page}: ${pageReviews.length} reviews (${startIndex + 1}-${Math.min(endIndex, allReviews.length)})\n`;
+                console.log(`Page ${page}: ${pageReviews.length} reviews`);
+            }
+            
+            console.log('=== PAGINATION TEST COMPLETE ===');
+        }
+
+        function generateStarRating(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<span style="color: #ffd700; font-size: 1.3em;">★</span>';
+                } else {
+                    stars += '<span style="color: #ddd; font-size: 1.3em;">★</span>';
+                }
+            }
+            return stars;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = 'Console cleared...\n';
+        }
+
+        // Auto-run test when page loads
+        window.onload = function() {
+            console.log('Reviews Debug Page Loaded');
+            quickAPITest().then(() => {
+                simulateExactReviewsPageLoad();
+            });
+        };
+    </script>
+</body>
+</html>

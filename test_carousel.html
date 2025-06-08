@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews Carousel Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { border: 1px solid #ddd; margin: 20px 0; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .customer-reviews {
+            padding: 50px 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        /* Reviews Carousel Container */
+        .reviews-carousel-container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+
+        .reviews-carousel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            gap: 20px;
+        }
+
+        .review-slide {
+            display: flex;
+            gap: 20px;
+            min-width: 100%;
+            flex-shrink: 0;
+        }
+
+        .review-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .review-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4em;
+            color: #8B5A2B;
+            opacity: 0.2;
+            font-family: serif;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .review-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .reviewer-name {
+            font-weight: bold;
+            color: #8B5A2B;
+            font-size: 1.1em;
+        }
+
+        .reviewer-rating {
+            color: #f39c12;
+            font-size: 1.2em;
+        }
+
+        /* Carousel Navigation */
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(139, 90, 43, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .carousel-nav:hover {
+            background: rgba(139, 90, 43, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-nav.prev {
+            left: -25px;
+        }
+
+        .carousel-nav.next {
+            right: -25px;
+        }
+
+        .carousel-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        /* Carousel Indicators */
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(139, 90, 43, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #8B5A2B;
+            transform: scale(1.2);
+        }
+
+        .review-loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎠 Reviews Carousel Test</h1>
+    
+    <div class="test-section">
+        <h2>📡 API Test</h2>
+        <button onclick="testAPI()">Test Reviews API</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎠 Carousel Test</h2>
+        <div class="customer-reviews">
+            <h3>Customer Reviews Carousel</h3>
+            <div class="reviews-carousel-container">
+                <div class="reviews-carousel" id="reviewsCarousel">
+                    <div class="review-slide">
+                        <div class="review-loading">Loading customer reviews...</div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Arrows -->
+                <button class="carousel-nav prev" id="prevReview">❮</button>
+                <button class="carousel-nav next" id="nextReview">❯</button>
+            </div>
+            
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators" id="carouselIndicators"></div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔄 Manual Control</h2>
+        <button onclick="manualPrevious()">Previous</button>
+        <button onclick="manualNext()">Next</button>
+        <button onclick="goToSlide(0)">Slide 1</button>
+        <button onclick="goToSlide(1)">Slide 2</button>
+        <button onclick="goToSlide(2)">Slide 3</button>
+        <div id="carouselStatus"></div>
+    </div>
+    
+    <script>
+        const API_BASE = 'api';
+        
+        // Carousel variables
+        let allCustomerReviews = [];
+        let currentReviewSlide = 0;
+        let reviewsPerSlide = 3;
+        
+        async function testAPI() {
+            const result = document.getElementById('apiResult');
+            result.innerHTML = 'Testing API...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/reviews.php`);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const reviews = await response.json();
+                console.log('Reviews received:', reviews);
+                
+                result.innerHTML = `
+                    <div class="success">✅ API Test Successful</div>
+                    <p><strong>Reviews found:</strong> ${reviews.length}</p>
+                    <p><strong>First review:</strong> ${reviews[0] ? reviews[0].customer_name : 'None'}</p>
+                `;
+                
+                // Initialize carousel with data
+                allCustomerReviews = reviews;
+                initializeReviewsCarousel();
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                result.innerHTML = `<div class="error">❌ API Error: ${error.message}</div>`;
+            }
+        }
+        
+        function initializeReviewsCarousel() {
+            if (!allCustomerReviews || allCustomerReviews.length === 0) {
+                showNoReviews();
+                return;
+            }
+
+            updateReviewsCarousel();
+            setupCarouselIndicators();
+            setupCarouselEventListeners();
+            updateCarouselStatus();
+        }
+
+        function setupCarouselEventListeners() {
+            const prevBtn = document.getElementById('prevReview');
+            const nextBtn = document.getElementById('nextReview');
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', previousReviews);
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', nextReviews);
+            }
+        }
+
+        function updateReviewsCarousel() {
+            const carousel = document.getElementById('reviewsCarousel');
+            if (!carousel) return;
+
+            const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+            
+            // Create slides
+            let slidesHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const slideStart = i * reviewsPerSlide;
+                const slideEnd = Math.min(slideStart + reviewsPerSlide, allCustomerReviews.length);
+                const slideReviews = allCustomerReviews.slice(slideStart, slideEnd);
+                
+                slidesHTML += `
+                    <div class="review-slide">
+                        ${slideReviews.map(review => `
+                            <div class="review-card">
+                                <div class="review-text">${review.review_text}</div>
+                                <div class="reviewer-info">
+                                    <div class="reviewer-name">${review.customer_name}</div>
+                                    <div class="reviewer-rating">${'★'.repeat(review.rating)}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            carousel.innerHTML = slidesHTML;
+            
+            // Update navigation buttons
+            updateNavigationButtons(totalSlides);
+            updateCarouselStatus();
+        }
+
+        function setupCarouselIndicators() {
+            const indicatorsContainer = document.getElementById('carouselIndicators');
+            if (!indicatorsContainer || allCustomerReviews.length <= reviewsPerSlide) {
+                indicatorsContainer.style.display = 'none';
+                return;
+            }
+            
+            const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+            let indicatorsHTML = '';
+            
+            for (let i = 0; i < totalSlides; i++) {
+                indicatorsHTML += `
+                    <div class="indicator ${i === currentReviewSlide ? 'active' : ''}" 
+                         data-slide="${i}"></div>
+                `;
+            }
+            
+            indicatorsContainer.innerHTML = indicatorsHTML;
+            indicatorsContainer.style.display = 'flex';
+            
+            // Add click event listeners to indicators
+            const indicators = indicatorsContainer.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => goToReviewSlide(index));
+            });
+        }
+
+        function updateNavigationButtons(totalSlides) {
+            const prevBtn = document.getElementById('prevReview');
+            const nextBtn = document.getElementById('nextReview');
+            
+            if (totalSlides <= 1) {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                return;
+            }
+            
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+            prevBtn.disabled = currentReviewSlide === 0;
+            nextBtn.disabled = currentReviewSlide === totalSlides - 1;
+        }
+
+        function previousReviews() {
+            if (currentReviewSlide > 0) {
+                currentReviewSlide--;
+                animateCarousel();
+                updateIndicators();
+                updateNavigationButtons(Math.ceil(allCustomerReviews.length / reviewsPerSlide));
+                updateCarouselStatus();
+            }
+        }
+
+        function nextReviews() {
+            const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+            if (currentReviewSlide < totalSlides - 1) {
+                currentReviewSlide++;
+                animateCarousel();
+                updateIndicators();
+                updateNavigationButtons(totalSlides);
+                updateCarouselStatus();
+            } else {
+                // Loop back to first slide
+                currentReviewSlide = 0;
+                animateCarousel();
+                updateIndicators();
+                updateNavigationButtons(totalSlides);
+                updateCarouselStatus();
+            }
+        }
+
+        function goToReviewSlide(slideIndex) {
+            currentReviewSlide = slideIndex;
+            animateCarousel();
+            updateIndicators();
+            updateNavigationButtons(Math.ceil(allCustomerReviews.length / reviewsPerSlide));
+            updateCarouselStatus();
+        }
+
+        function animateCarousel() {
+            const carousel = document.getElementById('reviewsCarousel');
+            if (!carousel) return;
+            
+            const translateX = -currentReviewSlide * 100;
+            carousel.style.transform = `translateX(${translateX}%)`;
+        }
+
+        function updateIndicators() {
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentReviewSlide);
+            });
+        }
+
+        function showNoReviews() {
+            const carousel = document.getElementById('reviewsCarousel');
+            if (!carousel) return;
+            
+            carousel.innerHTML = `
+                <div class="review-slide">
+                    <div class="review-loading">
+                        No reviews available at the moment. 
+                        <a href="contact.html" style="color: #8B5A2B;">Be the first to leave a review!</a>
+                    </div>
+                </div>
+            `;
+            
+            // Hide navigation
+            document.getElementById('prevReview').style.display = 'none';
+            document.getElementById('nextReview').style.display = 'none';
+            document.getElementById('carouselIndicators').style.display = 'none';
+        }
+        
+        function updateCarouselStatus() {
+            const statusDiv = document.getElementById('carouselStatus');
+            const totalSlides = Math.ceil(allCustomerReviews.length / reviewsPerSlide);
+            statusDiv.innerHTML = `
+                <p><strong>Status:</strong> Slide ${currentReviewSlide + 1} of ${totalSlides}</p>
+                <p><strong>Total Reviews:</strong> ${allCustomerReviews.length}</p>
+                <p><strong>Reviews per slide:</strong> ${reviewsPerSlide}</p>
+            `;
+        }
+        
+        // Manual control functions
+        function manualPrevious() {
+            previousReviews();
+        }
+        
+        function manualNext() {
+            nextReviews();
+        }
+        
+        function goToSlide(index) {
+            goToReviewSlide(index);
+        }
+        
+        // Auto-run test when page loads
+        window.onload = function() {
+            testAPI();
+        };
+    </script>
+</body>
+</html>
