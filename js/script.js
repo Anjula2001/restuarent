@@ -1442,15 +1442,13 @@ function setupReservationForm() {
         submitButton.innerHTML = '⏳ Processing...';
         
         // Collect form data
-        const formData = new FormData(this);
-        const reservationData = {
+        const formData = new FormData(this);        const reservationData = {
             name: formData.get('name'),
             email: formData.get('email'),
             phone: formData.get('phone'),
             date: formData.get('date'),
             time: formData.get('time'),
             guests: formData.get('guests'),
-            occasion: formData.get('occasion') || '',
             special_requests: formData.get('special_requests') || ''
         };
         
@@ -1473,9 +1471,7 @@ function setupReservationForm() {
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonText;
             return;
-        }
-        
-        try {
+        }        try {
             console.log('Submitting reservation:', reservationData);
             
             const response = await fetch('api/reservations.php', {
@@ -1486,10 +1482,29 @@ function setupReservationForm() {
                 body: JSON.stringify(reservationData)
             });
             
-            const result = await response.json();
-            console.log('Reservation response:', result);
+            console.log('Response status:', response.status, 'OK:', response.ok);
+            console.log('Response headers:', response.headers.get('content-type'));
             
-            if (result.success) {
+            // Check if response is actually JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.error('Server returned non-JSON response');
+                console.log('Response text:', await response.text());
+                throw new Error('Server returned invalid response format. Please contact support.');
+            }
+            
+            // Parse JSON response
+            let result;
+            try {
+                result = await response.json();
+                console.log('Reservation response:', result);
+            } catch (jsonError) {
+                console.error('JSON parsing error:', jsonError);
+                throw new Error('Invalid response from server. Please try again.');
+            }
+            
+            // Check if response is successful (status 200-299)
+            if (response.ok && result.success) {
                 showNotification(
                     `🎉 Reservation confirmed! Your table for ${reservationData.guests} guests on ${reservationData.date} at ${reservationData.time} has been reserved. Confirmation details sent to ${reservationData.email}.`,
                     'success'
@@ -1502,23 +1517,34 @@ function setupReservationForm() {
                 setTimeout(() => {
                     if (confirm('Would you like to view your reservation details?')) {
                         // You could redirect to a reservations page here
-                        console.log('Reservation ID:', result.reservation_id);
+                        console.log('Reservation ID:', result.id);
                     }
                 }, 2000);
                 
             } else {
-                showNotification(
-                    result.message || 'Failed to make reservation. Please try again or call us directly.',
-                    'error'
-                );
+                // Handle API errors (both HTTP errors and application errors)
+                const errorMessage = result.message || result.error || 'Failed to make reservation. Please try again or call us directly.';
+                console.error('API Error:', errorMessage, 'Status:', response.status);
+                showNotification(errorMessage, 'error');
+            }
+              } catch (error) {
+            console.error('Reservation submission error:', error);
+            
+            // Provide more specific error messages based on error type
+            let errorMessage = 'Network error occurred. Please check your connection and try again, or call us directly at (555) 123-4567.';
+            
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                errorMessage = 'Unable to connect to the server. Please check your internet connection and try again, or call us at (555) 123-4567.';
+            } else if (error.message.includes('Invalid response')) {
+                errorMessage = 'Server returned an invalid response. Please try again in a moment or call us at (555) 123-4567.';
+            } else if (error.message.includes('JSON')) {
+                errorMessage = 'Server response format error. Please try again or call us at (555) 123-4567.';
+            } else if (error.message.includes('Server returned invalid response format')) {
+                errorMessage = error.message;
             }
             
-        } catch (error) {
-            console.error('Reservation submission error:', error);
-            showNotification(
-                'Network error occurred. Please check your connection and try again, or call us directly at (555) 123-4567.',
-                'error'
-            );
+            console.log('Showing error to user:', errorMessage);
+            showNotification(errorMessage, 'error');
         } finally {
             // Re-enable submit button
             submitButton.disabled = false;

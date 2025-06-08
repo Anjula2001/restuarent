@@ -17,7 +17,7 @@ class ReservationManager {
                            WHERE customer_email = :email 
                            AND reservation_date = :date 
                            AND reservation_time = :time 
-                           AND created_at > datetime('now', '-5 minutes')
+                           AND created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
                            LIMIT 1";
         
         $dup_stmt = $this->conn->prepare($duplicate_check);

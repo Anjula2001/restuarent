@@ -1,265 +1,370 @@
--- ============================================================================
--- GRAND RESTAURANT - COMPLETE DATABASE FILE
--- ============================================================================
--- Version: Final Consolidated Master
--- Generated: June 8, 2025
--- Compatible: MySQL/MariaDB (Primary) | SQLite (Secondary)
--- Description: Complete database structure and data for Grand Restaurant Management System
--- 
--- 🎯 THIS IS THE ONLY DATABASE FILE YOU NEED 
--- All other SQL files have been merged into this one master file.
+-- phpMyAdmin SQL Dump
+-- version 5.2.0
+-- https://www.phpmyadmin.net/
 --
--- ============================================================================
--- 🚀 QUICK SETUP FOR NEW DEVICES
--- ============================================================================
--- 
--- FOR MAMP (macOS):
--- 1. Start MAMP (Apache + MySQL)
--- 2. Open phpMyAdmin: http://localhost:8888/phpMyAdmin/
--- 3. Create database: CREATE DATABASE grand_restaurant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- 4. Import this file via phpMyAdmin Import tab
--- 5. Update config/database.php with your MySQL credentials (host:localhost, port:8889, user:root, pass:root)
--- 6. Test: http://localhost:8888/restuarent/
---
--- FOR XAMPP (Windows):
--- 1. Start XAMPP (Apache + MySQL)  
--- 2. Open phpMyAdmin: http://localhost/phpMyAdmin/
--- 3. Create database: CREATE DATABASE grand_restaurant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- 4. Import this file via phpMyAdmin Import tab
--- 5. Update config/database.php with your MySQL credentials (host:localhost, port:3306, user:root, pass:'')
--- 6. Test: http://localhost/restuarent/
---
--- FOR LAMP (Linux):
--- 1. Start Apache + MySQL services
--- 2. Command line: mysql -u root -p
--- 3. Create database: CREATE DATABASE grand_restaurant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- 4. Import: mysql -u root -p grand_restaurant < database/grand_restaurant.sql
--- 5. Update config/database.php with your MySQL credentials
--- 6. Test: http://localhost/restuarent/
---
--- ============================================================================
--- 📦 WHAT'S INCLUDED
--- ============================================================================
--- ✅ Complete table structures (7 tables)
--- ✅ Sample menu items (Sri Lankan cuisine, Chinese dishes, seafood)
--- ✅ User accounts and admin access
--- ✅ Customer reviews and ratings
--- ✅ Order system with sample data
--- ✅ Reservation system structure
--- ✅ Proper MySQL syntax with constraints and indexes
--- ✅ UTF8MB4 character set for emoji and international character support
--- ✅ Cross-platform compatibility notes
---
--- ============================================================================
--- 🔧 DATABASE CONTENTS
--- ============================================================================
--- Tables: initialization_marker, menu_items, reservations, orders, order_items, reviews, admin_users, users
--- Records: 13+ menu items, 6 users + 1 admin, 10+ reviews, sample orders
--- Features: Foreign key constraints, proper indexes, transaction safety
--- ============================================================================
+-- Host: 127.0.0.1
+-- Generation Time: Jun 08, 2025 at 09:19 PM
+-- Server version: 10.4.27-MariaDB
+-- PHP Version: 8.2.0
 
-SET FOREIGN_KEY_CHECKS = 0;
-SET AUTOCOMMIT = 0;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Initialization marker to track database setup
-CREATE TABLE IF NOT EXISTS `initialization_marker` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `initialized_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `grand_restaurant`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_users`
+--
+
+CREATE TABLE `admin_users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Menu Items Table
-CREATE TABLE IF NOT EXISTS `menu_items` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(100) NOT NULL,
-    `description` TEXT,
-    `price` DECIMAL(10,2) NOT NULL,
-    `category` VARCHAR(50) NOT NULL,
-    `image_url` VARCHAR(255),
-    `is_available` BOOLEAN DEFAULT 1,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+--
+-- Dumping data for table `admin_users`
+--
+
+INSERT INTO `admin_users` (`id`, `username`, `password_hash`, `email`, `created_at`) VALUES
+(1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@grandrestaurant.com', '2025-06-02 05:46:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `initialization_marker`
+--
+
+CREATE TABLE `initialization_marker` (
+  `id` int(11) NOT NULL,
+  `initialized_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert existing menu items with all current data
-INSERT IGNORE INTO `menu_items` VALUES(59,'Test Rice Curry','A delicious test item',750.00,'Rice & Curry','images/popular/1.png',0,'2025-06-05 19:52:48','2025-06-05 19:52:48');
-INSERT IGNORE INTO `menu_items` VALUES(60,'Sweet and Sour Chicken','Chinese style chicken',950.00,'Chinese','images/popular/2.png',1,'2025-06-05 19:52:58','2025-06-05 19:52:58');
-INSERT IGNORE INTO `menu_items` VALUES(61,'Special Fusion Dish','Our chef special creation',1200.00,'Other Specialties','images/popular/3.png',1,'2025-06-05 19:53:06','2025-06-05 19:53:06');
-INSERT IGNORE INTO `menu_items` VALUES(64,'Seafood Platter','Fresh mixed seafood with rice and vegetables',28.99,'Seafood','https://via.placeholder.com/300x200?text=Seafood+Platter',1,'2025-06-05 20:08:06','2025-06-05 20:08:06');
-INSERT IGNORE INTO `menu_items` VALUES(65,'Chicken Kottu','Traditional Sri Lankan street food with chicken and vegetables',15.99,'Kottu','https://via.placeholder.com/300x200?text=Chicken+Kottu',1,'2025-06-05 20:08:14','2025-06-05 20:08:14');
-INSERT IGNORE INTO `menu_items` VALUES(67,'Fresh Orange Juice','Freshly squeezed orange juice',4.99,'Juices','https://via.placeholder.com/300x200?text=Orange+Juice',1,'2025-06-05 20:08:27','2025-06-05 20:08:27');
-INSERT IGNORE INTO `menu_items` VALUES(68,'Watalappan','Traditional Sri Lankan coconut custard dessert',6.99,'Desserts','https://via.placeholder.com/300x200?text=Watalappan',1,'2025-06-05 20:08:35','2025-06-05 20:08:35');
-INSERT IGNORE INTO `menu_items` VALUES(69,'Traditional Rice & Curry','A hearty plate of steamed rice served with a variety of traditional curries including dhal, vegetable curry, and chicken curry',12.99,'Rice & Curry','/images/rice-curry.jpg',1,'2025-06-05 22:01:25','2025-06-05 22:01:25');
+--
+-- Dumping data for table `initialization_marker`
+--
 
--- Additional sample menu items for new installations
-INSERT IGNORE INTO `menu_items` (`name`, `description`, `price`, `category`, `image_url`) VALUES
-('Sri Lankan String Hoppers', 'Traditional Sri Lankan breakfast made from rice flour, served with coconut sambol and curry', 450.00, 'Traditional', 'images/popular/1.png'),
-('Seafood Fried Rice', 'Fragrant rice with prawns, calamari, and crab meat', 750.00, 'Rice & Curry', 'images/popular/3.png'),
-('Mutton Biryani', 'Aromatic basmati rice cooked with tender mutton and traditional spices', 850.00, 'Rice & Curry', 'images/popular/2.png'),
-('Fish Kottu', 'Traditional kottu roti with fresh fish, vegetables, and aromatic spices', 650.00, 'Kottu', 'images/popular/1.png'),
-('General Tso Chicken', 'Crispy chicken pieces in sweet and spicy sauce', 720.00, 'Chinese', 'images/popular/2.png');
+INSERT INTO `initialization_marker` (`id`, `initialized_at`) VALUES
+(1, '2025-06-08 09:11:18');
 
--- Reservations Table
-CREATE TABLE IF NOT EXISTS `reservations` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `customer_name` VARCHAR(100) NOT NULL,
-    `customer_email` VARCHAR(100) NOT NULL,
-    `customer_phone` VARCHAR(20),
-    `reservation_date` DATE NOT NULL,
-    `reservation_time` TIME NOT NULL,
-    `party_size` INT NOT NULL,
-    `special_requests` TEXT,
-    `status` VARCHAR(20) DEFAULT 'pending',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `menu_items`
+--
+
+CREATE TABLE `menu_items` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `is_available` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Orders Table
-CREATE TABLE IF NOT EXISTS `orders` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `customer_name` VARCHAR(100) NOT NULL,
-    `customer_email` VARCHAR(100) NOT NULL,
-    `customer_phone` VARCHAR(20),
-    `delivery_address` TEXT,
-    `total_amount` DECIMAL(10,2) NOT NULL,
-    `status` VARCHAR(20) DEFAULT 'pending',
-    `order_type` VARCHAR(20) DEFAULT 'delivery',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+--
+-- Dumping data for table `menu_items`
+--
+
+INSERT INTO `menu_items` (`id`, `name`, `description`, `price`, `category`, `image_url`, `is_available`, `created_at`, `updated_at`) VALUES
+(86, 'Fish Curry with Basmati Rice', 'Tender fish in a rich, spicy coconut curry, served with fluffy Basmati rice.', '300.00', 'Rice & Curry', 'uploads/menu-items/menu_item_6845c005d6276_1749401605.jpg', 1, '2025-06-08 16:53:29', '2025-06-08 16:53:29'),
+(87, 'Chicken Curry with Basmati Rice', 'Homestyle Sri Lankan Chicken Curry with Basmati Rice', '350.00', 'Rice & Curry', 'uploads/menu-items/menu_item_6845c05ef32b1_1749401694.jpg', 1, '2025-06-08 16:54:57', '2025-06-08 16:54:57'),
+(88, 'Rice with Vegetable Curries', 'raditional Sri Lankan Vegetable Rice & Curry', '250.00', 'Rice & Curry', 'uploads/menu-items/menu_item_6845c0afc01e1_1749401775.jpg', 1, '2025-06-08 16:56:19', '2025-06-08 16:56:19'),
+(89, 'Mixed Fried Rice', 'A hearty mix of rice, chicken, egg, and vegetables, wok-fried to perfection.', '650.00', 'Chinese', 'uploads/menu-items/menu_item_6845c1b5ad258_1749402037.jpg', 1, '2025-06-08 17:00:40', '2025-06-08 17:00:40'),
+(90, 'Egg Fried Rice', ' Fluffy rice wok-fried with scrambled egg, fresh vegetables, and a savory seasoning blend.', '450.00', 'Chinese', 'uploads/menu-items/menu_item_6845c1f04dc51_1749402096.jpg', 1, '2025-06-08 17:01:42', '2025-06-08 17:01:42'),
+(91, 'Chicken Fried Rice', 'Savory fried rice with tender chicken, garden vegetables, and a light soy seasoning.', '500.00', 'Chinese', 'uploads/menu-items/menu_item_6845c23a668ed_1749402170.jpg', 1, '2025-06-08 17:02:52', '2025-06-08 17:02:52'),
+(92, 'Creamy Seafood Linguine', ' Linguine tossed with prawns, calamari, mussels in a rich garlic cream sauce.', '1200.00', 'Seafood', 'uploads/menu-items/menu_item_6845c52a302d0_1749402922.jpg', 1, '2025-06-08 17:16:14', '2025-06-08 17:16:14'),
+(93, 'Seafood Fried Rice', 'Aromatic fried rice with a medley of fresh prawns, calamari, and selected vegetables.', '1200.00', 'Seafood', 'uploads/menu-items/menu_item_6845c5648f10b_1749402980.jpg', 1, '2025-06-08 17:17:04', '2025-06-08 17:17:04'),
+(94, 'Grilled Seafood Platter', 'A delectable assortment of grilled prawns, calamari, and fish, served with lemon butter.', '2400.00', 'Seafood', 'uploads/menu-items/menu_item_6845c5aca6c3d_1749403052.jpg', 1, '2025-06-08 17:18:24', '2025-06-08 17:18:24'),
+(95, 'Rich Chocolate Milkshake', 'Indulgent blend of premium chocolate ice cream and fresh milk, thick and creamy.', '400.00', 'Juices', 'uploads/menu-items/menu_item_6845d17a83e37_1749406074.png', 1, '2025-06-08 18:09:27', '2025-06-08 18:09:27'),
+(96, 'Classic Virgin Mojito', 'Refreshing blend of fresh mint, lime, sugar, and soda, muddled to perfection.', '600.00', 'Juices', 'uploads/menu-items/menu_item_6845d21403770_1749406228.png', 1, '2025-06-08 18:10:37', '2025-06-08 18:10:37'),
+(97, 'Falooda', 'A sweet, refreshing drink with rose syrup, vermicelli, basil seeds, jelly, and ice cream.', '350.00', 'Juices', 'uploads/menu-items/menu_item_6845d2292a2df_1749406249.png', 1, '2025-06-08 18:11:38', '2025-06-08 18:11:38'),
+(98, 'Cheesy Chicken Kottu', 'Shredded roti mixed with chicken, vegetables, egg, and melted cheese, griddled perfectly.', '900.00', 'Kottu', 'uploads/menu-items/menu_item_6845d9144bd51_1749408020.jpg', 1, '2025-06-08 18:19:07', '2025-06-08 18:41:49'),
+(99, 'Classic Egg Kottu', 'Shredded godamba roti stir-fried with scrambled egg, fresh vegetables, and savory spices.', '650.00', 'Kottu', 'uploads/menu-items/menu_item_6845d4261fcb7_1749406758.png', 1, '2025-06-08 18:20:10', '2025-06-08 18:20:10'),
+(100, 'Chicken Kottu', 'Shredded godamba roti stir-fried with tender chicken, fresh vegetables, and savory spices.', '700.00', 'Kottu', 'uploads/menu-items/menu_item_6845d46928ea5_1749406825.png', 1, '2025-06-08 18:20:48', '2025-06-08 18:20:48'),
+(101, 'Ice Cream', 'Creamy, delightful scoop of premium ice cream available in various classic and seasonal flavors.', '250.00', 'Desserts', 'uploads/menu-items/menu_item_6845d57092612_1749407088.png', 1, '2025-06-08 18:25:48', '2025-06-08 18:25:48'),
+(102, 'Fresh Fruit Salad', 'A vibrant mix of seasonal fresh fruits, diced and lightly tossed.', '200.00', 'Desserts', 'uploads/menu-items/menu_item_6845d5b2d108a_1749407154.png', 1, '2025-06-08 18:26:33', '2025-06-08 18:26:33'),
+(103, 'Chocolate Lava Cake', 'Warm, rich chocolate cake with a molten chocolate center, served with a dusting of cocoa.', '400.00', 'Desserts', 'uploads/menu-items/menu_item_6845d5e184e9d_1749407201.png', 1, '2025-06-08 18:27:07', '2025-06-08 18:27:07'),
+(104, 'Indonesian Nasi Goreng', 'Spicy fried rice with chicken, shrimp, egg, and vegetables, topped with a fried egg.', '900.00', 'Other Specialties', 'uploads/menu-items/menu_item_6845de16a8b77_1749409302.png', 1, '2025-06-08 18:31:14', '2025-06-08 19:01:45'),
+(105, 'Chicken Biriyani', 'Fragrant Basmati rice cooked with tender chicken, aromatic spices, and caramelized onions.', '800.00', 'Other Specialties', 'uploads/menu-items/menu_item_6845d6ff6a95d_1749407487.png', 1, '2025-06-08 18:32:08', '2025-06-08 18:32:08'),
+(106, 'Savory Chicken & Vegetable Noodles', 'Wok-tossed noodles with tender chicken, an assortment of fresh vegetables, and savory sauce.', '600.00', 'Other Specialties', 'uploads/menu-items/menu_item_6845d731416c6_1749407537.png', 1, '2025-06-08 18:32:48', '2025-06-08 18:32:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `orders`
+--
+
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `customer_email` varchar(100) NOT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  `delivery_address` text DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `status` varchar(20) DEFAULT 'pending',
+  `order_type` varchar(20) DEFAULT 'delivery',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert existing order data
-INSERT IGNORE INTO `orders` VALUES(18,'anjula prasad','prasadanjula1@gmail.com','0771950486','',1200.00,'pending','pickup','2025-06-07 19:16:10','2025-06-07 19:16:10');
+--
+-- Dumping data for table `orders`
+--
 
--- Order Items Table
-CREATE TABLE IF NOT EXISTS `order_items` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `order_id` INT NOT NULL,
-    `menu_item_id` INT NOT NULL,
-    `quantity` INT NOT NULL,
-    `price` DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
-    FOREIGN KEY (`menu_item_id`) REFERENCES `menu_items`(`id`)
+INSERT INTO `orders` (`id`, `customer_name`, `customer_email`, `customer_phone`, `delivery_address`, `total_amount`, `status`, `order_type`, `created_at`, `updated_at`) VALUES
+(42, 'anjula', 'prasadanjula1@gmail.com', '(041) 251-6896', '', '800.00', 'preparing', 'pickup', '2025-06-08 19:00:00', '2025-06-08 19:00:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_items`
+--
+
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `menu_item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert existing order items data
-INSERT IGNORE INTO `order_items` VALUES(14,18,61,1,1200.00);
+--
+-- Dumping data for table `order_items`
+--
 
--- Customer Reviews Table
-CREATE TABLE IF NOT EXISTS `reviews` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `customer_name` VARCHAR(100) NOT NULL,
-    `customer_email` VARCHAR(100) NOT NULL,
-    `rating` INT NOT NULL CHECK (`rating` >= 1 AND `rating` <= 5),
-    `review_text` TEXT,
-    `is_approved` BOOLEAN DEFAULT 0,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+INSERT INTO `order_items` (`id`, `order_id`, `menu_item_id`, `quantity`, `price`) VALUES
+(25, 42, 87, 1, '350.00'),
+(26, 42, 90, 1, '450.00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reservations`
+--
+
+CREATE TABLE `reservations` (
+  `id` int(11) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `customer_email` varchar(100) NOT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  `reservation_date` date NOT NULL,
+  `reservation_time` time NOT NULL,
+  `party_size` int(11) NOT NULL,
+  `special_requests` text DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert existing reviews (all current reviews)
-INSERT IGNORE INTO `reviews` VALUES(17,'Test User','test@example.com',5,'This is a test review with more than 10 characters to check validation.',1,'2025-06-07 08:33:00');
-INSERT IGNORE INTO `reviews` VALUES(18,'Test User','test@example.com',4,'This is a test review with sufficient length',1,'2025-06-07 08:40:24');
-INSERT IGNORE INTO `reviews` VALUES(19,'madhawa','madhawa@example.com',3,'tharahai oyth ekk mn',1,'2025-06-07 08:42:32');
-INSERT IGNORE INTO `reviews` VALUES(20,'dona','dona@example.com',2,'donthodi hodi hodi dannam',1,'2025-06-07 08:47:55');
-INSERT IGNORE INTO `reviews` VALUES(21,'anjula prasad','anjula@example.com',4,'good food tase. rasai gdk',1,'2025-06-07 08:50:37');
-INSERT IGNORE INTO `reviews` VALUES(22,'kaputa','kaputa@example.com',3,'kaak kaak kaak kaak',1,'2025-06-07 08:53:33');
+--
+-- Dumping data for table `reservations`
+--
 
--- Insert additional sample reviews for demo purposes
-INSERT IGNORE INTO `reviews` (`customer_name`, `customer_email`, `rating`, `review_text`, `is_approved`) VALUES
-('John Smith', 'john@email.com', 5, 'Amazing food and great service! The ribeye steak was perfectly cooked.', 1),
-('Sarah Johnson', 'sarah@email.com', 4, 'Loved the atmosphere and the salmon was delicious. Will definitely come back!', 1),
-('Mike Wilson', 'mike@email.com', 5, 'Best pizza in town! The margherita was authentic and fresh.', 1),
-('Emily Davis', 'emily@email.com', 5, 'Great restaurant for special occasions. The lobster ravioli was outstanding.', 1);
+INSERT INTO `reservations` (`id`, `customer_name`, `customer_email`, `customer_phone`, `reservation_date`, `reservation_time`, `party_size`, `special_requests`, `status`, `created_at`, `updated_at`) VALUES
+(3, 'anjula prasad', 'prasadanjula1@gmail.com', '0771950486', '2025-06-18', '19:00:00', 4, '', 'confirmed', '2025-06-08 18:57:41', '2025-06-08 18:59:11'),
+(4, 'Amila pathum', 'prasadanjula1@gmail.com', '0771950486', '2025-06-10', '19:00:00', 4, '', 'confirmed', '2025-06-08 19:17:14', '2025-06-08 19:17:25');
 
--- Admin Users Table
-CREATE TABLE IF NOT EXISTS `admin_users` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(50) UNIQUE NOT NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
-    `email` VARCHAR(100) NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `customer_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `rating` int(11) NOT NULL,
+  `review_text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_approved` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `customer_name`, `customer_email`, `rating`, `review_text`, `is_approved`, `created_at`) VALUES
+(1, 'Amaya Perera', 'amaya.perera@example.com', 5, 'Absolutely loved the food and ambiance! The service was top-notch. Will definitely visit again.', 1, '2025-06-08 19:06:03'),
+(2, 'Kamal Jayasinghe', 'kamalj@example.com', 4, 'The dishes were tasty and well presented. Just wish the portions were slightly bigger.', 1, '2025-06-08 19:06:03'),
+(3, 'Nadeesha Silva', 'nadeesha.silva@example.com', 3, 'Good overall experience. However, the waiting time was a bit long.', 1, '2025-06-08 19:06:03'),
+(4, 'Tharindu Fernando', 'tharindu.fernando@example.com', 2, 'Food was average and our server forgot one of our orders. Hope they improve.', 1, '2025-06-08 19:06:03'),
+(5, 'Ishara Gunasekara', 'ishara.g@example.com', 1, 'Very disappointing experience. The food was cold and lacked flavor.', 1, '2025-06-08 19:06:03'),
+(6, 'Mevan Rajapaksha', 'mevanr@example.com', 5, 'Excellent restaurant! The chef deserves a special mention for the unique flavors.', 1, '2025-06-08 19:06:03'),
+(7, 'Dinithi Alwis', 'dinithi.alwis@example.com', 4, 'Great ambiance and friendly staff. Prices are reasonable too.', 1, '2025-06-08 19:06:03'),
+(8, 'Yohan Dissanayake', 'yohan.d@example.com', 3, 'It was okay. Nothing stood out, but not bad either.', 1, '2025-06-08 19:06:03'),
+(9, 'Ruwani Samarasinghe', 'ruwani.s@example.com', 5, 'Loved everything about this place. Highly recommend!', 1, '2025-06-08 19:06:03'),
+(10, 'Sahan Wickramasinghe', 'sahan.w@example.com', 4, 'Very good food and fast service. A little noisy though.', 1, '2025-06-08 19:06:03'),
+(11, 'Amila Pathum', '', 4, 'Loved the spicy chicken curry. Great portions and fair pricing.', 1, '2025-06-08 19:08:06'),
+(12, 'Anjula Prasad', '', 5, 'Impressed with the fast delivery and neatly packed food. Everything was still hot and fresh!', 1, '2025-06-08 19:09:47');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `address` text DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `email_verified` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `last_login` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert existing admin user
-INSERT IGNORE INTO `admin_users` VALUES(1,'admin','$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi','admin@grandrestaurant.com','2025-06-02 11:16:15');
+--
+-- Dumping data for table `users`
+--
 
--- Customer Users Table
-CREATE TABLE IF NOT EXISTS `users` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `first_name` VARCHAR(100) NOT NULL,
-    `last_name` VARCHAR(100) NOT NULL,
-    `email` VARCHAR(255) UNIQUE NOT NULL,
-    `phone` VARCHAR(20),
-    `password_hash` VARCHAR(255) NOT NULL,
-    `address` TEXT,
-    `date_of_birth` DATE,
-    `email_verified` BOOLEAN DEFAULT 0,
-    `is_active` BOOLEAN DEFAULT 1,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `last_login` TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `phone`, `password_hash`, `address`, `date_of_birth`, `email_verified`, `is_active`, `created_at`, `updated_at`, `last_login`) VALUES
+(8, 'anjula', 'prasad', 'prasadanjula1@gmail.com', '0771950486', '$2y$10$aiToNJMJ7iX.o58hL0GOpuXI.RXYZRPi91JqcUGNplALlcM0E8QvG', '70000\n70000', '2001-11-03', 0, 1, '2025-06-08 09:18:32', '2025-06-08 19:17:50', '2025-06-08 19:17:50'),
+(11, 'amila', 'pathum', 'amila@gmail.com', '(041) 251-6896', '$2y$10$NhdSxaeeQKINEImc6TCo.eqvizgZs0vHDdgG67tmQe4.xQ/6I7x7W', '', '2025-06-05', 0, 1, '2025-06-08 15:36:54', '2025-06-08 19:18:07', '2025-06-08 19:18:07');
 
--- Insert existing user data
-INSERT IGNORE INTO `users` VALUES(1,'MAMP','User','mampuser@example.com','1234567890','$2y$10$k9y08.g/JbLSfUsC9DjnQekLfZ97W/.G3iSTAL34.juaDIoMx7.iu','','','0','1','2025-06-02 11:16:22','2025-06-02 11:16:22','2025-06-02 11:16:22');
-INSERT IGNORE INTO `users` VALUES(2,'anju','pu','anju@gmail.com','0909088787','$2y$10$LsR25lD36GehvDW94XHZGuZ4.GPyBGuPat4NrogBULUMyHGHjcjkq','asd,jhgd','2025-06-13','0','1','2025-06-02 11:19:59','2025-06-02 11:19:59','2025-06-02 11:30:07');
-INSERT IGNORE INTO `users` VALUES(3,'Test','User','test@example.com','','$2y$12$BvhanhnSWiMTmGjcB5r7S.mXlcnpSBmhkuh4kqKfsSeUoSZQGKfRy','','','0','1','2025-06-02 22:48:19','2025-06-02 22:48:19','2025-06-02 22:48:19');
-INSERT IGNORE INTO `users` VALUES(4,'Jane','Doe','jane@example.com','','$2y$12$WkX/PmgYKn4nsZPIprl6N.pY26BNkcp0OveG9erczzY8q6/7P8H4C','','','0','1','2025-06-02 22:49:08','2025-06-02 22:49:08','2025-06-02 22:49:09');
-INSERT IGNORE INTO `users` VALUES(5,'Final','Test','finaltest@example.com','555-123-4567','$2y$12$j.FtMr2pLIHVcLs7IZpK2uhyJ./2LWqdjZihZyTKaXVy3eBCSJIDu','123 Test Street','','0','1','2025-06-02 22:51:08','2025-06-02 22:51:08','2025-06-02 22:51:14');
-INSERT IGNORE INTO `users` VALUES(6,'anjula','prasad','prasadanjula1@gmail.com','0771950486','$2y$10$qo3DaUf2dmiTVBXWLvcZKOaAq2B5s/RHlMWKn0xgL25aeVAHeIXVG','70000','2001-11-03','0','0','2025-06-02 22:52:33','2025-06-02 23:00:54','2025-06-07 19:15:57');
+--
+-- Indexes for dumped tables
+--
 
--- Mark database as initialized
-INSERT IGNORE INTO `initialization_marker` (`initialized_at`) VALUES (CURRENT_TIMESTAMP);
+--
+-- Indexes for table `admin_users`
+--
+ALTER TABLE `admin_users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
 
-SET FOREIGN_KEY_CHECKS = 1;
+--
+-- Indexes for table `initialization_marker`
+--
+ALTER TABLE `initialization_marker`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `menu_items`
+--
+ALTER TABLE `menu_items`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `menu_item_id` (`menu_item_id`);
+
+--
+-- Indexes for table `reservations`
+--
+ALTER TABLE `reservations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `admin_users`
+--
+ALTER TABLE `admin_users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `initialization_marker`
+--
+ALTER TABLE `initialization_marker`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `menu_items`
+--
+ALTER TABLE `menu_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+
+--
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+
+--
+-- AUTO_INCREMENT for table `order_items`
+--
+ALTER TABLE `order_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+
+--
+-- AUTO_INCREMENT for table `reservations`
+--
+ALTER TABLE `reservations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`menu_item_id`) REFERENCES `menu_items` (`id`);
 COMMIT;
 
--- End of Grand Restaurant Complete Database
--- Total Tables: 7 (initialization_marker, menu_items, reservations, orders, order_items, reviews, admin_users, users)
--- Total Records: 13+ menu items, 1 active order, 10+ reviews, 6 users + 1 admin
--- 
--- ============================================================================
--- 🌐 CROSS-PLATFORM DEPLOYMENT GUIDE
--- ============================================================================
--- 
--- 📱 SHARING THIS PROJECT:
--- 1. Copy entire 'restuarent' folder to new device
--- 2. Import this grand_restaurant.sql file to MySQL
--- 3. Update config/database.php with local MySQL credentials
--- 4. Test the application
---
--- 🔄 BACKUP STRATEGY:
--- - Export from phpMyAdmin regularly
--- - Keep this master SQL file as template
--- - Version control your project folder
---
--- 🔧 MYSQL CONFIGURATION BY PLATFORM:
--- 
--- MAMP (macOS):
--- Host: localhost
--- Port: 8889
--- User: root  
--- Pass: root
--- URL: http://localhost:8888/restuarent/
---
--- XAMPP (Windows):
--- Host: localhost
--- Port: 3306
--- User: root
--- Pass: (empty)
--- URL: http://localhost/restuarent/
---
--- LAMP (Linux):
--- Host: localhost
--- Port: 3306
--- User: root
--- Pass: (your_password)
--- URL: http://localhost/restuarent/
---
--- ============================================================================
--- 🎉 PROJECT STATUS: READY FOR PRODUCTION
--- ============================================================================
--- This consolidated database file ensures your Grand Restaurant system works
--- seamlessly across different devices and platforms. Simply import this file
--- and update the database configuration for your local environment.
--- ============================================================================
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
