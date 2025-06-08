@@ -1475,6 +1475,66 @@ function setupContactForm() {
     });
 }
 
+// Authentication functions
+async function checkUserAuthentication() {
+    try {
+        const response = await fetch('api/auth.php?action=check_session');
+        const result = await response.json();
+
+        const guestLinks = document.getElementById('guestLinks');
+        const userLinks = document.getElementById('userLinks');
+
+        if (result.logged_in) {
+            if (guestLinks) guestLinks.style.display = 'none';
+            if (userLinks) userLinks.style.display = 'inline';
+        } else {
+            if (guestLinks) guestLinks.style.display = 'inline';
+            if (userLinks) userLinks.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Authentication check error:', error);
+        // Default to guest state on error
+        const guestLinks = document.getElementById('guestLinks');
+        const userLinks = document.getElementById('userLinks');
+        if (guestLinks) guestLinks.style.display = 'inline';
+        if (userLinks) userLinks.style.display = 'none';
+    }
+}
+
+async function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        try {
+            await fetch('api/auth.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'logout'
+                })
+            });
+
+            // Clear localStorage
+            localStorage.removeItem('user');
+            
+            // Refresh authentication state
+            checkUserAuthentication();
+            
+            // Show success message
+            showNotification('Logged out successfully!', 'success');
+            
+            // Redirect to home page after a short delay
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Logout error:', error);
+            showNotification('Error logging out. Please try again.', 'error');
+        }
+    }
+}
+
 // Export functions to global scope for HTML onclick access
 window.placeOrder = placeOrder;
 window.clearCartConfirm = clearCartConfirm;
@@ -1484,3 +1544,5 @@ window.toggleDeliveryAddress = toggleDeliveryAddress;
 window.loadOrderPage = loadOrderPage;
 window.setupReservationForm = setupReservationForm;
 window.setupContactForm = setupContactForm;
+window.logout = logout;
+window.checkUserAuthentication = checkUserAuthentication;

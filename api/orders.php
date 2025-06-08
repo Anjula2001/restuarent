@@ -1,5 +1,5 @@
 <?php
-require_once '../config/database_sqlite.php';
+require_once '../config/database.php';
 require_once '../classes/OrderManager.php';
 
 setCorsHeaders();

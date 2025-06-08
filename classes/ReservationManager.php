@@ -1,5 +1,5 @@
 <?php
-require_once '../config/database_sqlite.php';
+require_once '../config/database.php';
 
 class ReservationManager {
     private $conn;

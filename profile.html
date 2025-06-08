@@ -243,12 +243,12 @@
                     <span class="cart-count" id="cartCount">0</span>
                 </div>
                 <!-- Authentication Buttons -->
-                <div class="auth-buttons" id="authButtons">
-                    <div id="guestLinks" style="display: inline;">
+                <div class="auth-buttons" id="authButtons" >
+                    <div id="guestLinks" style="display: none;">
                         <a href="login.html" class="auth-btn login">LOGIN</a>
                         <a href="register.html" class="auth-btn register">REGISTER</a>
                     </div>
-                    <div id="userLinks" style="display: none;">
+                    <div id="userLinks">
                         <a href="dashboard.html" class="auth-btn dashboard">DASHBOARD</a>
                         <a href="profile.html" class="auth-btn profile">PROFILE</a>
                         <a href="#" onclick="logout()" class="auth-btn logout">LOGOUT</a>
@@ -387,6 +387,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             initializeProfile();
+            // Check user authentication state for header buttons
+            if (typeof checkUserAuthentication === 'function') {
+                checkUserAuthentication();
+            }
         });
 
         async function initializeProfile() {
@@ -610,6 +614,40 @@
         // Initialize cart functionality
         if (typeof initializeCart === 'function') {
             initializeCart();
+        }
+
+        // Logout function (fallback if not available globally)
+        if (typeof window.logout !== 'function') {
+            window.logout = async function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    try {
+                        await fetch('api/auth.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'logout'
+                            })
+                        });
+
+                        // Clear localStorage
+                        localStorage.removeItem('user');
+                        
+                        // Show success message
+                        showAlert('Logged out successfully!', 'success');
+                        
+                        // Redirect to home page after a short delay
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                        
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                        showAlert('Error logging out. Please try again.', 'error');
+                    }
+                }
+            };
         }
     </script>
 </body>
