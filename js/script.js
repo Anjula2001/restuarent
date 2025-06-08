@@ -533,8 +533,8 @@ function showReviewsError() {
         <div class="review-slide">
             <div class="review-card" style="text-align: center; padding: 60px 40px;">
                 <div style="font-size: 3em; color: #dc3545; margin-bottom: 20px;">⚠️</div>
-                <h3 style="color: #333; margin-bottom: 15px;">Unable to Load Reviews</h3>
-                <p style="color: #666; margin-bottom: 25px;">Please check your connection and try again.</p>
+                <h3 style="color: #333; margin-bottom: 15px;">Connection Issue</h3>
+                <p style="color: #666; margin-bottom: 25px;">We're having trouble loading customer reviews right now. Please check your internet connection and try again.</p>
                 <button onclick="loadReviews()" style="background: #8B5A2B; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                     🔄 Retry
                 </button>
@@ -1244,7 +1244,6 @@ function calculateOrderTotals() {
     const totalItemsElement = document.getElementById('total-items');
     const subtotalElement = document.getElementById('subtotal');
     const deliveryFeeElement = document.getElementById('delivery-fee');
-    const taxAmountElement = document.getElementById('tax-amount');
     const finalTotalElement = document.getElementById('final-total');
     
     if (!totalItemsElement || !subtotalElement) return;
@@ -1258,12 +1257,8 @@ function calculateOrderTotals() {
     const orderType = orderTypeSelect ? orderTypeSelect.value : '';
     const deliveryFee = orderType === 'delivery' ? 50.00 : 0.00;
     
-    // Tax calculation (5%)
-    const taxRate = 0.05;
-    const taxAmount = subtotal * taxRate;
-    
-    // Final total
-    const finalTotal = subtotal + deliveryFee + taxAmount;
+    // Final total (no tax)
+    const finalTotal = subtotal + deliveryFee;
     
     // Update display
     totalItemsElement.textContent = totalItems;
@@ -1271,10 +1266,6 @@ function calculateOrderTotals() {
     
     if (deliveryFeeElement) {
         deliveryFeeElement.textContent = deliveryFee.toFixed(2);
-    }
-    
-    if (taxAmountElement) {
-        taxAmountElement.textContent = taxAmount.toFixed(2);
     }
     
     if (finalTotalElement) {

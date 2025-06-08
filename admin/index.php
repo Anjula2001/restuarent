@@ -590,6 +590,194 @@
         .no-data .action-btn:hover {
             background: #2980b9;
         }
+
+        /* Enhanced Error Card Styles */
+        .error-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .error-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .error-card-content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .error-icon {
+            margin-bottom: 25px;
+        }
+
+        .error-icon-circle {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 50%;
+            line-height: 80px;
+            font-size: 36px;
+            box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+            animation: pulse-warning 2s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .error-details {
+            margin-bottom: 30px;
+        }
+
+        .error-title {
+            color: #2d3436;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .error-message {
+            color: #636e72;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 25px 0;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-suggestions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            border-left: 4px solid #74b9ff;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            color: #2d3436;
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .suggestion-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #636e72;
+        }
+
+        .suggestion-list li {
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .retry-btn:hover {
+            background: linear-gradient(135deg, #00a085 0%, #00b7b8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .secondary-btn:hover {
+            background: linear-gradient(135deg, #5498ff 0%, #2d3436 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 14px;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .retry-btn:hover .btn-icon {
+            animation-duration: 0.5s;
+        }
+
+        /* Responsive design for error card */
+        @media (max-width: 768px) {
+            .error-card-content {
+                padding: 30px 20px;
+            }
+            
+            .error-title {
+                font-size: 20px;
+            }
+            
+            .error-message {
+                font-size: 14px;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .retry-btn, .secondary-btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1135,11 +1323,34 @@
             } catch (error) {
                 console.error('Error loading reviews:', error);
                 container.innerHTML = `
-                    <div class="no-data">
-                        <div class="no-data-icon">⭐</div>
-                        <h3>Unable to load reviews</h3>
-                        <p>There was a problem connecting to the server. Please check your connection and try again.</p>
-                        <button class="action-btn" onclick="loadReviews()">Try Again</button>
+                    <div class="error-card">
+                        <div class="error-card-content">
+                            <div class="error-icon">
+                                <span class="error-icon-circle">⚠️</span>
+                            </div>
+                            <div class="error-details">
+                                <h3 class="error-title">Review Loading Error</h3>
+                                <p class="error-message">Unable to retrieve review data from the database. This could be due to a temporary server issue or network connectivity problem.</p>
+                                <div class="error-suggestions">
+                                    <p class="suggestion-title">Try these solutions:</p>
+                                    <ul class="suggestion-list">
+                                        <li>Check your internet connection</li>
+                                        <li>Refresh the page</li>
+                                        <li>Verify the server is running</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="error-actions">
+                                <button class="retry-btn" onclick="loadReviews()">
+                                    <span class="btn-icon">🔄</span>
+                                    Reload Reviews
+                                </button>
+                                <button class="secondary-btn" onclick="location.reload()">
+                                    <span class="btn-icon">↻</span>
+                                    Refresh Page
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `;
                 loading.style.display = 'none';
