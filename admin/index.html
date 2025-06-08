@@ -941,14 +941,11 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="itemImage">Image</label>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="url" id="itemImage" name="image_url" placeholder="https://example.com/image.jpg" style="flex: 1;">
-                            <span style="color: #666;">or</span>
-                            <input type="file" id="itemImageFile" accept="image/*" style="flex: 1;" onchange="handleImageUpload(this)">
-                        </div>
+                        <label for="itemImageFile">Image Upload</label>
+                        <input type="file" id="itemImageFile" name="image_file" accept="image/*" onchange="handleImageUpload(this)" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                        <input type="hidden" id="itemImage" name="image_url">
                         <small style="color: #666; font-size: 12px;">
-                            You can either paste an image URL or upload an image file
+                            Upload an image file for the menu item
                         </small>
                     </div>
                     
@@ -1751,9 +1748,7 @@
             if (!file) return;
             
             // Show loading state
-            const originalText = document.getElementById('itemImage').value;
-            document.getElementById('itemImage').value = 'Uploading...';
-            document.getElementById('itemImage').disabled = true;
+            input.disabled = true;
             
             try {
                 // Create FormData for file upload
@@ -1769,12 +1764,9 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Set the uploaded image URL
+                    // Set the uploaded image URL (hidden field)
                     document.getElementById('itemImage').value = result.url;
-                    document.getElementById('itemImage').disabled = false;
-                    
-                    // Show preview
-                    showImagePreview(result.url);
+                    input.disabled = false;
                     
                     alert('Image uploaded successfully!');
                 } else {
@@ -1782,31 +1774,9 @@
                 }
             } catch (error) {
                 console.error('Upload error:', error);
-                document.getElementById('itemImage').value = originalText;
-                document.getElementById('itemImage').disabled = false;
+                input.disabled = false;
                 alert('Failed to upload image: ' + error.message);
             }
-        }
-        
-        function showImagePreview(imageUrl) {
-            // Remove existing preview
-            const existingPreview = document.getElementById('imagePreview');
-            if (existingPreview) {
-                existingPreview.remove();
-            }
-            
-            // Create new preview
-            const preview = document.createElement('div');
-            preview.id = 'imagePreview';
-            preview.style.marginTop = '10px';
-            preview.innerHTML = `
-                <img src="${imageUrl}" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 5px; border: 1px solid #ddd;">
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">Image Preview</div>
-            `;
-            
-            // Insert after the image input group
-            const imageGroup = document.getElementById('itemImage').closest('.form-group');
-            imageGroup.appendChild(preview);
         }
 
         // Hard delete - permanently remove from database

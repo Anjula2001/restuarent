@@ -1,4 +1,38 @@
 // Wait for DOM to fully load
+// Image handling functions for cross-platform compatibility
+function getImageUrl(imageUrl) {
+    // Handle empty or null image URLs
+    if (!imageUrl || imageUrl.trim() === '') {
+        return 'images/popular/3.png'; // Default fallback image
+    }
+    
+    // If it's already a full URL (starts with http/https), keep it as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl;
+    }
+    
+    // If it starts with 'uploads/', it's a relative path from our upload system
+    if (imageUrl.startsWith('uploads/')) {
+        return imageUrl; // Keep relative path for cross-platform compatibility
+    }
+    
+    // If it starts with 'images/', it's a relative path to our asset images
+    if (imageUrl.startsWith('images/')) {
+        return imageUrl;
+    }
+    
+    // If it's something else, assume it's a relative path
+    return imageUrl;
+}
+
+// Fallback image handling for broken images
+function handleImageError(imgElement) {
+    // Set fallback image
+    imgElement.src = 'images/popular/3.png';
+    // Prevent infinite loop if fallback image also fails
+    imgElement.onerror = null;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     console.log('DOM loaded, starting initialization...');
     // Initialize backend integration
@@ -168,13 +202,12 @@ function updatePopularFoods(items) {
 
     // Use dynamic items from database if available
     if (items && Array.isArray(items) && items.length > 0) {
-        console.log('🎯 Processing dynamic items from database:', items.length, 'items');
-        popularItems = items.map(item => ({
+        console.log('🎯 Processing dynamic items from database:', items.length, 'items');        popularItems = items.map(item => ({
             id: item.id,
             name: item.name,
             description: item.description || `Delicious ${item.name.toLowerCase()}`,
             price: parseFloat(item.price).toFixed(2),
-            image_url: item.image_url || 'images/popular/2.png' // Fallback image
+            image_url: getImageUrl(item.image_url) // Use our new image helper function
         }));
         console.log('✅ Using dynamic popular items from database');
         console.log('🍽️ Dynamic items processed:', popularItems);    } else {
@@ -192,12 +225,10 @@ function updatePopularFoods(items) {
         `;
         console.log('🔄 Showing empty state for popular foods');
         return; // Exit early since we've set the empty state
-    }
-
-    foodCards.innerHTML = popularItems.map(item => `
+    }    foodCards.innerHTML = popularItems.map(item => `
         <div class="food-card">
             <img src="${item.image_url}" alt="${item.name}" 
-                 onerror="console.log('Popular image failed: ${item.image_url}'); this.src='images/popular/2.png';">
+                 onerror="handleImageError(this)">
             <div class="food-card-content">
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
@@ -734,12 +765,8 @@ function addMenuItemToCart(itemId, name, price, imageUrl) {
     const quantityInput = document.getElementById(`qty-${itemId}`);
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
     
-    // Clean up the image URL - remove any escaped characters
-    let cleanImageUrl = imageUrl;
-    if (typeof cleanImageUrl === 'string') {
-        // Remove any extra escaping that might have been added
-        cleanImageUrl = cleanImageUrl.replace(/\\\'/g, "'").replace(/\\\//g, "/");
-    }
+    // Clean up the image URL using our helper function
+    let cleanImageUrl = getImageUrl(imageUrl);
     
     console.log('🛒 Adding menu item to cart:', {
         id: itemId,
@@ -1184,7 +1211,7 @@ function displayOrderItems() {
     if (!orderItemsContainer) return;
       orderItemsContainer.innerHTML = cart.map(item => `
         <div class="order-item" data-item-id="${item.id}">
-            <img src="${item.image || 'images/popular/3.png'}" alt="${item.name}" class="order-item-image" onerror="this.src='images/popular/3.png'">
+            <img src="${getImageUrl(item.image)}" alt="${item.name}" class="order-item-image" onerror="handleImageError(this)">
             <div class="order-item-details">
                 <h4 class="order-item-name">${item.name}</h4>
                 <div class="order-item-price">Rs. ${item.price} each</div>

@@ -64,22 +64,13 @@ if (!move_uploaded_file($file['tmp_name'], $filepath)) {
 // Return the URL to access the uploaded image
 $relativePath = 'uploads/menu-items/' . $filename;
 
-// Get the correct base URL
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'];
-$baseUrl = $protocol . '://' . $host;
-
-// For MAMP local development, we need to get the correct path
-$documentRoot = $_SERVER['DOCUMENT_ROOT'];
-$currentDir = dirname(__DIR__); // Go up one level from /api to /restuarent
-$projectPath = str_replace($documentRoot, '', $currentDir);
-$fullUrl = $baseUrl . $projectPath . '/' . $relativePath;
-
+// Instead of creating absolute URLs that break on different computers,
+// just return the relative path that works universally
 echo json_encode([
     'success' => true,
     'message' => 'Image uploaded successfully',
     'filename' => $filename,
-    'url' => $fullUrl,
+    'url' => $relativePath,  // Use relative path instead of full URL
     'relative_path' => $relativePath
 ]);
 ?>

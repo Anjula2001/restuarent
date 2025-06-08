@@ -410,12 +410,10 @@
                     console.log(`Category ${category.name} (${category.id}) matched items:`, categoryItems);
 
                     const containerElement = document.getElementById(`${category.id}-items`);
-                    const emptyElement = document.getElementById(`${category.id}-empty`);
-
-                    if (categoryItems.length > 0) {
+                    const emptyElement = document.getElementById(`${category.id}-empty`);                    if (categoryItems.length > 0) {
                         containerElement.innerHTML = categoryItems.map(item => `
                             <div class="food-card">
-                                <img src="${item.image_url || 'images/popular/2.png'}" alt="${item.name}" onerror="this.src='images/popular/2.png'">
+                                <img src="${getImageUrl(item.image_url)}" alt="${item.name}" onerror="handleImageError(this)">
                                 <div class="food-card-content">
                                     <h3>${item.name}</h3>
                                     <p>${item.description || 'Delicious ' + item.name.toLowerCase()}</p>
@@ -423,7 +421,7 @@
                                     <div class="food-card-actions">
                                         <div class="quantity-selector">
                                             <label>Qty:</label>
-                                            <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">                                        </div>                        <button onclick="addMenuItemToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price}, '${item.image_url || 'images/popular/2.png'}')" class="add-to-cart-btn">
+                                            <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">                                        </div>                        <button onclick="addMenuItemToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price}, '${getImageUrl(item.image_url)}')" class="add-to-cart-btn">
                             Add to Cart
                         </button>
                                     </div>

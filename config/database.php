@@ -1,18 +1,18 @@
 <?php
 class Database {
-    // MAMP MySQL Configuration
+    // XAMPP MySQL Configuration
     private $host = 'localhost';
-    private $port = '8889'; // Default MAMP MySQL port
+    private $port = '3306'; // Default XAMPP MySQL port
     private $db_name = 'grand_restaurant';
     private $username = 'root';
-    private $password = 'root'; // Default MAMP MySQL password
+    private $password = ''; // Default XAMPP MySQL password (empty)
     private $conn;
 
     public function getConnection() {
         $this->conn = null;
         
         try {
-            // MAMP MySQL connection with port
+            // XAMPP MySQL connection with port
             $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name . ";charset=utf8mb4";
             $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -36,7 +36,7 @@ function setCorsHeaders() {
 }
 
 // Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     setCorsHeaders();
     http_response_code(200);
     exit();
