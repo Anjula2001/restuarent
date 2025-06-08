@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Cart Image Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f8ff; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .test-card { background: white; margin: 20px 0; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .success { border-left: 5px solid #4caf50; }
+        .error { border-left: 5px solid #f44336; }
+        .warning { border-left: 5px solid #ff9800; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        .test-result { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+        .image-test { display: flex; align-items: center; margin: 10px 0; padding: 10px; border: 1px solid #dee2e6; border-radius: 5px; }
+        .image-test img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
+        .status { font-weight: bold; padding: 4px 8px; border-radius: 4px; }
+        .status.pass { background: #d4edda; color: #155724; }
+        .status.fail { background: #f8d7da; color: #721c24; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .flow-step { margin: 10px 0; padding: 15px; background: #e9ecef; border-radius: 5px; position: relative; }
+        .flow-step.completed { background: #d1ecf1; }
+        .step-number { position: absolute; top: -10px; left: 15px; background: #007bff; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Final Cart Image Test - Menu to Order Flow</h1>
+        
+        <div class="test-card">
+            <h2>📋 Test Objective</h2>
+            <p>Verify that uploaded menu items (like "bath" with uploads/menu-items/... image) maintain their correct image URLs through the entire cart workflow.</p>
+            <p><strong>Success Criteria:</strong> Uploaded images should NOT be replaced with fallback images (images/popular/...) in the cart.</p>
+        </div>
+
+        <div class="test-card">
+            <h2>🔄 Complete Workflow Test</h2>
+            <button onclick="runCompleteTest()">🚀 Run Complete Test</button>
+            <button onclick="clearCart()">🗑️ Clear Cart</button>
+            <button onclick="showCurrentCart()">👁️ Show Current Cart</button>
+            
+            <div id="workflow-results"></div>
+        </div>
+
+        <div class="test-card">
+            <h2>🛒 Live Cart Monitor</h2>
+            <div id="cart-monitor">
+                <p>Click "Show Current Cart" to see live cart contents</p>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>🔍 Detailed Analysis</h2>
+            <button onclick="analyzeImagePaths()">🔬 Analyze Image Paths</button>
+            <div id="analysis-results"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        let menuItems = [];
+        let testResults = [];
+
+        async function runCompleteTest() {
+            const resultsDiv = document.getElementById('workflow-results');
+            resultsDiv.innerHTML = '<h3>🔄 Running Complete Workflow Test...</h3>';
+            
+            testResults = [];
+            
+            try {
+                // Step 1: Load menu data
+                await step1_LoadMenuData();
+                
+                // Step 2: Clear cart
+                step2_ClearCart();
+                
+                // Step 3: Add items using new function
+                step3_AddItemsToCart();
+                
+                // Step 4: Verify cart contents
+                step4_VerifyCartContents();
+                
+                // Step 5: Simulate order page display
+                step5_SimulateOrderDisplay();
+                
+                // Display results
+                displayTestResults();
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `<div class="test-result error"><strong>❌ Test Failed:</strong> ${error.message}</div>`;
+            }
+        }
+
+        async function step1_LoadMenuData() {
+            addTestStep('Loading menu data from API...');
+            
+            const response = await fetch('api/menu.php');
+            menuItems = await response.json();
+            
+            if (menuItems.length === 0) {
+                throw new Error('No menu items found');
+            }
+            
+            const uploadedItems = menuItems.filter(item => 
+                item.image_url && item.image_url.includes('uploads/menu-items/')
+            );
+            
+            addTestResult('✅ Step 1: Menu Data Loaded', 
+                `Found ${menuItems.length} total items, ${uploadedItems.length} with uploaded images`);
+        }
+
+        function step2_ClearCart() {
+            addTestStep('Clearing existing cart...');
+            localStorage.removeItem('cart');
+            addTestResult('✅ Step 2: Cart Cleared', 'Cart storage cleared successfully');
+        }
+
+        function step3_AddItemsToCart() {
+            addTestStep('Adding items to cart using new function...');
+            
+            let addedCount = 0;
+            menuItems.forEach(item => {
+                try {
+                    if (typeof addMenuItemToCart === 'function') {
+                        addMenuItemToCart(item.id, item.name, item.price, item.image_url || 'images/popular/2.png');
+                        addedCount++;
+                    } else {
+                        throw new Error('addMenuItemToCart function not found');
+                    }
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                }
+            });
+            
+            addTestResult('✅ Step 3: Items Added to Cart', 
+                `Successfully added ${addedCount} items using addMenuItemToCart()`);
+        }
+
+        function step4_VerifyCartContents() {
+            addTestStep('Verifying cart contents...');
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            let correctImages = 0;
+            let incorrectImages = 0;
+            let imageAnalysis = [];
+            
+            cart.forEach(cartItem => {
+                const originalItem = menuItems.find(m => m.id == cartItem.id);
+                if (originalItem) {
+                    const isCorrect = cartItem.image === (originalItem.image_url || 'images/popular/2.png');
+                    if (isCorrect) correctImages++;
+                    else incorrectImages++;
+                    
+                    imageAnalysis.push({
+                        name: cartItem.name,
+                        original: originalItem.image_url || 'images/popular/2.png',
+                        cart: cartItem.image,
+                        correct: isCorrect
+                    });
+                }
+            });
+            
+            const success = incorrectImages === 0;
+            addTestResult(
+                success ? '✅ Step 4: Cart Verification PASSED' : '❌ Step 4: Cart Verification FAILED',
+                `Correct images: ${correctImages}, Incorrect images: ${incorrectImages}`
+            );
+            
+            // Store detailed analysis
+            window.lastImageAnalysis = imageAnalysis;
+        }
+
+        function step5_SimulateOrderDisplay() {
+            addTestStep('Simulating order page display...');
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const uploadedItems = cart.filter(item => 
+                item.image && item.image.includes('uploads/menu-items/')
+            );
+            
+            addTestResult('✅ Step 5: Order Simulation Complete', 
+                `${uploadedItems.length} items will display with uploaded images on order page`);
+        }
+
+        function addTestStep(message) {
+            console.log('🔄 ' + message);
+        }
+
+        function addTestResult(title, message) {
+            testResults.push({ title, message });
+        }
+
+        function displayTestResults() {
+            const resultsDiv = document.getElementById('workflow-results');
+            
+            let html = '<h3>📊 Test Results</h3>';
+            
+            testResults.forEach((result, index) => {
+                const isSuccess = result.title.includes('✅');
+                const stepClass = isSuccess ? 'completed' : '';
+                
+                html += `
+                    <div class="flow-step ${stepClass}">
+                        <div class="step-number">${index + 1}</div>
+                        <strong>${result.title}</strong><br>
+                        <small>${result.message}</small>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearCart() {
+            localStorage.removeItem('cart');
+            document.getElementById('cart-monitor').innerHTML = '<p style="color: green;">✅ Cart cleared successfully</p>';
+        }
+
+        function showCurrentCart() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const monitorDiv = document.getElementById('cart-monitor');
+            
+            if (cart.length === 0) {
+                monitorDiv.innerHTML = '<p>🛒 Cart is empty</p>';
+                return;
+            }
+            
+            let html = `<h4>🛒 Cart Contents (${cart.length} items)</h4>`;
+            
+            cart.forEach(item => {
+                const imageType = analyzeImageURL(item.image);
+                html += `
+                    <div class="image-test">
+                        <img src="${item.image}" alt="${item.name}" 
+                             onerror="this.style.border='3px solid red'; this.title='Failed to load: ${item.image}';">
+                        <div>
+                            <strong>${item.name}</strong> - $${item.price} x ${item.quantity}<br>
+                            <small>Image: <code>${item.image}</code></small><br>
+                            <span class="status ${imageType.isUploaded ? 'pass' : 'fail'}">${imageType.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            monitorDiv.innerHTML = html;
+        }
+
+        function analyzeImagePaths() {
+            const resultsDiv = document.getElementById('analysis-results');
+            
+            if (!window.lastImageAnalysis) {
+                resultsDiv.innerHTML = '<p>❌ No analysis data available. Please run the complete test first.</p>';
+                return;
+            }
+            
+            let html = '<h4>🔬 Detailed Image Path Analysis</h4>';
+            
+            window.lastImageAnalysis.forEach(item => {
+                const status = item.correct ? 'CORRECT' : 'INCORRECT';
+                const statusClass = item.correct ? 'pass' : 'fail';
+                
+                html += `
+                    <div class="test-result">
+                        <strong>Item:</strong> ${item.name}<br>
+                        <strong>Original URL:</strong> <code>${item.original}</code><br>
+                        <strong>Cart URL:</strong> <code>${item.cart}</code><br>
+                        <span class="status ${statusClass}">${status}</span>
+                        ${!item.correct ? '<br><small style="color: red;">⚠️ Image URL was modified during cart process</small>' : ''}
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        function analyzeImageURL(url) {
+            if (!url) return { status: 'No Image', isUploaded: false };
+            if (url.includes('uploads/menu-items/')) return { status: 'Uploaded Image ✅', isUploaded: true };
+            if (url.includes('images/popular/')) return { status: 'Fallback Image ⚠️', isUploaded: false };
+            return { status: 'Unknown Image Type', isUploaded: false };
+        }
+
+        // Auto-refresh cart monitor every 3 seconds if it has content
+        setInterval(() => {
+            const monitorDiv = document.getElementById('cart-monitor');
+            if (monitorDiv.innerHTML.includes('Cart Contents')) {
+                showCurrentCart();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Cart Image Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-container {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        
+        .cart-debug {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .menu-item-test {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .menu-item-test img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .menu-info {
+            flex: 1;
+        }
+        
+        .code-block {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Cart Image Issue</h1>
+    
+    <div class="debug-container">
+        <h2>📊 Current Cart Analysis</h2>
+        <button class="btn" onclick="analyzeCurrentCart()">🔍 Analyze Current Cart</button>
+        <button class="btn btn-danger" onclick="clearCart()">🗑️ Clear Cart</button>
+        <div id="cart-analysis"></div>
+    </div>
+
+    <div class="debug-container">
+        <h2>🧪 Test Menu Item Addition</h2>
+        
+        <!-- Simulate a newly uploaded item -->
+        <div class="menu-item-test">
+            <img src="http://localhost:8888/restuarent/uploads/menu-items/test_curry.jpg" 
+                 alt="Test Curry" 
+                 onerror="this.src='https://via.placeholder.com/120x120/8B5A2B/white?text=NEW+ITEM'">
+            <div class="menu-info">
+                <h3>🆕 Newly Uploaded Curry</h3>
+                <p><strong>Price:</strong> Rs. 1200.00</p>
+                <p><strong>Image Path:</strong> uploads/menu-items/test_curry.jpg</p>
+                <div class="code-block">
+                    addToCartWithQuantity(999, 'Test Curry', 1200, 'http://localhost:8888/restuarent/uploads/menu-items/test_curry.jpg')
+                </div>
+                <button class="btn btn-success" onclick="testAddUploadedItem()">
+                    ➕ Add This Item to Cart
+                </button>
+            </div>
+        </div>
+
+        <!-- Simulate a popular item -->
+        <div class="menu-item-test">
+            <img src="images/popular/2.png" alt="Popular Item">
+            <div class="menu-info">
+                <h3>🍛 Popular Menu Item</h3>
+                <p><strong>Price:</strong> Rs. 750.00</p>
+                <p><strong>Image Path:</strong> images/popular/2.png</p>
+                <div class="code-block">
+                    addToCartWithQuantity(998, 'Kottu Roti', 750, 'images/popular/2.png')
+                </div>
+                <button class="btn btn-success" onclick="testAddPopularItem()">
+                    ➕ Add This Item to Cart
+                </button>
+            </div>
+        </div>
+
+        <!-- Simulate an item without image -->
+        <div class="menu-item-test">
+            <img src="images/popular/3.png" alt="No Image Item">
+            <div class="menu-info">
+                <h3>❓ Item Without Image</h3>
+                <p><strong>Price:</strong> Rs. 500.00</p>
+                <p><strong>Image Path:</strong> null (should fallback)</p>
+                <div class="code-block">
+                    addToCartWithQuantity(997, 'No Image Item', 500, null)
+                </div>
+                <button class="btn btn-success" onclick="testAddNoImageItem()">
+                    ➕ Add This Item to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-container">
+        <h2>🔧 Function Testing</h2>
+        <button class="btn" onclick="testCartFunctions()">🧪 Test Cart Functions</button>
+        <button class="btn" onclick="simulateOrderPage()">📋 Simulate Order Page</button>
+        <div id="function-test-results"></div>
+    </div>
+
+    <div class="debug-container">
+        <h2>📋 Live Order Page Test</h2>
+        <p>Add items above, then click this button to open the order page and see if images display correctly:</p>
+        <button class="btn" onclick="openOrderPageTest()">🚀 Open Order Page</button>
+        <div id="order-page-instructions" style="display: none;" class="info">
+            <strong>🎯 What to Check in Order Page:</strong><br>
+            1. Look at the "🛒 Your Items" section<br>
+            2. Check if each item shows the correct image<br>
+            3. Newly uploaded items should show their upload path<br>
+            4. Popular items should show their popular path<br>
+            5. Items without images should show fallback image
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function analyzeCurrentCart() {
+            const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            const analysisDiv = document.getElementById('cart-analysis');
+            
+            if (cart.length === 0) {
+                analysisDiv.innerHTML = '<div class="warning">📭 Cart is empty. Add some test items to analyze.</div>';
+                return;
+            }
+            
+            let html = '<div class="cart-debug">';
+            html += '<h4>🛒 Current Cart Contents:</h4>';
+            html += '<pre>' + JSON.stringify(cart, null, 2) + '</pre>';
+            
+            html += '<h4>📊 Image Analysis:</h4>';
+            cart.forEach((item, index) => {
+                html += `<div style="margin: 10px 0; padding: 10px; background: #e9ecef; border-radius: 5px;">`;
+                html += `<strong>Item ${index + 1}: ${item.name}</strong><br>`;
+                html += `ID: ${item.id}<br>`;
+                html += `Price: Rs. ${item.price}<br>`;
+                html += `Quantity: ${item.quantity}<br>`;
+                html += `Image URL: ${item.image_url || 'NOT SET'}<br>`;
+                
+                if (item.image_url) {
+                    if (item.image_url.includes('uploads/menu-items/')) {
+                        html += `<span style="color: green;">✅ Uploaded image detected</span>`;
+                    } else if (item.image_url.includes('images/popular/')) {
+                        html += `<span style="color: blue;">ℹ️ Popular image detected</span>`;
+                    } else {
+                        html += `<span style="color: orange;">⚠️ Other image path</span>`;
+                    }
+                } else {
+                    html += `<span style="color: red;">❌ No image URL stored</span>`;
+                }
+                html += `</div>`;
+            });
+            html += '</div>';
+            
+            analysisDiv.innerHTML = html;
+        }
+        
+        function testAddUploadedItem() {
+            console.log('Testing uploaded item addition...');
+            addToCartWithQuantity(999, 'Test Curry', 1200, 'http://localhost:8888/restuarent/uploads/menu-items/test_curry.jpg');
+            
+            setTimeout(() => {
+                analyzeCurrentCart();
+                showResult('success', '✅ Added uploaded item. Check cart analysis above.');
+            }, 100);
+        }
+        
+        function testAddPopularItem() {
+            console.log('Testing popular item addition...');
+            addToCartWithQuantity(998, 'Kottu Roti', 750, 'images/popular/2.png');
+            
+            setTimeout(() => {
+                analyzeCurrentCart();
+                showResult('success', '✅ Added popular item. Check cart analysis above.');
+            }, 100);
+        }
+        
+        function testAddNoImageItem() {
+            console.log('Testing no-image item addition...');
+            addToCartWithQuantity(997, 'No Image Item', 500, null);
+            
+            setTimeout(() => {
+                analyzeCurrentCart();
+                showResult('success', '✅ Added no-image item. Check cart analysis above.');
+            }, 100);
+        }
+        
+        function testCartFunctions() {
+            const resultsDiv = document.getElementById('function-test-results');
+            let html = '<h4>🧪 Function Test Results:</h4>';
+            
+            // Test function existence
+            const functions = [
+                'addToCartWithQuantity',
+                'displayOrderItems', 
+                'updateCartItemImages',
+                'cleanFallbackItems'
+            ];
+            
+            functions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    html += `<div class="success">✅ ${funcName}() exists</div>`;
+                } else {
+                    html += `<div class="error">❌ ${funcName}() missing</div>`;
+                }
+            });
+            
+            // Test localStorage
+            try {
+                const testData = {test: 'data'};
+                localStorage.setItem('test_key', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('test_key'));
+                localStorage.removeItem('test_key');
+                
+                if (retrieved && retrieved.test === 'data') {
+                    html += `<div class="success">✅ localStorage working</div>`;
+                } else {
+                    html += `<div class="error">❌ localStorage not working</div>`;
+                }
+            } catch (error) {
+                html += `<div class="error">❌ localStorage error: ${error.message}</div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function simulateOrderPage() {
+            const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            
+            if (cart.length === 0) {
+                showResult('warning', '⚠️ Cart is empty. Add some items first.');
+                return;
+            }
+            
+            // Simulate the displayOrderItems function
+            let html = '<h4>🖼️ Order Page Image Simulation:</h4>';
+            html += '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">';
+            
+            cart.forEach(item => {
+                const imageUrl = item.image_url || 'images/popular/3.png';
+                html += `
+                    <div style="display: flex; align-items: center; margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
+                        <img src="${imageUrl}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px; margin-right: 15px;" onerror="this.src='images/popular/3.png'">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            Rs. ${item.price} × ${item.quantity}<br>
+                            <small>Image: ${imageUrl}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('function-test-results').innerHTML = html;
+        }
+        
+        function openOrderPageTest() {
+            const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            
+            if (cart.length === 0) {
+                alert('⚠️ Cart is empty! Add some test items first.');
+                return;
+            }
+            
+            document.getElementById('order-page-instructions').style.display = 'block';
+            
+            setTimeout(() => {
+                window.open('order.html', '_blank');
+            }, 1000);
+        }
+        
+        function showResult(type, message) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.textContent = message;
+            
+            // Find the last clicked button's container
+            const containers = document.querySelectorAll('.debug-container');
+            const lastContainer = containers[containers.length - 2]; // Usually the test container
+            lastContainer.appendChild(resultDiv);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (resultDiv.parentNode) {
+                    resultDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Auto-analyze cart on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            analyzeCurrentCart();
+        });
+    </script>
+</body>
+</html>

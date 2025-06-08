@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Image Debug - Final Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        
+        .code-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        
+        .order-simulation {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        h1 { color: #333; text-align: center; }
+        h2 { color: #555; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🛒 Cart Image Issue - Final Debug Test</h1>
+    
+    <div class="test-container">
+        <h2>🔍 Current Issue Analysis</h2>
+        <div class="info">
+            <strong>Problem:</strong> Menu items show correct images on menu page but show fallback images in cart/order page.
+        </div>
+        <button class="btn" onclick="analyzeProblem()">🔍 Analyze Current State</button>
+        <div id="problem-analysis"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🧪 Direct Function Test</h2>
+        <p>Test the cart functions directly to see if they properly store image URLs:</p>
+        
+        <button class="btn btn-danger" onclick="clearCartTest()">🗑️ Clear Cart</button>
+        <button class="btn btn-success" onclick="testDirectlyWithUploadedImage()">➕ Test Uploaded Image</button>
+        <button class="btn btn-success" onclick="testDirectlyWithPopularImage()">➕ Test Popular Image</button>
+        
+        <div id="direct-test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📋 Order Page Simulation</h2>
+        <p>Simulate what the order page would display:</p>
+        <button class="btn" onclick="simulateOrderPageDisplay()">📋 Simulate Order Page</button>
+        <div id="order-simulation-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🚀 Live Order Page Test</h2>
+        <p>After adding items above, test the actual order page:</p>
+        <button class="btn btn-success" onclick="openOrderPageWithItems()">🚀 Open Order Page</button>
+        <div class="warning">
+            <strong>Manual Verification Required:</strong><br>
+            Check if the "🛒 Your Items" section shows the correct images
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function analyzeProblem() {
+            const analysisDiv = document.getElementById('problem-analysis');
+            
+            let html = '<h4>🔧 System Analysis:</h4>';
+            
+            // Check function availability
+            const functions = ['addToCartWithQuantity', 'addMenuItemToCart', 'displayOrderItems'];
+            functions.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    html += `<div class="success">✅ ${func}() function exists</div>`;
+                } else {
+                    html += `<div class="error">❌ ${func}() function missing</div>`;
+                }
+            });
+            
+            // Check cart state
+            const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            html += `<h4>📊 Current Cart State:</h4>`;
+            html += `<div class="info">Cart contains ${cart.length} items</div>`;
+            
+            if (cart.length > 0) {
+                cart.forEach((item, index) => {
+                    html += `<div class="code-block">Item ${index + 1}: ${item.name}
+ID: ${item.id} | Price: Rs. ${item.price} | Qty: ${item.quantity}
+Image URL: ${item.image_url || 'NOT SET'}
+Expected: ${item.image_url ? (item.image_url.includes('uploads/') ? 'UPLOADED IMAGE' : 'STATIC IMAGE') : 'NO IMAGE'}</div>`;
+                });
+            }
+            
+            analysisDiv.innerHTML = html;
+        }
+        
+        function clearCartTest() {
+            if (typeof clearCart === 'function') {
+                clearCart();
+            } else {
+                localStorage.removeItem('restaurant_cart');
+                if (typeof window.cart !== 'undefined') {
+                    window.cart = [];
+                }
+            }
+            showResult('success', '✅ Cart cleared');
+            setTimeout(analyzeProblem, 100);
+        }
+        
+        function testDirectlyWithUploadedImage() {
+            const testImageUrl = 'uploads/menu-items/menu_item_6845639b70c75_1749377947.jpg';
+            
+            console.log('Testing uploaded image direct call:', testImageUrl);
+            
+            // Test with the new function if available
+            if (typeof addMenuItemToCart === 'function') {
+                addMenuItemToCart(999, 'Test Uploaded Curry', 1200, testImageUrl);
+                showResult('info', '🔧 Called addMenuItemToCart() with uploaded image');
+            } else if (typeof addToCartWithQuantity === 'function') {
+                addToCartWithQuantity(999, 'Test Uploaded Curry', 1200, testImageUrl);
+                showResult('info', '🔧 Called addToCartWithQuantity() with uploaded image');
+            } else {
+                showResult('error', '❌ No cart functions available');
+                return;
+            }
+            
+            setTimeout(() => {
+                const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+                const addedItem = cart.find(item => item.id === 999);
+                
+                if (addedItem) {
+                    showResult('success', `✅ Item added. Stored image URL: ${addedItem.image_url}`);
+                    if (addedItem.image_url === testImageUrl) {
+                        showResult('success', '✅ Image URL correctly preserved!');
+                    } else {
+                        showResult('error', `❌ Image URL changed! Expected: ${testImageUrl}, Got: ${addedItem.image_url}`);
+                    }
+                } else {
+                    showResult('error', '❌ Item not found in cart');
+                }
+                
+                setTimeout(analyzeProblem, 100);
+            }, 200);
+        }
+        
+        function testDirectlyWithPopularImage() {
+            const testImageUrl = 'images/popular/2.png';
+            
+            console.log('Testing popular image direct call:', testImageUrl);
+            
+            // Test with the new function if available
+            if (typeof addMenuItemToCart === 'function') {
+                addMenuItemToCart(998, 'Test Popular Item', 750, testImageUrl);
+                showResult('info', '🔧 Called addMenuItemToCart() with popular image');
+            } else if (typeof addToCartWithQuantity === 'function') {
+                addToCartWithQuantity(998, 'Test Popular Item', 750, testImageUrl);
+                showResult('info', '🔧 Called addToCartWithQuantity() with popular image');
+            } else {
+                showResult('error', '❌ No cart functions available');
+                return;
+            }
+            
+            setTimeout(() => {
+                const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+                const addedItem = cart.find(item => item.id === 998);
+                
+                if (addedItem) {
+                    showResult('success', `✅ Item added. Stored image URL: ${addedItem.image_url}`);
+                    if (addedItem.image_url === testImageUrl) {
+                        showResult('success', '✅ Image URL correctly preserved!');
+                    } else {
+                        showResult('error', `❌ Image URL changed! Expected: ${testImageUrl}, Got: ${addedItem.image_url}`);
+                    }
+                } else {
+                    showResult('error', '❌ Item not found in cart');
+                }
+                
+                setTimeout(analyzeProblem, 100);
+            }, 200);
+        }
+        
+        function simulateOrderPageDisplay() {
+            const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            const resultsDiv = document.getElementById('order-simulation-results');
+            
+            if (cart.length === 0) {
+                resultsDiv.innerHTML = '<div class="warning">⚠️ Cart is empty. Add some test items first.</div>';
+                return;
+            }
+            
+            let html = '<h4>🖼️ Order Page Display Simulation:</h4>';
+            html += '<div class="order-simulation">';
+            
+            cart.forEach(item => {
+                const imageUrl = item.image_url || 'images/popular/3.png';
+                html += `
+                    <div style="display: flex; align-items: center; margin: 15px 0; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ddd;">
+                        <img src="${imageUrl}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;" onerror="this.src='images/popular/3.png'; this.style.border='2px solid red';">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            Rs. ${item.price} × ${item.quantity}<br>
+                            <small style="color: #666;">Image: <code>${imageUrl}</code></small><br>
+                            <small style="color: ${imageUrl.includes('uploads/') ? 'green' : 'blue'};">
+                                ${imageUrl.includes('uploads/') ? '📤 Uploaded Image' : '📁 Static Image'}
+                            </small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        function openOrderPageWithItems() {
+            const cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            
+            if (cart.length === 0) {
+                alert('⚠️ Cart is empty! Add some test items first.');
+                return;
+            }
+            
+            showResult('info', '🚀 Opening order page. Check the "🛒 Your Items" section for correct images.');
+            
+            setTimeout(() => {
+                window.open('order.html', '_blank');
+            }, 1000);
+        }
+        
+        function showResult(type, message) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.textContent = message;
+            
+            const resultsContainer = document.getElementById('direct-test-results');
+            resultsContainer.appendChild(resultDiv);
+            
+            setTimeout(() => {
+                if (resultDiv.parentNode) {
+                    resultDiv.remove();
+                }
+            }, 8000);
+        }
+        
+        // Auto-analyze on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(analyzeProblem, 500);
+        });
+    </script>
+</body>
+</html>

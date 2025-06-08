@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Debug - Image Issue Investigation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .debug-container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .debug-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { background: #ffe6e6; border-color: #ff0000; }
+        .success { background: #e6ffe6; border-color: #00aa00; }
+        .warning { background: #fff3e0; border-color: #ff9800; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .image-test { display: flex; align-items: center; margin: 10px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+        .image-test img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin-right: 15px; border: 2px solid #ddd; }
+        .image-error { border-color: red !important; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .cart-item-debug { margin: 10px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🐛 Cart Image Debug - Live Investigation</h1>
+        
+        <div class="debug-section">
+            <h2>📋 Current Issue</h2>
+            <p><strong>Problem:</strong> Food images not displaying correctly in "🛒 Your Items" section</p>
+            <p><strong>Goal:</strong> Identify why uploaded images still show fallback images</p>
+        </div>
+
+        <div class="debug-section">
+            <h2>🔍 Step 1: Check Current Cart State</h2>
+            <button onclick="debugCurrentCart()">Analyze Current Cart</button>
+            <div id="cart-debug-results"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🛠️ Step 2: Test Menu Item Addition</h2>
+            <button onclick="testMenuItemAddition()">Add Fresh Menu Item</button>
+            <div id="menu-addition-results"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>📺 Step 3: Simulate Order Page Display</h2>
+            <button onclick="simulateOrderPageDisplay()">Test Order Page Logic</button>
+            <div id="order-page-results"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🔧 Step 4: Function Analysis</h2>
+            <button onclick="analyzeFunctions()">Check Functions</button>
+            <div id="function-analysis-results"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🚨 Step 5: Live Fix Test</h2>
+            <button onclick="testLiveFix()">Apply & Test Fix</button>
+            <div id="live-fix-results"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function debugCurrentCart() {
+            const resultsDiv = document.getElementById('cart-debug-results');
+            
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                let html = '<h3>🛒 Cart Analysis</h3>';
+                html += `<p><strong>Cart items:</strong> ${cart.length}</p>`;
+                
+                if (cart.length === 0) {
+                    html += '<div class="warning">Cart is empty. Please add items from menu first.</div>';
+                } else {
+                    cart.forEach((item, index) => {
+                        html += `
+                            <div class="cart-item-debug">
+                                <h4>Item ${index + 1}: ${item.name}</h4>
+                                <strong>Properties:</strong><br>
+                                <pre>${JSON.stringify(item, null, 2)}</pre>
+                                
+                                <div class="image-test">
+                                    <img src="${item.image || 'images/popular/fallback.png'}" 
+                                         alt="${item.name}"
+                                         onerror="this.classList.add('image-error'); this.title='Failed to load: ' + this.src;">
+                                    <div>
+                                        <strong>Image URL:</strong> <code>${item.image || 'No image property'}</code><br>
+                                        <strong>Analysis:</strong> ${analyzeImageURL(item.image)}<br>
+                                        <strong>Expected on Order Page:</strong> ${item.image ? 'This image' : 'Fallback image'}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                resultsDiv.innerHTML = html;
+                resultsDiv.parentElement.className = cart.length > 0 ? 'debug-section success' : 'debug-section warning';
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error analyzing cart: ${error.message}</div>`;
+                resultsDiv.parentElement.className = 'debug-section error';
+            }
+        }
+
+        async function testMenuItemAddition() {
+            const resultsDiv = document.getElementById('menu-addition-results');
+            resultsDiv.innerHTML = '<p>🔄 Testing menu item addition...</p>';
+            
+            try {
+                // Clear cart first
+                localStorage.removeItem('cart');
+                
+                // Get fresh menu data
+                const response = await fetch('api/menu.php');
+                const menuItems = await response.json();
+                
+                // Find an uploaded item
+                const uploadedItem = menuItems.find(item => 
+                    item.image_url && item.image_url.includes('uploads/menu-items/')
+                );
+                
+                if (!uploadedItem) {
+                    resultsDiv.innerHTML = '<div class="warning">No uploaded items found in menu data</div>';
+                    return;
+                }
+                
+                let html = `<h3>🎯 Testing with: "${uploadedItem.name}"</h3>`;
+                html += `<p><strong>Original image URL:</strong> <code>${uploadedItem.image_url}</code></p>`;
+                
+                // Test the function
+                if (typeof addMenuItemToCart === 'function') {
+                    html += '<p>✅ addMenuItemToCart function exists</p>';
+                    
+                    // Add to cart
+                    addMenuItemToCart(uploadedItem.id, uploadedItem.name, uploadedItem.price, uploadedItem.image_url);
+                    
+                    // Check result
+                    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    const cartItem = cart.find(item => item.id == uploadedItem.id);
+                    
+                    if (cartItem) {
+                        html += '<div class="success">✅ Item added to cart successfully</div>';
+                        html += `<p><strong>Cart image URL:</strong> <code>${cartItem.image}</code></p>`;
+                        
+                        if (cartItem.image === uploadedItem.image_url) {
+                            html += '<div class="success">🎉 SUCCESS: Image URL preserved correctly!</div>';
+                        } else {
+                            html += '<div class="error">❌ PROBLEM: Image URL was modified</div>';
+                            html += `<p>Expected: <code>${uploadedItem.image_url}</code></p>`;
+                            html += `<p>Got: <code>${cartItem.image}</code></p>`;
+                        }
+                        
+                        // Test image display
+                        html += `
+                            <div class="image-test">
+                                <img src="${cartItem.image}" alt="${cartItem.name}"
+                                     onerror="this.classList.add('image-error');">
+                                <div>
+                                    <strong>Live Test:</strong> Can this image load?<br>
+                                    <small>If image has red border, it failed to load</small>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        html += '<div class="error">❌ Item not found in cart after addition</div>';
+                    }
+                } else {
+                    html += '<div class="error">❌ addMenuItemToCart function not found</div>';
+                }
+                
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Test failed: ${error.message}</div>`;
+            }
+        }
+
+        function simulateOrderPageDisplay() {
+            const resultsDiv = document.getElementById('order-page-results');
+            
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                if (cart.length === 0) {
+                    resultsDiv.innerHTML = '<div class="warning">Cart is empty. Please add items first.</div>';
+                    return;
+                }
+                
+                let html = '<h3>📺 Order Page Display Simulation</h3>';
+                html += '<p>This simulates exactly how displayOrderItems() function works:</p>';
+                
+                // Simulate the actual displayOrderItems logic
+                const orderHTML = cart.map(item => `
+                    <div class="order-item" data-item-id="${item.id}">
+                        <img src="${item.image || 'images/popular/3.png'}" alt="${item.name}" class="order-item-image" onerror="this.src='images/popular/3.png'">
+                        <div class="order-item-details">
+                            <h4 class="order-item-name">${item.name}</h4>
+                            <div class="order-item-price">Rs. ${item.price} each</div>
+                            <div class="order-item-quantity">Quantity: ${item.quantity}</div>
+                            <div class="order-item-subtotal">Subtotal: Rs. ${(item.price * item.quantity).toFixed(2)}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                html += '<div style="border: 1px solid #ccc; padding: 15px; background: #f9f9f9; border-radius: 5px;">';
+                html += '<h4>🛒 Your Items (Simulated)</h4>';
+                html += orderHTML;
+                html += '</div>';
+                
+                // Analysis
+                const uploadedCount = cart.filter(item => 
+                    item.image && item.image.includes('uploads/menu-items/')
+                ).length;
+                
+                html += `
+                    <div class="cart-item-debug">
+                        <h4>📊 Analysis</h4>
+                        <p><strong>Total items:</strong> ${cart.length}</p>
+                        <p><strong>Items with uploaded images:</strong> ${uploadedCount}</p>
+                        <p><strong>Items using fallback:</strong> ${cart.length - uploadedCount}</p>
+                        ${uploadedCount === 0 ? '<div class="error">⚠️ No items are showing uploaded images!</div>' : '<div class="success">✅ Some items showing uploaded images</div>'}
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Simulation error: ${error.message}</div>`;
+            }
+        }
+
+        function analyzeFunctions() {
+            const resultsDiv = document.getElementById('function-analysis-results');
+            
+            let html = '<h3>🔧 Function Analysis</h3>';
+            
+            // Check function availability
+            const functions = [
+                'addToCartWithQuantity',
+                'addMenuItemToCart', 
+                'displayOrderItems',
+                'updateCartUI'
+            ];
+            
+            functions.forEach(funcName => {
+                const exists = typeof window[funcName] === 'function';
+                html += `<p>${exists ? '✅' : '❌'} ${funcName}: ${exists ? 'Available' : 'Not found'}</p>`;
+            });
+            
+            // Check displayOrderItems source
+            if (typeof displayOrderItems === 'function') {
+                html += '<h4>displayOrderItems Function Source:</h4>';
+                html += `<pre>${displayOrderItems.toString()}</pre>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        function testLiveFix() {
+            const resultsDiv = document.getElementById('live-fix-results');
+            resultsDiv.innerHTML = '<p>🔄 Testing live fix...</p>';
+            
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                
+                if (cart.length === 0) {
+                    resultsDiv.innerHTML = '<div class="warning">Cart is empty. Please add items first.</div>';
+                    return;
+                }
+                
+                let html = '<h3>🚨 Live Fix Test</h3>';
+                
+                // Check each cart item for issues
+                let fixedCount = 0;
+                cart.forEach((item, index) => {
+                    if (!item.image || item.image.includes('images/popular/')) {
+                        html += `<p>⚠️ Item "${item.name}" has fallback image: ${item.image}</p>`;
+                        
+                        // Try to find the original image from the item data
+                        if (item.image_url) {
+                            item.image = item.image_url;
+                            fixedCount++;
+                            html += `<p>🔧 Fixed: Updated to ${item.image_url}</p>`;
+                        }
+                    } else {
+                        html += `<p>✅ Item "${item.name}" has correct image: ${item.image}</p>`;
+                    }
+                });
+                
+                if (fixedCount > 0) {
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    html += `<div class="success">🎉 Applied fixes to ${fixedCount} items. Cart updated.</div>`;
+                } else {
+                    html += '<div class="warning">No fixes needed or no image_url data available.</div>';
+                }
+                
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Fix test failed: ${error.message}</div>`;
+            }
+        }
+
+        function analyzeImageURL(url) {
+            if (!url) return '❌ No image URL';
+            if (url.includes('uploads/menu-items/')) return '✅ Uploaded image (CORRECT)';
+            if (url.includes('images/popular/')) return '⚠️ Fallback image (INCORRECT for uploaded items)';
+            return '❓ Unknown type';
+        }
+
+        // Auto-refresh on cart changes
+        let lastCartState = localStorage.getItem('cart');
+        setInterval(() => {
+            const currentCartState = localStorage.getItem('cart');
+            if (currentCartState !== lastCartState) {
+                lastCartState = currentCartState;
+                console.log('Cart changed, auto-refreshing debug...');
+                debugCurrentCart();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

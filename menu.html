@@ -423,11 +423,9 @@
                                     <div class="food-card-actions">
                                         <div class="quantity-selector">
                                             <label>Qty:</label>
-                                            <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">
-                                        </div>
-                                        <button onclick="addToCartWithQuantity(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})" class="add-to-cart-btn">
-                                            Add to Cart
-                                        </button>
+                                            <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">                                        </div>                        <button onclick="addMenuItemToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price}, '${item.image_url || 'images/popular/2.png'}')" class="add-to-cart-btn">
+                            Add to Cart
+                        </button>
                                     </div>
                                 </div>
                             </div>

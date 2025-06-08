@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Definitive Cart Image Test</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: white; margin: 20px 0; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .warning { border-left: 4px solid #ffc107; }
+        button { padding: 12px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-success { background: #28a745; }
+        .btn-danger { background: #dc3545; }
+        .test-step { margin: 15px 0; padding: 15px; background: #f1f3f4; border-radius: 8px; position: relative; }
+        .step-completed { background: #d4edda; border-left: 4px solid #28a745; }
+        .step-failed { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .image-display { display: flex; align-items: center; margin: 15px 0; padding: 15px; background: white; border: 1px solid #dee2e6; border-radius: 8px; }
+        .image-display img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 20px; border: 2px solid #28a745; }
+        .image-error { border-color: #dc3545 !important; }
+        pre { background: #f8f9fa; padding: 12px; border-radius: 5px; overflow-x: auto; font-size: 13px; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+        .status-pass { background: #28a745; }
+        .status-fail { background: #dc3545; }
+        .final-result { font-size: 1.2em; font-weight: bold; text-align: center; padding: 20px; border-radius: 10px; }
+        .result-success { background: #d4edda; color: #155724; }
+        .result-failure { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Definitive Cart Image Test</h1>
+        <p>Complete verification that uploaded menu items display correctly in the cart system</p>
+
+        <div class="card">
+            <h2>🧪 Test Execution</h2>
+            <button onclick="runDefinitiveTest()" class="btn-success">🚀 Run Definitive Test</button>
+            <button onclick="clearEverything()" class="btn-danger">🗑️ Clear All Data</button>
+            
+            <div id="test-progress">
+                <p>Click "Run Definitive Test" to begin comprehensive testing</p>
+            </div>
+        </div>
+
+        <div class="card" id="results-card" style="display: none;">
+            <h2>📊 Test Results</h2>
+            <div id="final-results"></div>
+        </div>
+
+        <div class="card" id="visual-verification" style="display: none;">
+            <h2>👁️ Visual Verification</h2>
+            <div id="visual-content"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        let testProgress = [];
+        let testData = {};
+
+        async function runDefinitiveTest() {
+            testProgress = [];
+            testData = {};
+            
+            const progressDiv = document.getElementById('test-progress');
+            progressDiv.innerHTML = '<h3>🔄 Running Definitive Test...</h3>';
+            
+            try {
+                // Step 1: Initialize
+                await step1_Initialize();
+                updateProgress();
+                
+                // Step 2: Get test data
+                await step2_GetTestData();
+                updateProgress();
+                
+                // Step 3: Clear and add to cart
+                await step3_AddToCart();
+                updateProgress();
+                
+                // Step 4: Verify cart storage
+                await step4_VerifyCartStorage();
+                updateProgress();
+                
+                // Step 5: Test order page display
+                await step5_TestOrderDisplay();
+                updateProgress();
+                
+                // Step 6: Final verification
+                await step6_FinalVerification();
+                updateProgress();
+                
+                showFinalResults();
+                
+            } catch (error) {
+                addStep('❌ Test Failed', `Error: ${error.message}`, 'failed');
+                updateProgress();
+            }
+        }
+
+        async function step1_Initialize() {
+            addStep('🔧 Initializing Test', 'Clearing cart and setting up test environment', 'running');
+            
+            // Clear cart
+            localStorage.removeItem('cart');
+            
+            // Verify functions exist
+            const requiredFunctions = ['addMenuItemToCart', 'addToCartWithQuantity', 'displayOrderItems'];
+            const missingFunctions = requiredFunctions.filter(func => typeof window[func] !== 'function');
+            
+            if (missingFunctions.length > 0) {
+                throw new Error(`Missing required functions: ${missingFunctions.join(', ')}`);
+            }
+            
+            addStep('✅ Initialization Complete', 'All required functions available, cart cleared', 'completed');
+        }
+
+        async function step2_GetTestData() {
+            addStep('📡 Loading Test Data', 'Fetching menu items from API', 'running');
+            
+            const response = await fetch('api/menu.php');
+            const menuItems = await response.json();
+            
+            // Find uploaded item (we know "bath" exists with ID 79)
+            const uploadedItem = menuItems.find(item => 
+                item.id == 79 && item.image_url && item.image_url.includes('uploads/menu-items/')
+            );
+            
+            if (!uploadedItem) {
+                throw new Error('Test item "bath" (ID: 79) not found or missing uploaded image');
+            }
+            
+            testData.uploadedItem = uploadedItem;
+            testData.originalImageUrl = uploadedItem.image_url;
+            
+            addStep('✅ Test Data Loaded', `Using "${uploadedItem.name}" with uploaded image`, 'completed');
+        }
+
+        async function step3_AddToCart() {
+            addStep('🛒 Adding to Cart', 'Using addMenuItemToCart function with uploaded image URL', 'running');
+            
+            const item = testData.uploadedItem;
+            
+            // Add to cart using the new safe function
+            addMenuItemToCart(item.id, item.name, item.price, item.image_url);
+            
+            // Small delay to ensure cart is updated
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            addStep('✅ Item Added to Cart', `"${item.name}" added successfully`, 'completed');
+        }
+
+        async function step4_VerifyCartStorage() {
+            addStep('🔍 Verifying Cart Storage', 'Checking cart data structure and image property', 'running');
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const cartItem = cart.find(item => item.id == testData.uploadedItem.id);
+            
+            if (!cartItem) {
+                throw new Error('Item not found in cart after addition');
+            }
+            
+            testData.cartItem = cartItem;
+            
+            // Critical check: Does cart item have 'image' property (not 'image_url')?
+            const hasImageProperty = cartItem.hasOwnProperty('image');
+            const imageMatches = cartItem.image === testData.originalImageUrl;
+            
+            if (!hasImageProperty) {
+                throw new Error('Cart item missing "image" property');
+            }
+            
+            if (!imageMatches) {
+                throw new Error(`Image URL mismatch. Expected: ${testData.originalImageUrl}, Got: ${cartItem.image}`);
+            }
+            
+            addStep('✅ Cart Storage Verified', 'Item has correct "image" property with uploaded URL', 'completed');
+        }
+
+        async function step5_TestOrderDisplay() {
+            addStep('📺 Testing Order Display', 'Simulating displayOrderItems function logic', 'running');
+            
+            const cartItem = testData.cartItem;
+            
+            // Simulate the exact logic from displayOrderItems function
+            const imageUrl = cartItem.image || 'images/popular/3.png';
+            const isUploadedImage = imageUrl.includes('uploads/menu-items/');
+            
+            testData.orderDisplayImageUrl = imageUrl;
+            testData.willShowUploadedImage = isUploadedImage;
+            
+            if (!isUploadedImage) {
+                throw new Error(`Order page will show fallback image instead of uploaded image. URL: ${imageUrl}`);
+            }
+            
+            addStep('✅ Order Display Test Passed', 'Order page will display correct uploaded image', 'completed');
+        }
+
+        async function step6_FinalVerification() {
+            addStep('🎯 Final Verification', 'Testing complete workflow end-to-end', 'running');
+            
+            const success = testData.willShowUploadedImage && 
+                           testData.cartItem.image === testData.originalImageUrl &&
+                           testData.orderDisplayImageUrl.includes('uploads/menu-items/');
+            
+            if (!success) {
+                throw new Error('Final verification failed - image workflow not working correctly');
+            }
+            
+            testData.testPassed = true;
+            addStep('🎉 Test PASSED', 'Complete workflow working correctly!', 'completed');
+        }
+
+        function addStep(title, description, status) {
+            testProgress.push({ title, description, status, timestamp: new Date().toLocaleTimeString() });
+        }
+
+        function updateProgress() {
+            const progressDiv = document.getElementById('test-progress');
+            
+            let html = '<h3>📋 Test Progress</h3>';
+            
+            testProgress.forEach((step, index) => {
+                let stepClass = 'test-step';
+                if (step.status === 'completed') stepClass += ' step-completed';
+                if (step.status === 'failed') stepClass += ' step-failed';
+                
+                html += `
+                    <div class="${stepClass}">
+                        <span class="status-indicator ${step.status === 'completed' ? 'status-pass' : 'status-fail'}"></span>
+                        <strong>${step.title}</strong><br>
+                        <small>${step.description}</small><br>
+                        <small style="color: #6c757d;">Time: ${step.timestamp}</small>
+                    </div>
+                `;
+            });
+            
+            progressDiv.innerHTML = html;
+        }
+
+        function showFinalResults() {
+            const resultsCard = document.getElementById('results-card');
+            const visualCard = document.getElementById('visual-verification');
+            const resultsDiv = document.getElementById('final-results');
+            const visualDiv = document.getElementById('visual-content');
+            
+            resultsCard.style.display = 'block';
+            visualCard.style.display = 'block';
+            
+            // Final result summary
+            const testPassed = testData.testPassed;
+            const resultClass = testPassed ? 'result-success' : 'result-failure';
+            const resultText = testPassed ? '🎉 TEST PASSED - Cart Image Fix Working!' : '❌ TEST FAILED - Issues Detected';
+            
+            resultsDiv.innerHTML = `
+                <div class="final-result ${resultClass}">
+                    ${resultText}
+                </div>
+                
+                <h4>📊 Test Summary</h4>
+                <ul>
+                    <li><strong>Test Item:</strong> "${testData.uploadedItem?.name}" (ID: ${testData.uploadedItem?.id})</li>
+                    <li><strong>Original Image:</strong> ${testData.originalImageUrl}</li>
+                    <li><strong>Cart Image Property:</strong> ${testData.cartItem?.image}</li>
+                    <li><strong>Order Page Image:</strong> ${testData.orderDisplayImageUrl}</li>
+                    <li><strong>Uploaded Image Preserved:</strong> ${testData.willShowUploadedImage ? '✅ Yes' : '❌ No'}</li>
+                </ul>
+                
+                <h4>🔧 Technical Details</h4>
+                <pre>${JSON.stringify({
+                    cartItemStructure: testData.cartItem,
+                    imageWorkflow: {
+                        original: testData.originalImageUrl,
+                        inCart: testData.cartItem?.image,
+                        onOrderPage: testData.orderDisplayImageUrl
+                    }
+                }, null, 2)}</pre>
+            `;
+            
+            // Visual verification
+            if (testData.cartItem) {
+                visualDiv.innerHTML = `
+                    <h4>👁️ Visual Verification</h4>
+                    <p>This is how the item will appear on the order page:</p>
+                    
+                    <div class="image-display">
+                        <img src="${testData.cartItem.image}" alt="${testData.cartItem.name}"
+                             onerror="this.classList.add('image-error'); this.title='Failed to load: ' + this.src;">
+                        <div>
+                            <h4>🛒 ${testData.cartItem.name}</h4>
+                            <p><strong>Price:</strong> Rs. ${testData.cartItem.price}</p>
+                            <p><strong>Quantity:</strong> ${testData.cartItem.quantity}</p>
+                            <p><strong>Image URL:</strong> <code>${testData.cartItem.image}</code></p>
+                            <p><strong>Status:</strong> ${testData.willShowUploadedImage ? 
+                                '<span style="color: #28a745;">✅ Showing uploaded image correctly</span>' : 
+                                '<span style="color: #dc3545;">❌ Using fallback image</span>'}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px;">
+                        <h5>🔍 What This Means:</h5>
+                        <p>${testData.willShowUploadedImage ? 
+                            'The cart image fix is working perfectly! When you add this uploaded menu item to your cart and view the order page, it will display the correct uploaded image instead of a generic fallback image.' :
+                            'There is still an issue with the cart image system. The uploaded image is being replaced with a fallback image somewhere in the workflow.'
+                        }</p>
+                    </div>
+                `;
+            }
+        }
+
+        function clearEverything() {
+            localStorage.removeItem('cart');
+            document.getElementById('test-progress').innerHTML = '<p style="color: green;">✅ All data cleared. Ready for fresh test.</p>';
+            document.getElementById('results-card').style.display = 'none';
+            document.getElementById('visual-verification').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

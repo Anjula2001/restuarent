@@ -206,8 +206,7 @@ function updatePopularFoods(items) {
                     <div class="quantity-selector">
                         <label>Qty:</label>
                         <input type="number" class="quantity-input" min="1" max="10" value="1" id="qty-${item.id}">
-                    </div>
-                    <button onclick="addToCartWithQuantity('${item.id}', '${item.name}', ${item.price})" class="add-to-cart-btn">
+                    </div>                    <button onclick="addToCartWithQuantity('${item.id}', '${item.name}', ${item.price}, '${item.image_url}')" class="add-to-cart-btn">
                         Add to Cart
                     </button>
                 </div>
@@ -610,10 +609,29 @@ function cleanFallbackItems() {
     }
 }
 
+// Update existing cart items to include image URLs if missing
+function updateCartItemImages() {
+    let updated = false;
+    cart.forEach(item => {
+        if (!item.image) {
+            item.image = 'images/popular/3.png'; // Default fallback image
+            updated = true;
+        }
+    });
+    
+    if (updated) {
+        console.log('Updated cart items with missing image URLs');
+        saveCartToStorage();
+    }
+}
+
 // Initialize cart functionality
 function initializeCart() {
     // Clean up any fallback items first
     cleanFallbackItems();
+    
+    // Update existing cart items with image URLs if missing
+    updateCartItemImages();
     
     updateCartUI();
     setupCartEventListeners();
@@ -673,20 +691,24 @@ function hideCartDropdown() {
 }
 
 // Add item to cart with quantity
-function addToCartWithQuantity(itemId, name, price) {
+function addToCartWithQuantity(itemId, name, price, imageUrl = null) {
     const quantityInput = document.getElementById(`qty-${itemId}`);
     const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
     
     const existingItem = cart.find(item => item.id === itemId);
-    
-    if (existingItem) {
+      if (existingItem) {
         existingItem.quantity += quantity;
+        // Update image URL if provided and not already set
+        if (imageUrl && !existingItem.image) {
+            existingItem.image = imageUrl;
+        }
     } else {
         cart.push({
             id: itemId,
             name: name,
             price: price,
-            quantity: quantity
+            quantity: quantity,
+            image: imageUrl || 'images/popular/3.png' // fallback image
         });
     }
     
@@ -701,8 +723,34 @@ function addToCartWithQuantity(itemId, name, price) {
 }
 
 // Legacy function for compatibility
-function addToCart(itemId, name, price) {
-    addToCartWithQuantity(itemId, name, price);
+function addToCart(itemId, name, price, imageUrl = null) {
+    addToCartWithQuantity(itemId, name, price, imageUrl);
+}
+
+// Safe menu item addition function that avoids string escaping issues
+function addMenuItemToCart(itemId, name, price, imageUrl) {
+    // Find the item in the current menu data to get the real image URL
+    // This avoids the string escaping issues in HTML onclick attributes
+    const quantityInput = document.getElementById(`qty-${itemId}`);
+    const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+    
+    // Clean up the image URL - remove any escaped characters
+    let cleanImageUrl = imageUrl;
+    if (typeof cleanImageUrl === 'string') {
+        // Remove any extra escaping that might have been added
+        cleanImageUrl = cleanImageUrl.replace(/\\\'/g, "'").replace(/\\\//g, "/");
+    }
+    
+    console.log('🛒 Adding menu item to cart:', {
+        id: itemId,
+        name: name,
+        price: price,
+        imageUrl: cleanImageUrl,
+        quantity: quantity
+    });
+    
+    // Call the main cart function with cleaned image URL
+    addToCartWithQuantity(itemId, name, price, cleanImageUrl);
 }
 
 // Update cart quantity
@@ -1134,10 +1182,9 @@ function loadOrderPage() {
 function displayOrderItems() {
     const orderItemsContainer = document.getElementById('order-items-container');
     if (!orderItemsContainer) return;
-    
-    orderItemsContainer.innerHTML = cart.map(item => `
+      orderItemsContainer.innerHTML = cart.map(item => `
         <div class="order-item" data-item-id="${item.id}">
-            <img src="images/popular/3.png" alt="${item.name}" class="order-item-image">
+            <img src="${item.image || 'images/popular/3.png'}" alt="${item.name}" class="order-item-image" onerror="this.src='images/popular/3.png'">
             <div class="order-item-details">
                 <h4 class="order-item-name">${item.name}</h4>
                 <div class="order-item-price">Rs. ${item.price} each</div>
