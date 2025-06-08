@@ -639,7 +639,7 @@
                         <div>
                             <h4>Order #${order.id}</h4>
                             <p class="order-items">${orderItemsText}</p>
-                            <p class="order-meta">${new Date(order.created_at).toLocaleDateString()} • $${parseFloat(order.total_amount).toFixed(2)}</p>
+                            <p class="order-meta">${new Date(order.created_at).toLocaleDateString()} • Rs.${parseFloat(order.total_amount).toFixed(2)}</p>
                         </div>
                         <span class="item-status status-${order.status}">${order.status}</span>
                     </div>
