@@ -1,0 +1,63 @@
+/* Empty State Styles */
+.empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    width: 100%;
+    padding: 2rem;
+}
+
+.empty-state-content {
+    text-align: center;
+    background: #fff;
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.empty-state-content h3 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.empty-state-content p {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .empty-state {
+        min-height: 250px;
+        padding: 1rem;
+    }
+    
+    .empty-state-content {
+        padding: 2rem 1.5rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+    
+    .empty-state-content h3 {
+        font-size: 1.3rem;
+    }
+    
+    .empty-state-content p {
+        font-size: 0.9rem;
+    }
+}

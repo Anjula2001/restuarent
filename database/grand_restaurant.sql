@@ -1,13 +1,27 @@
--- Grand Restaurant MySQL Database
+-- ============================================================================
+-- GRAND RESTAURANT - MASTER DATABASE FILE
+-- ============================================================================
+-- Version: Final Consolidated
 -- Generated: June 8, 2025
--- Description: MySQL/MariaDB compatible version for phpMyAdmin
--- Compatible with MAMP, XAMPP, and other MySQL installations
+-- Database: MySQL/MariaDB Compatible
+-- Description: Complete database structure and data for Grand Restaurant Management System
+-- 
+-- This is the ONLY database file you need. All other SQL files have been merged into this one.
+-- 
+-- SETUP INSTRUCTIONS:
+-- 1. Create database in phpMyAdmin/MySQL: 
+--    CREATE DATABASE grand_restaurant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- 2. Import this file via phpMyAdmin or command line:
+--    mysql -u root -p grand_restaurant < database/grand_restaurant.sql
+-- 3. Update config/database.php with your MySQL credentials
+-- 4. Run setup_mysql.php to verify the installation
 --
--- IMPORTANT: Create database first in phpMyAdmin or MySQL:
--- CREATE DATABASE grand_restaurant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
---
--- Then import this file via phpMyAdmin or:
--- mysql -u root -p grand_restaurant < grand_restaurant_mysql.sql
+-- CONTAINS:
+-- - All table structures (7 tables)
+-- - Complete sample data (menu items, users, reviews, orders)
+-- - Proper MySQL syntax and constraints
+-- - UTF8MB4 character set for emoji support
+-- ============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
 SET AUTOCOMMIT = 0;

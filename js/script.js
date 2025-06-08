@@ -177,35 +177,21 @@ function updatePopularFoods(items) {
             image_url: item.image_url || 'images/popular/2.png' // Fallback image
         }));
         console.log('✅ Using dynamic popular items from database');
-        console.log('🍽️ Dynamic items processed:', popularItems);
-    } else {
-        console.log('⚠️ No valid dynamic items, using fallback static items');
+        console.log('🍽️ Dynamic items processed:', popularItems);    } else {
+        console.log('⚠️ No valid dynamic items available - showing empty state');
         console.log('📊 Items data check - items:', items, 'isArray:', Array.isArray(items), 'length:', items?.length);
-        // Fallback to predefined popular items when no dynamic data available
-        popularItems = [
-            {
-                id: 'popular-1',
-                name: 'String Hoppers (FALLBACK)',
-                description: 'A Sri Lankan delicacy, perfect for breakfast or dinner.',
-                price: '350.00',
-                image_url: 'images/popular/1.png'
-            },
-            {
-                id: 'popular-2',
-                name: 'Kottu Roti (FALLBACK)',
-                description: 'A flavorful Sri Lankan street food favorite.',
-                price: '750.00',
-                image_url: 'images/popular/2.png'
-            },
-            {
-                id: 'popular-3',
-                name: 'Fish Ambulthiyal (FALLBACK)',
-                description: 'A tangy and spicy fish curry, unique to Sri Lanka.',
-                price: '950.00',
-                image_url: 'images/popular/3.png'
-            }
-        ];
-        console.log('🔄 Using fallback static popular items');
+        // Show empty state when no menu items are available
+        foodCards.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">🍽️</div>
+                    <h3>No Menu Items Available</h3>
+                    <p>Our menu is currently being updated. Please check back later for delicious food options!</p>
+                </div>
+            </div>
+        `;
+        console.log('🔄 Showing empty state for popular foods');
+        return; // Exit early since we've set the empty state
     }
 
     foodCards.innerHTML = popularItems.map(item => `
@@ -612,8 +598,23 @@ function debounce(func, wait) {
 // Enhanced Cart System
 let cart = JSON.parse(localStorage.getItem('restaurant_cart')) || [];
 
+// Clean up any fallback items from cart
+function cleanFallbackItems() {
+    const originalLength = cart.length;
+    cart = cart.filter(item => !item.name.includes('FALLBACK'));
+    
+    // If we removed items, save the cleaned cart
+    if (cart.length !== originalLength) {
+        console.log(`Removed ${originalLength - cart.length} fallback items from cart`);
+        saveCartToStorage();
+    }
+}
+
 // Initialize cart functionality
 function initializeCart() {
+    // Clean up any fallback items first
+    cleanFallbackItems();
+    
     updateCartUI();
     setupCartEventListeners();
     
@@ -1103,6 +1104,9 @@ function toggleDeliveryAddress() {
 
 // Load and display order page content
 function loadOrderPage() {
+    // Clean up any fallback items before loading the order page
+    cleanFallbackItems();
+    
     const orderContentWrapper = document.getElementById('order-content-wrapper');
     const emptyCartMessage = document.getElementById('empty-cart-message');
     

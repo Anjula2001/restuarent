@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Clear Fallback Items</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-primary { background: #007bff; color: white; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 3px; }
+        .current-cart { background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .fallback-item { background: #fff3cd; border: 1px solid #ffeaa7; padding: 8px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Force Clear Fallback Items</h1>
+    
+    <div class="section">
+        <h2>📋 Current Cart Status</h2>
+        <div id="current-cart" class="current-cart">Loading...</div>
+        <button class="btn btn-primary" onclick="showCurrentCart()">Refresh Cart Status</button>
+    </div>
+    
+    <div class="section">
+        <h2>🚀 Force Clear Fallback Items</h2>
+        <p>This will specifically remove items with "FALLBACK" in their names while preserving other cart items.</p>
+        <button class="btn btn-danger" onclick="forceClearFallback()">Remove Fallback Items Only</button>
+        <button class="btn btn-danger" onclick="clearEntireCart()">Clear Entire Cart</button>
+        <div id="clear-results" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>🧪 Test Order Page</h2>
+        <button class="btn btn-success" onclick="testOrderPage()">Open Order Page</button>
+        <button class="btn btn-primary" onclick="addTestItem()">Add Test Item & Open Order Page</button>
+        <div id="test-results" class="result"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function showCurrentCart() {
+            const cartData = localStorage.getItem('restaurant_cart');
+            const cartDiv = document.getElementById('current-cart');
+            
+            if (!cartData) {
+                cartDiv.innerHTML = '<strong>📭 Cart is empty (no localStorage data)</strong>';
+                return;
+            }
+            
+            try {
+                const cart = JSON.parse(cartData);
+                if (cart.length === 0) {
+                    cartDiv.innerHTML = '<strong>📭 Cart is empty (empty array)</strong>';
+                    return;
+                }
+                
+                let html = `<strong>🛒 Cart contains ${cart.length} items:</strong><br><br>`;
+                let fallbackCount = 0;
+                
+                cart.forEach((item, index) => {
+                    const isFallback = item.name.includes('FALLBACK');
+                    if (isFallback) fallbackCount++;
+                    
+                    html += `<div class="${isFallback ? 'fallback-item' : ''}" style="margin: 5px 0; padding: 8px;">
+                        <strong>${index + 1}. ${item.name}</strong> ${isFallback ? '⚠️ FALLBACK' : '✅'}
+                        <br>Price: Rs. ${item.price} | Quantity: ${item.quantity}
+                        <br>Subtotal: Rs. ${(item.price * item.quantity).toFixed(2)}
+                    </div>`;
+                });
+                
+                if (fallbackCount > 0) {
+                    html = `<div style="color: #dc3545; font-weight: bold; margin-bottom: 10px;">
+                        ⚠️ Found ${fallbackCount} fallback items that need to be removed!
+                    </div>` + html;
+                } else {
+                    html = `<div style="color: #28a745; font-weight: bold; margin-bottom: 10px;">
+                        ✅ No fallback items found in cart!
+                    </div>` + html;
+                }
+                
+                cartDiv.innerHTML = html;
+                
+            } catch (error) {
+                cartDiv.innerHTML = `<strong>❌ Error parsing cart data:</strong> ${error.message}`;
+            }
+        }
+        
+        function forceClearFallback() {
+            const cartData = localStorage.getItem('restaurant_cart');
+            
+            if (!cartData) {
+                document.getElementById('clear-results').innerHTML = 
+                    '<span style="color: #ffc107;">⚠️ No cart data found in localStorage</span>';
+                return;
+            }
+            
+            try {
+                const cart = JSON.parse(cartData);
+                const originalLength = cart.length;
+                
+                // Filter out fallback items
+                const cleanCart = cart.filter(item => !item.name.includes('FALLBACK'));
+                
+                // Save the cleaned cart
+                localStorage.setItem('restaurant_cart', JSON.stringify(cleanCart));
+                
+                // Update global cart variable if it exists
+                if (typeof window.cart !== 'undefined') {
+                    window.cart = cleanCart;
+                }
+                
+                const removedCount = originalLength - cleanCart.length;
+                
+                document.getElementById('clear-results').innerHTML = 
+                    `<span style="color: #28a745;">✅ Removed ${removedCount} fallback items. Cart now has ${cleanCart.length} items.</span>`;
+                
+                // Refresh the cart display
+                showCurrentCart();
+                
+            } catch (error) {
+                document.getElementById('clear-results').innerHTML = 
+                    `<span style="color: #dc3545;">❌ Error: ${error.message}</span>`;
+            }
+        }
+        
+        function clearEntireCart() {
+            localStorage.removeItem('restaurant_cart');
+            
+            // Update global cart variable if it exists
+            if (typeof window.cart !== 'undefined') {
+                window.cart = [];
+            }
+            
+            document.getElementById('clear-results').innerHTML = 
+                '<span style="color: #28a745;">✅ Entire cart cleared!</span>';
+            
+            showCurrentCart();
+        }
+        
+        function testOrderPage() {
+            window.open('order.html', '_blank');
+            document.getElementById('test-results').innerHTML = 
+                '<span style="color: #007bff;">📄 Order page opened in new tab. Check if fallback items are gone!</span>';
+        }
+        
+        function addTestItem() {
+            // Add a clean test item to verify the order page works correctly
+            const testItem = {
+                id: 'test-' + Date.now(),
+                name: 'Test Pizza',
+                price: 15.99,
+                quantity: 1
+            };
+            
+            let cart = JSON.parse(localStorage.getItem('restaurant_cart') || '[]');
+            cart.push(testItem);
+            localStorage.setItem('restaurant_cart', JSON.stringify(cart));
+            
+            // Update global cart variable if it exists
+            if (typeof window.cart !== 'undefined') {
+                window.cart = cart;
+            }
+            
+            setTimeout(() => {
+                window.open('order.html', '_blank');
+            }, 100);
+            
+            document.getElementById('test-results').innerHTML = 
+                '<span style="color: #28a745;">✅ Added test item and opened order page in new tab!</span>';
+            
+            showCurrentCart();
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showCurrentCart();
+        });
+    </script>
+</body>
+</html>
