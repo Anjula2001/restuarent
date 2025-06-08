@@ -190,7 +190,7 @@ class UserManager {
     // Get user orders
     public function getUserOrders($user_id, $limit = null) {
         $query = "SELECT o.*, 
-                         GROUP_CONCAT(mi.name || ' (' || oi.quantity || ')', ', ') as items
+                         GROUP_CONCAT(CONCAT(mi.name, ' (', oi.quantity, ')') SEPARATOR ', ') as items
                   FROM orders o
                   LEFT JOIN order_items oi ON o.id = oi.order_id
                   LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id

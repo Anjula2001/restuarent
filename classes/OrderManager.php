@@ -65,7 +65,7 @@ class OrderManager {
     // Get all orders (admin only)
     public function getAllOrders($status = null) {
         $query = "SELECT o.*, 
-                         GROUP_CONCAT(mi.name || ' (' || oi.quantity || ')', ', ') as items
+                         GROUP_CONCAT(CONCAT(mi.name, ' (', oi.quantity, ')') SEPARATOR ', ') as items
                   FROM " . $this->orders_table . " o
                   LEFT JOIN " . $this->order_items_table . " oi ON o.id = oi.order_id
                   LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id";
@@ -164,7 +164,7 @@ class OrderManager {
         $stats = [];
 
         // Total orders today
-        $query = "SELECT COUNT(*) as total FROM " . $this->orders_table . " WHERE DATE(created_at) = DATE('now')";
+        $query = "SELECT COUNT(*) as total FROM " . $this->orders_table . " WHERE DATE(created_at) = CURDATE()";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $stats['today'] = $stmt->fetch()['total'];
@@ -177,7 +177,7 @@ class OrderManager {
 
         // Revenue today
         $query = "SELECT COALESCE(SUM(total_amount), 0) as revenue FROM " . $this->orders_table . " 
-                  WHERE DATE(created_at) = DATE('now') AND status != 'cancelled'";
+                  WHERE DATE(created_at) = CURDATE() AND status != 'cancelled'";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $stats['revenue_today'] = $stmt->fetch()['revenue'];
